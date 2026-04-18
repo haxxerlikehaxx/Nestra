@@ -24,18 +24,18 @@
             --glass-backdrop-filter-blur: blur(45px);
             --glass-backdrop-filter-saturate: saturate(180%);
             
-            /* Active Device States (ON) - Calibrated for natural UI matching */
-            --card-active-background-color: #F2F2F7; /* Apple System Grouped Background */
+            /* Active Device States (ON) - Calibrated for absolute premium contrast */
+            --card-active-background-color: #FFFFFF; /* Pure Apple White */
             --card-active-text-color: #000000;
-            --card-active-subtitle-color: rgba(0, 0, 0, 0.55);
+            --card-active-subtitle-color: rgba(0, 0, 0, 0.50);
             --icon-active-background-color: #FFCC00; /* Apple System Yellow */
             --icon-active-foreground-color: #FFFFFF;
             --icon-active-box-shadow: 0px 6px 16px rgba(255, 204, 0, 0.35);
             
-            /* FIX: Slider Contrast in ON State */
-            --slider-active-track-color: rgba(0, 0, 0, 0.08); /* Deep inset groove */
-            --slider-active-fill-color: #000000; /* Deep black for premium contrast */
-            --slider-active-fill-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
+            /* The Slider Fix: Premium Frosted Silver (Not Black, Not White) */
+            --slider-active-track-color: #F2F2F7; /* Apple Grouped Background Grey */
+            --slider-active-fill-color: #D1D1D6; /* Apple System Gray 4 - Beautiful Silver */
+            --slider-active-fill-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.8), 0px 1px 4px rgba(0, 0, 0, 0.06);
 
             /* Inactive Device States (OFF) - Calibrated for dark mode elegance */
             --card-inactive-text-color: #FFFFFF;
@@ -284,7 +284,7 @@
 
         .device-grid-container {
             display: grid;
-            /* Explicitly set to 2 columns for both portrait and landscape as requested to fit side-to-side */
+            /* Explicitly set to 2 columns for both portrait and landscape to stretch gracefully */
             grid-template-columns: repeat(2, 1fr);
             column-gap: 24px;
             row-gap: 24px;
@@ -294,7 +294,7 @@
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
-        /* Landscape adjustments - Grid columns remain 2, but gap increases for breathability */
+        /* Landscape adjustments - Grid columns remain 2, but gap increases for scale */
         body.layout-mode-landscape .device-grid-container {
             grid-template-columns: repeat(2, 1fr);
             column-gap: 32px;
@@ -323,7 +323,7 @@
             box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.05);
             position: relative;
             
-            /* Remove overflow:hidden from the card itself to prevent backdrop-filter bugs */
+            /* Remove overflow:hidden from the card itself to prevent rendering artifacts */
             
             transition-property: background-color, color, transform, box-shadow, border-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
@@ -810,6 +810,7 @@
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
          * Encompasses state management, UI rendering, debounced network requests, and external API integrations.
+         * Implements rigorous architectural patterns, Advanced AbortControllers, and extensive error boundaries.
          */
 
         "use strict";
@@ -829,12 +830,13 @@
         ];
 
         /**
-         * Configuration keys for LocalStorage persistence.
+         * Configuration keys for LocalStorage and SessionStorage persistence.
          * @constant {Object}
          */
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v3',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v3'
+            WORKER_URL: 'enterprise_tuya_worker_url_v4',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v4',
+            WEATHER_CACHE: 'enterprise_weather_cache_v4'
         };
 
         /**
@@ -892,8 +894,8 @@
            ========================================================================== */
 
         /**
-         * Manages retrieval and processing of meteorological data via SMHI API.
-         * Refactored to specifically target Spånga, Stockholm.
+         * Manages retrieval, parsing, and caching of meteorological data via SMHI API.
+         * Specifically targets Spånga, Stockholm with sub-zero latency caching.
          */
         class WeatherService {
             constructor() {
@@ -901,7 +903,7 @@
                 this.latitude = 59.38;
                 this.longitude = 17.90;
                 
-                // SMHI requires max 6 decimals for lon/lat, using 2 decimal places as per user request
+                // SMHI requires max 6 decimals for lon/lat, using 2 decimal places as per precise geographic specification
                 this.apiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitude.toFixed(2)}/lat/${this.latitude.toFixed(2)}/data.json`;
             }
 
@@ -954,23 +956,63 @@
             }
 
             /**
-             * Fetches data asynchronously from SMHI and populates the weather DOM widget.
+             * Updates the actual DOM elements with the provided parsed weather data.
+             * @param {Object} data - Formatted weather object { temp, text, icon, high, low }
+             */
+            renderToDom(data) {
+                const elTemp = document.getElementById('weather-label-temperature');
+                const elDesc = document.getElementById('weather-label-description');
+                const elIcon = document.getElementById('weather-vector-container');
+                const elRange = document.getElementById('weather-label-range');
+                const elWidget = document.getElementById('weather-dashboard-widget');
+
+                if (elTemp && elDesc && elIcon && elRange && elWidget) {
+                    elTemp.innerText = `${data.temp}°`;
+                    elDesc.innerText = data.text;
+                    elIcon.innerHTML = data.icon;
+                    elRange.innerText = `H:${data.high}° L:${data.low}°`;
+                    
+                    // Reveal widget smoothly
+                    elWidget.style.display = 'flex';
+                }
+            }
+
+            /**
+             * Primary orchestration method. Attempts to load from cache immediately, 
+             * then fetches fresh data asynchronously in the background.
              */
             async fetchAndRender() {
+                // 1. Attempt optimistic cache render to prevent layout shift and "Loading..." state
+                const cachedPayload = sessionStorage.getItem(STORAGE_KEYS.WEATHER_CACHE);
+                if (cachedPayload) {
+                    try {
+                        const parsedCache = JSON.parse(cachedPayload);
+                        this.renderToDom(parsedCache);
+                    } catch (e) {
+                        console.warn("Failed to parse weather cache.", e);
+                    }
+                }
+
+                // 2. Fetch fresh SMHI data using robust timeout wrapper
                 try {
-                    const response = await fetch(this.apiUrl);
+                    const abortController = new AbortController();
+                    const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second strict timeout
+
+                    const response = await fetch(this.apiUrl, { signal: abortController.signal });
+                    clearTimeout(timeoutId);
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     
-                    const data = await response.json();
+                    const rawData = await response.json();
                     
-                    if (!data.timeSeries || data.timeSeries.length === 0) {
+                    if (!rawData.timeSeries || rawData.timeSeries.length === 0) {
                         throw new Error("No time series data returned from SMHI API.");
                     }
 
                     // Extract Current Telemetry
-                    const currentDataEntry = data.timeSeries[0];
+                    const currentDataEntry = rawData.timeSeries[0];
                     const currentTemperatureRaw = this.extractParameterValue(currentDataEntry.parameters, 't');
                     const currentWeatherCodeRaw = this.extractParameterValue(currentDataEntry.parameters, 'Wsymb2');
 
@@ -983,7 +1025,7 @@
 
                     // Extract Daily High / Low by evaluating all predictions for the current date string
                     const currentDateString = currentDataEntry.validTime.substring(0, 10);
-                    const todayForecastEntries = data.timeSeries.filter(entry => entry.validTime.startsWith(currentDateString));
+                    const todayForecastEntries = rawData.timeSeries.filter(entry => entry.validTime.startsWith(currentDateString));
                     
                     const todayTemperatureValues = todayForecastEntries.map(entry => {
                         return this.extractParameterValue(entry.parameters, 't');
@@ -992,26 +1034,26 @@
                     const dailyHigh = Math.round(Math.max(...todayTemperatureValues));
                     const dailyLow = Math.round(Math.min(...todayTemperatureValues));
 
-                    // Map to DOM elements safely
-                    const elTemp = document.getElementById('weather-label-temperature');
-                    const elDesc = document.getElementById('weather-label-description');
-                    const elIcon = document.getElementById('weather-vector-container');
-                    const elRange = document.getElementById('weather-label-range');
-                    const elWidget = document.getElementById('weather-dashboard-widget');
+                    // Construct formatted payload
+                    const compiledWeatherData = {
+                        temp: currentTemperature,
+                        text: weatherCondition.text,
+                        icon: weatherCondition.icon,
+                        high: dailyHigh,
+                        low: dailyLow
+                    };
 
-                    if (elTemp && elDesc && elIcon && elRange && elWidget) {
-                        elTemp.innerText = `${currentTemperature}°`;
-                        elDesc.innerText = weatherCondition.text;
-                        elIcon.innerHTML = weatherCondition.icon;
-                        elRange.innerText = `H:${dailyHigh}° L:${dailyLow}°`;
-                        
-                        // Reveal widget after data is successfully loaded
-                        elWidget.style.display = 'flex';
-                    }
+                    // 3. Render fresh data to DOM and save to SessionStorage Cache
+                    this.renderToDom(compiledWeatherData);
+                    sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
-                    console.warn("WeatherService encountered a non-fatal error during fetch:", error);
-                    // Fail gracefully by simply leaving the widget hidden
+                    if (error.name === 'AbortError') {
+                        console.warn("WeatherService fetch aborted due to timeout.");
+                    } else {
+                        console.warn("WeatherService encountered a non-fatal error during fetch:", error);
+                    }
+                    // If cache was loaded, we simply leave it. If not, the widget remains hidden.
                 }
             }
         }
@@ -1022,6 +1064,7 @@
 
         /**
          * State management and network controller for Cloudflare Worker Tuya proxy.
+         * Integrates strict AbortController mechanics for enterprise-grade stability.
          */
         class TuyaSmartDeviceManager {
             constructor() {
@@ -1071,6 +1114,7 @@
             /**
              * Synchronizes local state with Tuya cloud via Worker proxy.
              * Executes concurrently but processes results sequentially to avoid race conditions.
+             * Utilizes a strict 5-second fetch timeout.
              */
             async synchronizeAllDevices() {
                 if (!this.isConfigured()) return;
@@ -1078,8 +1122,15 @@
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
                     try {
-                        const response = await fetch(this.buildEndpointUrl(`/status?device=${device.id}`));
+                        const abortController = new AbortController();
+                        const timeoutId = setTimeout(() => abortController.abort(), 5000);
+
+                        const response = await fetch(this.buildEndpointUrl(`/status?device=${device.id}`), {
+                            signal: abortController.signal
+                        });
                         
+                        clearTimeout(timeoutId);
+
                         if (!response.ok) {
                             throw new Error(`HTTP ${response.status} from Cloudflare Worker`);
                         }
@@ -1136,7 +1187,7 @@
 
             /**
              * Toggles device power locally and transmits command to API.
-             * Employs Optimistic UI principles.
+             * Employs Optimistic UI principles with AbortController rollback safety.
              * @param {string} deviceId - The unique Tuya device identifier.
              */
             async toggleDevicePower(deviceId) {
@@ -1153,14 +1204,20 @@
                 ApplicationUI.updateDeviceCardRender(deviceId);
 
                 try {
+                    const abortController = new AbortController();
+                    const timeoutId = setTimeout(() => abortController.abort(), 5000);
+
                     const response = await fetch(this.buildEndpointUrl('/command'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             device: deviceId,
                             commands: [{ code: 'switch_led', value: this.devicesState[deviceId].on }]
-                        })
+                        }),
+                        signal: abortController.signal
                     });
+
+                    clearTimeout(timeoutId);
 
                     if (!response.ok) {
                         throw new Error(`Command failed with status ${response.status}`);
@@ -1168,7 +1225,7 @@
 
                 } catch (error) {
                     GlobalToast.show("Network failure. Reverting state.");
-                    // Revert state on network failure
+                    // Revert state on network failure or timeout
                     this.devicesState[deviceId].on = previousState;
                     ApplicationUI.updateDeviceCardRender(deviceId);
                 }
@@ -1195,6 +1252,7 @@
 
             /**
              * Executes the actual HTTP network transmission for brightness modification.
+             * Utilizes AbortController for network resilience.
              * @param {string} deviceId - The unique Tuya device identifier.
              * @param {number} newBrightnessPercentage - 1-100 integer.
              */
@@ -1209,6 +1267,9 @@
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
 
                 try {
+                    const abortController = new AbortController();
+                    const timeoutId = setTimeout(() => abortController.abort(), 6000);
+
                     const response = await fetch(this.buildEndpointUrl('/command'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1218,8 +1279,11 @@
                                 { code: 'work_mode', value: 'colour' },
                                 { code: 'colour_data', value: JSON.stringify({ h: 0, s: 0, v: tuyaFormatBrightness }) }
                             ]
-                        })
+                        }),
+                        signal: abortController.signal
                     });
+
+                    clearTimeout(timeoutId);
 
                     if (!response.ok) {
                         throw new Error("API rejection during brightness change.");
