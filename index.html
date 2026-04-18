@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <meta name="description" content="Premium Apple HomeKit Style Smart Home Controller for iPad Air 2">
+    <meta name="description" content="Ultimate Premium Apple HomeKit Style Smart Home Controller for iPad Air 2">
     <title>Smart Home Control Center</title>
 
     <style>
@@ -21,26 +21,28 @@
             --glass-background-base: rgba(255, 255, 255, 0.08);
             --glass-border-color: rgba(255, 255, 255, 0.12);
             --glass-background-hover: rgba(255, 255, 255, 0.15);
-            --glass-backdrop-filter-blur: blur(40px);
-            --glass-backdrop-filter-saturate: saturate(150%);
+            --glass-backdrop-filter-blur: blur(45px);
+            --glass-backdrop-filter-saturate: saturate(180%);
             
-            /* Active Device States (ON) */
-            --card-active-background-color: #EBEBF0; /* Premium frosted pearl */
+            /* Active Device States (ON) - Calibrated for natural UI matching */
+            --card-active-background-color: #F2F2F7; /* Apple System Grouped Background */
             --card-active-text-color: #000000;
             --card-active-subtitle-color: rgba(0, 0, 0, 0.55);
-            --icon-active-background-color: #FFB340; /* Warm incandescent amber */
+            --icon-active-background-color: #FFCC00; /* Apple System Yellow */
             --icon-active-foreground-color: #FFFFFF;
-            --icon-active-box-shadow: 0px 4px 18px rgba(255, 179, 64, 0.45);
-            --slider-active-track-color: rgba(0, 0, 0, 0.08);
-            --slider-active-fill-color: #000000;
+            --icon-active-box-shadow: 0px 6px 16px rgba(255, 204, 0, 0.35);
+            --slider-active-track-color: rgba(0, 0, 0, 0.06);
+            --slider-active-fill-color: #FFFFFF;
+            --slider-active-fill-shadow: 0px 2px 10px rgba(0, 0, 0, 0.12);
 
-            /* Inactive Device States (OFF) */
+            /* Inactive Device States (OFF) - Calibrated for dark mode elegance */
             --card-inactive-text-color: #FFFFFF;
             --card-inactive-subtitle-color: rgba(255, 255, 255, 0.55);
-            --icon-inactive-background-color: rgba(255, 255, 255, 0.15);
-            --icon-inactive-foreground-color: rgba(255, 255, 255, 0.85);
-            --slider-inactive-track-color: rgba(255, 255, 255, 0.05);
-            --slider-inactive-fill-color: rgba(255, 255, 255, 0.90);
+            --icon-inactive-background-color: rgba(255, 255, 255, 0.12);
+            --icon-inactive-foreground-color: rgba(255, 255, 255, 0.60);
+            --slider-inactive-track-color: rgba(0, 0, 0, 0.25);
+            --slider-inactive-fill-color: rgba(255, 255, 255, 0.20);
+            --slider-inactive-fill-shadow: none;
 
             /* Typography */
             --system-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -55,7 +57,8 @@
             /* Layout Constraints */
             --layout-max-width-portrait: 768px;
             --layout-max-width-landscape: 1024px;
-            --layout-padding-horizontal: 32px;
+            --layout-padding-horizontal-portrait: 32px;
+            --layout-padding-horizontal-landscape: 48px;
             --layout-padding-vertical-bottom: 40px;
         }
 
@@ -89,9 +92,9 @@
             min-height: 100vh;
             /* Safe area insets for notched iPads */
             padding-top: calc(env(safe-area-inset-top, 40px) + 24px);
-            padding-right: var(--layout-padding-horizontal);
+            padding-right: var(--layout-padding-horizontal-portrait);
             padding-bottom: var(--layout-padding-vertical-bottom);
-            padding-left: var(--layout-padding-horizontal);
+            padding-left: var(--layout-padding-horizontal-portrait);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -108,13 +111,14 @@
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
+        /* Responsive Landscape Injection */
         body.layout-mode-landscape {
             max-width: var(--layout-max-width-landscape);
-            padding-right: 48px;
-            padding-left: 48px;
+            padding-right: var(--layout-padding-horizontal-landscape);
+            padding-left: var(--layout-padding-horizontal-landscape);
         }
 
-        /* Allow typing in input fields */
+        /* Allow typing explicitly in input fields */
         input, textarea, select {
             user-select: text !important;
             -webkit-user-select: text !important;
@@ -277,18 +281,21 @@
 
         .device-grid-container {
             display: grid;
+            /* Explicitly set to 2 columns for both portrait and landscape as requested to fit side-to-side */
             grid-template-columns: repeat(2, 1fr);
             column-gap: 24px;
             row-gap: 24px;
             
-            transition-property: grid-template-columns;
+            transition-property: grid-template-columns, column-gap;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
-        /* Landscape adjustments */
+        /* Landscape adjustments - Grid columns remain 2, but gap increases for breathability */
         body.layout-mode-landscape .device-grid-container {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
+            column-gap: 32px;
+            row-gap: 32px;
         }
 
         /* ==========================================================================
@@ -312,7 +319,8 @@
             height: 200px;
             box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.05);
             position: relative;
-            overflow: hidden;
+            
+            /* Remove overflow:hidden from the card itself to prevent backdrop-filter bugs */
             
             transition-property: background-color, color, transform, box-shadow, border-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
@@ -323,7 +331,7 @@
         .smart-device-card.state-is-on {
             background-color: var(--card-active-background-color);
             color: var(--card-active-text-color);
-            box-shadow: 0px 16px 40px rgba(255, 255, 255, 0.1), inset 0px 1px 0px rgba(255, 255, 255, 0.9);
+            box-shadow: 0px 16px 40px rgba(0, 0, 0, 0.1), inset 0px 1px 0px rgba(255, 255, 255, 1.0);
             border-color: transparent;
         }
 
@@ -403,29 +411,32 @@
             color: var(--card-active-subtitle-color);
         }
 
-        /* Bottom Area: Slider Control */
-        /* FIX: Hardware accelerated mask clipping for zero-artifact rounded slider */
+        /* Bottom Area: Slider Control (Perfected Architecture) */
         .device-brightness-slider-container {
             width: 100%;
             height: 40px;
             border-radius: 20px;
             background-color: var(--slider-inactive-track-color);
             position: relative;
-            overflow: hidden;
             
-            /* Webkit mask forces precise sub-pixel rendering and kills iOS shadow bleed */
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            /* Critical fix for iOS Safari border-radius clipping shadow artifacts */
+            overflow: hidden;
+            -webkit-mask-image: -webkit-linear-gradient(white, white);
+            -webkit-mask-repeat: no-repeat;
             -webkit-backface-visibility: hidden;
             -moz-backface-visibility: hidden;
             transform: translate3d(0, 0, 0);
             
-            transition-property: background-color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
+            
+            transition-property: background-color, box-shadow;
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
+            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .device-brightness-slider-container {
             background-color: var(--slider-active-track-color);
+            box-shadow: inset 0px 1px 4px rgba(0, 0, 0, 0.05);
         }
 
         .brightness-slider-visual-fill {
@@ -438,14 +449,18 @@
             z-index: 1;
             /* width is controlled via CSS variable dynamically */
             width: var(--current-fill-percentage, 0%);
+            border-radius: 20px;
             
-            transition-property: background-color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            box-shadow: var(--slider-inactive-fill-shadow);
+            
+            transition-property: background-color, box-shadow;
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
+            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .brightness-slider-visual-fill {
             background-color: var(--slider-active-fill-color);
+            box-shadow: var(--slider-active-fill-shadow);
         }
 
         /* Native Input Overlay */
@@ -815,8 +830,8 @@
          * @constant {Object}
          */
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v1',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v1'
+            WORKER_URL: 'enterprise_tuya_worker_url_v2',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v2'
         };
 
         /**
