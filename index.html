@@ -24,7 +24,7 @@
             --glass-backdrop-filter-blur: blur(45px);
             --glass-backdrop-filter-saturate: saturate(180%);
             
-            /* Active Device States (ON) - Calibrated for natural UI matching */
+            /* Active Device States (ON) - Calibrated for absolute premium contrast */
             --card-active-background-color: #FFFFFF; /* Pure Apple White */
             --card-active-text-color: #000000;
             --card-active-subtitle-color: rgba(0, 0, 0, 0.50);
@@ -258,9 +258,17 @@
             gap: 16px;
         }
 
-        .weather-vector-icon svg {
+        .weather-vector-icon {
             width: 64px;
             height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .weather-vector-icon svg {
+            width: 100%;
+            height: 100%;
             filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15));
         }
 
@@ -269,6 +277,44 @@
             font-weight: 600;
             color: var(--card-inactive-subtitle-color);
         }
+        
+        /* Skeleton Loading State for Weather */
+        .skeleton {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        .weather-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-top-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
 
         /* ==========================================================================
            DEVICE GRID LAYOUT
@@ -463,8 +509,8 @@
             box-shadow: var(--slider-inactive-fill-shadow);
             
             transition-property: background-color, box-shadow;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
+            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .brightness-slider-visual-fill {
@@ -756,18 +802,8 @@
          WEATHER WIDGET SECTION
          ========================================================================== -->
     <section aria-label="Weather Dashboard" id="weather-dashboard-section">
-        <div class="weather-dashboard-widget" id="weather-dashboard-widget" style="display: none;">
-            <div class="weather-information-left">
-                <span class="weather-city-label" id="weather-label-city">Spånga</span>
-                <h2 class="weather-temperature-display" id="weather-label-temperature">--°</h2>
-                <span class="weather-condition-description" id="weather-label-description">Loading telemetry...</span>
-            </div>
-            <div class="weather-graphics-right">
-                <div class="weather-vector-icon" id="weather-vector-container" aria-hidden="true">
-                    <!-- SVG Graphics dynamically injected by WeatherService class -->
-                </div>
-                <span class="weather-high-low-range" id="weather-label-range">H:--° L:--°</span>
-            </div>
+        <div class="weather-dashboard-widget" id="weather-dashboard-widget">
+            <!-- Populated by WeatherService with loading state initially -->
         </div>
     </section>
 
@@ -911,6 +947,43 @@
                 
                 // SMHI requires max 6 decimals for lon/lat, using 2 decimal places as per precise geographic specification
                 this.apiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitude.toFixed(2)}/lat/${this.latitude.toFixed(2)}/data.json`;
+                
+                // DOM element references
+                this.widgetElement = document.getElementById('weather-dashboard-widget');
+            }
+            
+            /**
+             * Populates the widget with a skeleton loading state.
+             */
+            renderLoadingState() {
+                if (!this.widgetElement) return;
+                this.widgetElement.innerHTML = `
+                    <div class="weather-information-left">
+                        <span class="weather-city-label">Spånga</span>
+                        <h2 class="weather-temperature-display"><div class="skeleton" style="width: 80px; height: 50px;"></div></h2>
+                        <span class="weather-condition-description">Fetching Weather...</span>
+                    </div>
+                    <div class="weather-graphics-right">
+                        <div class="weather-vector-icon">
+                            <div class="weather-spinner"></div>
+                        </div>
+                        <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
+                    </div>
+                `;
+            }
+            
+            /**
+             * Populates the widget with an error message.
+             */
+            renderErrorState() {
+                if (!this.widgetElement) return;
+                this.widgetElement.innerHTML = `
+                    <div class="weather-information-left">
+                        <span class="weather-city-label">Spånga</span>
+                        <h2 class="weather-temperature-display">--</h2>
+                        <span class="weather-condition-description" style="color: #FF453A;">Connection Failed</span>
+                    </div>
+                `;
             }
 
             /**
@@ -965,22 +1038,21 @@
              * Updates the actual DOM elements with the provided parsed weather data.
              * @param {Object} data - Formatted weather object { temp, text, icon, high, low }
              */
-            renderToDom(data) {
-                const elTemp = document.getElementById('weather-label-temperature');
-                const elDesc = document.getElementById('weather-label-description');
-                const elIcon = document.getElementById('weather-vector-container');
-                const elRange = document.getElementById('weather-label-range');
-                const elWidget = document.getElementById('weather-dashboard-widget');
-
-                if (elTemp && elDesc && elIcon && elRange && elWidget) {
-                    elTemp.innerText = `${data.temp}°`;
-                    elDesc.innerText = data.text;
-                    elIcon.innerHTML = data.icon;
-                    elRange.innerText = `H:${data.high}° L:${data.low}°`;
-                    
-                    // Reveal widget smoothly
-                    elWidget.style.display = 'flex';
-                }
+            renderSuccessState(data) {
+                if (!this.widgetElement) return;
+                this.widgetElement.innerHTML = `
+                    <div class="weather-information-left">
+                        <span class="weather-city-label" id="weather-label-city">Spånga</span>
+                        <h2 class="weather-temperature-display" id="weather-label-temperature">${data.temp}°</h2>
+                        <span class="weather-condition-description" id="weather-label-description">${data.text}</span>
+                    </div>
+                    <div class="weather-graphics-right">
+                        <div class="weather-vector-icon" id="weather-vector-container" aria-hidden="true">
+                            ${data.icon}
+                        </div>
+                        <span class="weather-high-low-range" id="weather-label-range">H:${data.high}° L:${data.low}°</span>
+                    </div>
+                `;
             }
 
             /**
@@ -993,10 +1065,14 @@
                 if (cachedPayload) {
                     try {
                         const parsedCache = JSON.parse(cachedPayload);
-                        this.renderToDom(parsedCache);
+                        this.renderSuccessState(parsedCache);
                     } catch (e) {
                         console.warn("Failed to parse weather cache.", e);
+                        this.renderLoadingState(); // Fallback to loading state if cache is corrupt
                     }
+                } else {
+                    // No cache, show loading state immediately.
+                    this.renderLoadingState();
                 }
 
                 // 2. Fetch fresh SMHI data using robust timeout wrapper
@@ -1050,7 +1126,7 @@
                     };
 
                     // 3. Render fresh data to DOM and save to SessionStorage Cache
-                    this.renderToDom(compiledWeatherData);
+                    this.renderSuccessState(compiledWeatherData);
                     sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
@@ -1059,7 +1135,11 @@
                     } else {
                         console.warn("WeatherService encountered a non-fatal error during fetch:", error);
                     }
-                    // If cache was loaded, we simply leave it. If not, the widget remains hidden.
+
+                    // If we failed and there was no cache, render the error state.
+                    if (!cachedPayload) {
+                        this.renderErrorState();
+                    }
                 }
             }
         }
@@ -1525,6 +1605,7 @@
 
             /**
              * Applies authoritative state data from memory onto the DOM node structurally.
+             * This function is the single source of truth for a card's visual state.
              * @param {string} deviceId - The unique Tuya device identifier.
              */
             updateDeviceCardRender(deviceId) {
