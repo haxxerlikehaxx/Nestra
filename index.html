@@ -7,9 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     <meta name="description" content="Ultimate Premium Apple HomeKit Style Smart Home Controller for iPad Air 2">
-    <link rel="icon" href="/home/favicon.png">
-    <link rel="apple-touch-icon" href="/home/apple-touch-icon.png">
-    <title>Nestra Smart Home</title>
+    <title>Smart Home Control Center</title>
 
     <style>
         /* ==========================================================================
@@ -26,7 +24,7 @@
             --glass-backdrop-filter-blur: blur(45px);
             --glass-backdrop-filter-saturate: saturate(180%);
             
-            /* Active Device States (ON) - Calibrated for absolute premium contrast */
+            /* Active Device States (ON) - Calibrated for natural UI matching */
             --card-active-background-color: #FFFFFF; /* Pure Apple White */
             --card-active-text-color: #000000;
             --card-active-subtitle-color: rgba(0, 0, 0, 0.50);
@@ -434,9 +432,15 @@
             
             box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
             
-            transition-property: background-color, box-shadow;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve);
+            transition-property: background-color, box-shadow, opacity;
+            transition-duration: var(--animation-duration-medium);
+            transition-timing-function: var(--animation-ease-out-curve);
+        }
+
+        /* New: Disable slider interaction when light is OFF */
+        .smart-device-card:not(.state-is-on) .device-brightness-slider-container {
+            pointer-events: none;
+            opacity: 0.5;
         }
 
         .smart-device-card.state-is-on .device-brightness-slider-container {
@@ -459,8 +463,8 @@
             box-shadow: var(--slider-inactive-fill-shadow);
             
             transition-property: background-color, box-shadow;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve);
+            transition-duration: var(--animation-duration-medium);
+            transition-timing-function: var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .brightness-slider-visual-fill {
@@ -836,9 +840,9 @@
          * @constant {Object}
          */
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v4',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v4',
-            WEATHER_CACHE: 'enterprise_weather_cache_v4'
+            WORKER_URL: 'enterprise_tuya_worker_url_v5',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v5',
+            WEATHER_CACHE: 'enterprise_weather_cache_v5'
         };
 
         /**
@@ -1452,7 +1456,8 @@
                                    max="100" 
                                    step="1" 
                                    value="${currentState.brightness}"
-                                   aria-label="Brightness Control for ${deviceData.name}">
+                                   aria-label="Brightness Control for ${deviceData.name}"
+                                   ${currentState.on ? '' : 'disabled'}>
                         </div>
                     `;
 
@@ -1541,10 +1546,12 @@
                     cardWrapper.classList.add('state-is-on');
                     statusLabel.innerText = `${state.brightness}%`;
                     toggleBtn.setAttribute('aria-pressed', 'true');
+                    nativeSlider.disabled = false;
                 } else {
                     cardWrapper.classList.remove('state-is-on');
                     statusLabel.innerText = 'Off';
                     toggleBtn.setAttribute('aria-pressed', 'false');
+                    nativeSlider.disabled = true;
                 }
 
                 // Assign brightness layout constraints
