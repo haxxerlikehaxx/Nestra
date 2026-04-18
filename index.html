@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Light Control</title>
+  <style>
+    /* Completely fresh, minimalist light-theme styling */
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --primary: #4f46e5;
+      --text: #111827;
+      --text-light: #6b7280;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      /* iPad Portrait constraint */
+      max-width: 768px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 50px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .config-button {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .device-list {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .device-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .device-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .device-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .power-btn {
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .power-btn[data-state="off"] {
+      background: var(--border);
+      color: var(--text-light);
+    }
+
+    .power-btn[data-state="on"] {
+      background: var(--primary);
+      color: white;
+    }
+
+    .brightness-control {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brightness-label {
+      font-weight: bold;
+      color: var(--text-light);
+      min-width: 50px;
+    }
+
+    input[type="range"] {
+      flex-grow: 1;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      -webkit-appearance: none;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Simple prompt overlay */
+    #setup-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .setup-box {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      width: 80%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .setup-box input {
+      width: 100%;
+      padding: 15px;
+      margin: 20px 0;
+      font-size: 1.1rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .setup-box button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Room Lights</h1>
+    <button class="config-button" onclick="showSetup()">Setup API</button>
+  </header>
+
+  <main class="device-list" id="lights-container">
+    <!-- Devices will be injected here -->
+  </main>
+
+  <div id="setup-overlay">
+    <div class="setup-box">
+      <h2>Cloudflare Worker URL</h2>
+      <input type="text" id="api-url" placeholder="https://your-worker.workers.dev">
+      <button onclick="saveSetup()">Save & Connect</button>
+    </div>
+  </div>
+
+  <script>
+    // --- EXACT TUYA DATA / SPECS FROM YOUR ORIGINAL CODE ---
+    const TUYA_DEVICES = [
+      { id: 'bf8b0e945d8c5f9861fjzy', name: 'Led Lights Tak' },
+      { id: 'bf1cf6aca13749cf898g3p', name: 'Led Lights Skrivbord' }
+    ];
+    
+    // Application State
+    let workerApi = localStorage.getItem('my_api_url') || '';
+    let deviceStates = {};
+
+    // --- RENDER UI ---
+    function renderLights() {
+      const container = document.getElementById('lights-container');
+      container.innerHTML = '';
+
+      TUYA_DEVICES.forEach(device => {
+        // Default state if not yet loaded
+        if (!deviceStates[device.id]) {
+          deviceStates[device.id] = { isOn: false, brightness: 100 };
+        }
+        
+        const state = deviceStates[device.id];
+
+        const box = document.createElement('div');
+        box.className = 'device-box';
+        box.innerHTML = `
+          <div class="device-header">
+            <span class="device-title">${device.name}</span>
+            <button class="power-btn" 
+                    data-state="${state.isOn ? 'on' : 'off'}" 
+                    onclick="toggleLight('${device.id}')">
+              ${state.isOn ? 'TURN OFF' : 'TURN ON'}
+            </button>
+          </div>
+          <div class="brightness-control">
+            <span class="brightness-label">${state.brightness}%</span>
+            <input type="range" min="10" max="100" step="10" value="${state.brightness}" 
+                   onchange="changeBrightness('${device.id}', this.value)"
+                   oninput="this.previousElementSibling.innerText = this.value + '%'">
+          </div>
+        `;
+        container.appendChild(box);
+      });
+    }
+
+    // --- TUYA CLOUD LOGIC ---
+
+    async function fetchAllStatuses() {
+      if (!workerApi) return;
+      
+      for (const device of TUYA_DEVICES) {
+        try {
+          const response = await fetch(`${workerApi}/status?device=${device.id}`);
+          const json = await response.json();
+          
+          if (json.success && json.result) {
+            // Find power
+            const powerState = json.result.find(item => item.code === 'switch_led');
+            if (powerState !== undefined) {
+              deviceStates[device.id].isOn = powerState.value;
+            }
+
+            // Find brightness (colour_data or colour_data_v2)
+            const colorState = json.result.find(item => item.code.includes('colour_data'));
+            if (colorState !== undefined) {
+              // Tuya JSON string parsing
+              const parsedColor = typeof colorState.value === 'string' 
+                                  ? JSON.parse(colorState.value) 
+                                  : colorState.value;
+              
+              if (parsedColor && parsedColor.v) {
+                // Tuya scale is 10-1000, convert to 1-100 for range slider
+                deviceStates[device.id].brightness = Math.round(parsedColor.v / 10);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to get status for ${device.name}`, error);
+        }
+      }
+      renderLights();
+    }
+
+    async function toggleLight(deviceId) {
+      if (!workerApi) return showSetup();
+
+      const currentState = deviceStates[deviceId].isOn;
+      const newState = !currentState;
+
+      // Optimistic UI update
+      deviceStates[deviceId].isOn = newState;
+      renderLights();
+
+      try {
+        await fetch(`${workerApi}/command`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            device: deviceId,
+            commands: [
+              { code: 'switch_led', value: newState }
+            ]
+          })
+        });
+      } catch (error) {
+        alert('Failed to send command to Tuya.');
+        deviceStates[deviceId].isOn = currentState; // revert
+        renderLights();
+      }
+    }
+
+    async function changeBrightness(deviceId, newBrightnessValue) {
+      if (!workerApi) return showSetup();
+
+      deviceStates[deviceId].brightness = newBrightnessValue;
+      
+      // Convert UI 10-100 scale back to Tuya 100-1000 scale
+      const tuyaBrightness = newBrightnessValue * 10;
+
+      try {
+        await fetch(`${workerApi}/command`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            device: deviceId,
+            commands: [
+              { code: 'work_mode', value: 'colour' },
+              { 
+                code: 'colour_data', 
+                value: JSON.stringify({ h: 0, s: 0, v: tuyaBrightness }) 
+              }
+            ]
+          })
+        });
+      } catch (error) {
+        alert('Failed to adjust brightness.');
+      }
+    }
+
+    // --- SETUP / CONFIG ---
+    function showSetup() {
+      document.getElementById('api-url').value = workerApi;
+      document.getElementById('setup-overlay').style.display = 'flex';
+    }
+
+    function saveSetup() {
+      const input = document.getElementById('api-url').value.trim();
+      // Basic formatting to remove trailing slashes
+      workerApi = input.endsWith('/') ? input.slice(0, -1) : input;
+      localStorage.setItem('my_api_url', workerApi);
+      document.getElementById('setup-overlay').style.display = 'none';
+      fetchAllStatuses();
+    }
+
+    // --- INIT ---
+    renderLights();
+    if (!workerApi) {
+      showSetup();
+    } else {
+      fetchAllStatuses();
+    }
+  </script>
+</body>
+</html>
