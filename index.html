@@ -2,357 +2,486 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Light Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>My Home</title>
   <style>
-    /* Completely fresh, minimalist light-theme styling */
+    /* iOS System Colors & Apple Home Theme */
     :root {
-      --bg: #f4f6f8;
-      --surface: #ffffff;
-      --primary: #4f46e5;
-      --text: #111827;
-      --text-light: #6b7280;
-      --border: #e5e7eb;
+      --bg-color: #F2F2F7; /* iOS grouped background */
+      --card-bg-off: rgba(255, 255, 255, 0.6);
+      --card-bg-on: #FFFFFF;
+      --text-main: #000000;
+      --text-muted: #8E8E93;
+      --accent: #007AFF;
+      --light-on: #FFD60A;
+      --slider-bg: rgba(0, 0, 0, 0.06);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      /* iPad Portrait constraint */
-      max-width: 768px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      max-width: 768px; /* iPad Portrait */
       margin: 0 auto;
-      padding: 40px;
+      padding: env(safe-area-inset-top, 40px) 32px 32px 32px;
+      min-height: 100vh;
     }
 
+    /* Top Navigation / Header */
     header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 50px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid var(--border);
+      align-items: flex-end;
+      padding-top: 40px;
+      margin-bottom: 30px;
     }
 
     h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: var(--text);
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
 
-    .config-button {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      padding: 10px 20px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      color: var(--text);
-    }
-
-    .device-list {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-    }
-
-    .device-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .device-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .device-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    .power-btn {
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      font-weight: bold;
+    .settings-btn {
+      background: rgba(0, 0, 0, 0.05);
       border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .power-btn[data-state="off"] {
-      background: var(--border);
-      color: var(--text-light);
-    }
-
-    .power-btn[data-state="on"] {
-      background: var(--primary);
-      color: white;
-    }
-
-    .brightness-control {
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
       display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .brightness-label {
-      font-weight: bold;
-      color: var(--text-light);
-      min-width: 50px;
-    }
-
-    input[type="range"] {
-      flex-grow: 1;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--border);
-      -webkit-appearance: none;
-      outline: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--primary);
-      cursor: pointer;
-    }
-
-    /* Simple prompt overlay */
-    #setup-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: background 0.2s;
     }
 
-    .setup-box {
-      background: white;
-      padding: 40px;
+    .settings-btn:active {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Apple Home Grid Layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Apple Home Card Design */
+    .card {
+      background: var(--card-bg-off);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 160px;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      position: relative;
+    }
+
+    .card.is-on {
+      background: var(--card-bg-on);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .card.loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* Icon Toggle Button */
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-muted);
+    }
+
+    .card.is-on .icon-btn {
+      background: var(--light-on);
+      color: #FFFFFF;
+    }
+
+    /* Card Text */
+    .device-info {
+      margin-top: 12px;
+      pointer-events: none;
+    }
+
+    .device-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .device-status {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* Thick Apple-style Slider */
+    .slider-wrapper {
+      margin-top: 12px;
+      height: 36px;
+      position: relative;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 100%;
+      background: var(--slider-bg);
       border-radius: 12px;
-      width: 80%;
-      max-width: 500px;
+      outline: none;
+      overflow: hidden;
+      margin: 0;
+      /* The gradient creates the filled portion */
+      background-image: linear-gradient(var(--text-main), var(--text-main));
+      background-size: var(--val, 0%) 100%;
+      background-repeat: no-repeat;
+    }
+
+    .card.is-on input[type=range] {
+      background-image: linear-gradient(var(--light-on), var(--light-on));
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 1px; /* Invisible thumb, rely on the gradient fill */
+      height: 36px;
+      background: transparent;
+    }
+
+    /* iOS Modal / Sheet Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: #FFFFFF;
+      width: 320px;
+      border-radius: 20px;
+      padding: 24px;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       text-align: center;
     }
 
-    .setup-box input {
-      width: 100%;
-      padding: 15px;
-      margin: 20px 0;
-      font-size: 1.1rem;
-      border: 2px solid var(--border);
-      border-radius: 8px;
+    .modal-overlay.active .modal {
+      transform: scale(1);
     }
 
-    .setup-box button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      font-size: 1.1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
+    .modal h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
     }
+
+    .modal p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .modal input {
+      width: 100%;
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.1);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      margin-bottom: 16px;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .modal button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-save {
+      background: var(--accent);
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: var(--accent);
+    }
+
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Room Lights</h1>
-    <button class="config-button" onclick="showSetup()">Setup API</button>
+    <h1>My Home</h1>
+    <button class="settings-btn" onclick="openSetup()">
+      <!-- Apple Gear Icon -->
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
   </header>
 
-  <main class="device-list" id="lights-container">
-    <!-- Devices will be injected here -->
+  <main class="grid" id="home-grid">
+    <!-- UI injected here -->
   </main>
 
-  <div id="setup-overlay">
-    <div class="setup-box">
-      <h2>Cloudflare Worker URL</h2>
-      <input type="text" id="api-url" placeholder="https://your-worker.workers.dev">
-      <button onclick="saveSetup()">Save & Connect</button>
+  <!-- Setup Modal -->
+  <div class="modal-overlay" id="setup-modal">
+    <div class="modal">
+      <h2>Hub Setup</h2>
+      <p>Enter your Cloudflare Worker URL to connect to your Tuya devices.</p>
+      <input type="url" id="worker-url" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false">
+      <button class="btn-save" onclick="saveSetup()">Save</button>
+      <button class="btn-cancel" onclick="closeSetup()">Cancel</button>
     </div>
   </div>
 
   <script>
-    // --- EXACT TUYA DATA / SPECS FROM YOUR ORIGINAL CODE ---
+    // --- EXACT TUYA DATA / SPECS (Untouched) ---
     const TUYA_DEVICES = [
       { id: 'bf8b0e945d8c5f9861fjzy', name: 'Led Lights Tak' },
       { id: 'bf1cf6aca13749cf898g3p', name: 'Led Lights Skrivbord' }
     ];
     
-    // Application State
-    let workerApi = localStorage.getItem('my_api_url') || '';
-    let deviceStates = {};
+    // Internal state
+    let workerApi = localStorage.getItem('apple_home_worker') || '';
+    let devicesState = {};
 
-    // --- RENDER UI ---
-    function renderLights() {
-      const container = document.getElementById('lights-container');
-      container.innerHTML = '';
+    // --- 1. UI RENDERING ---
+    function renderGrid() {
+      const grid = document.getElementById('home-grid');
+      grid.innerHTML = '';
 
       TUYA_DEVICES.forEach(device => {
-        // Default state if not yet loaded
-        if (!deviceStates[device.id]) {
-          deviceStates[device.id] = { isOn: false, brightness: 100 };
+        // Initialize default state
+        if (!devicesState[device.id]) {
+          devicesState[device.id] = { on: false, brightness: 100 };
         }
-        
-        const state = deviceStates[device.id];
+        const state = devicesState[device.id];
 
-        const box = document.createElement('div');
-        box.className = 'device-box';
-        box.innerHTML = `
-          <div class="device-header">
-            <span class="device-title">${device.name}</span>
-            <button class="power-btn" 
-                    data-state="${state.isOn ? 'on' : 'off'}" 
-                    onclick="toggleLight('${device.id}')">
-              ${state.isOn ? 'TURN OFF' : 'TURN ON'}
-            </button>
+        const card = document.createElement('div');
+        card.className = `card ${state.on ? 'is-on' : ''}`;
+        card.id = `card-${device.id}`;
+        
+        card.innerHTML = `
+          <div class="icon-btn" onclick="toggleLight('${device.id}')">
+            <!-- Apple Lightbulb Symbol -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 14.49V11.5C18 8.19 15.31 5.5 12 5.5C8.69 5.5 6 8.19 6 11.5V14.49L4.47 16.02C4.16 16.33 4 16.74 4 17.18V18C4 18.55 4.45 19 5 19H19C19.55 19 20 18.55 20 18V17.18C20 16.74 19.84 16.33 19.53 16.02L18 14.49Z"/></svg>
           </div>
-          <div class="brightness-control">
-            <span class="brightness-label">${state.brightness}%</span>
-            <input type="range" min="10" max="100" step="10" value="${state.brightness}" 
-                   onchange="changeBrightness('${device.id}', this.value)"
-                   oninput="this.previousElementSibling.innerText = this.value + '%'">
+          
+          <div class="device-info">
+            <div class="device-name">${device.name}</div>
+            <div class="device-status" id="status-${device.id}">
+              ${state.on ? state.brightness + '%' : 'Off'}
+            </div>
+          </div>
+
+          <div class="slider-wrapper">
+            <input type="range" 
+                   min="10" max="100" step="1" 
+                   value="${state.brightness}"
+                   style="--val: ${state.brightness}%"
+                   oninput="handleSliderInput('${device.id}', this)"
+                   onchange="changeBrightness('${device.id}', this.value)">
           </div>
         `;
-        container.appendChild(box);
+        grid.appendChild(card);
       });
     }
 
-    // --- TUYA CLOUD LOGIC ---
+    function updateUI(deviceId) {
+      const state = devicesState[deviceId];
+      const card = document.getElementById(`card-${deviceId}`);
+      const statusText = document.getElementById(`status-${deviceId}`);
+      const slider = card.querySelector('input[type=range]');
+
+      if (state.on) {
+        card.classList.add('is-on');
+        statusText.innerText = state.brightness + '%';
+      } else {
+        card.classList.remove('is-on');
+        statusText.innerText = 'Off';
+      }
+
+      slider.value = state.brightness;
+      slider.style.setProperty('--val', state.brightness + '%');
+      card.classList.remove('loading');
+    }
+
+    // Live update CSS gradient while dragging
+    function handleSliderInput(deviceId, el) {
+      el.style.setProperty('--val', el.value + '%');
+      const state = devicesState[deviceId];
+      if (state.on) {
+        document.getElementById(`status-${deviceId}`).innerText = el.value + '%';
+      }
+    }
+
+    // --- 2. TUYA CLOUD LOGIC ---
+
+    // Format endpoint safely
+    const getUrl = (path) => workerApi.replace(/\/$/, '') + path;
 
     async function fetchAllStatuses() {
       if (!workerApi) return;
       
       for (const device of TUYA_DEVICES) {
         try {
-          const response = await fetch(`${workerApi}/status?device=${device.id}`);
+          const response = await fetch(getUrl(`/status?device=${device.id}`));
           const json = await response.json();
           
           if (json.success && json.result) {
-            // Find power
-            const powerState = json.result.find(item => item.code === 'switch_led');
-            if (powerState !== undefined) {
-              deviceStates[device.id].isOn = powerState.value;
+            // Power Status
+            const powerObj = json.result.find(r => r.code === 'switch_led');
+            if (powerObj !== undefined) {
+              devicesState[device.id].on = powerObj.value;
             }
 
-            // Find brightness (colour_data or colour_data_v2)
-            const colorState = json.result.find(item => item.code.includes('colour_data'));
-            if (colorState !== undefined) {
-              // Tuya JSON string parsing
-              const parsedColor = typeof colorState.value === 'string' 
-                                  ? JSON.parse(colorState.value) 
-                                  : colorState.value;
-              
-              if (parsedColor && parsedColor.v) {
-                // Tuya scale is 10-1000, convert to 1-100 for range slider
-                deviceStates[device.id].brightness = Math.round(parsedColor.v / 10);
+            // Brightness Status
+            const colorObj = json.result.find(r => r.code === 'colour_data_v2' || r.code === 'colour_data');
+            if (colorObj !== undefined) {
+              const colorVal = typeof colorObj.value === 'string' ? JSON.parse(colorObj.value) : colorObj.value;
+              if (colorVal && colorVal.v !== undefined) {
+                // Convert Tuya 1000 scale to 100 scale
+                devicesState[device.id].brightness = Math.round(colorVal.v / 10);
               }
             }
           }
         } catch (error) {
-          console.error(`Failed to get status for ${device.name}`, error);
+          console.error(`Failed to get status for ${device.name}`);
         }
+        updateUI(device.id);
       }
-      renderLights();
     }
 
     async function toggleLight(deviceId) {
-      if (!workerApi) return showSetup();
+      if (!workerApi) return openSetup();
 
-      const currentState = deviceStates[deviceId].isOn;
-      const newState = !currentState;
-
-      // Optimistic UI update
-      deviceStates[deviceId].isOn = newState;
-      renderLights();
+      // Optimistic Update
+      devicesState[deviceId].on = !devicesState[deviceId].on;
+      const card = document.getElementById(`card-${deviceId}`);
+      card.classList.add('loading');
+      updateUI(deviceId);
 
       try {
-        await fetch(`${workerApi}/command`, {
+        await fetch(getUrl('/command'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             device: deviceId,
-            commands: [
-              { code: 'switch_led', value: newState }
-            ]
+            commands: [{ code: 'switch_led', value: devicesState[deviceId].on }]
           })
         });
       } catch (error) {
-        alert('Failed to send command to Tuya.');
-        deviceStates[deviceId].isOn = currentState; // revert
-        renderLights();
+        // Revert on fail
+        devicesState[deviceId].on = !devicesState[deviceId].on;
+        updateUI(deviceId);
+        alert('Failed to reach light.');
       }
+      card.classList.remove('loading');
     }
 
     async function changeBrightness(deviceId, newBrightnessValue) {
-      if (!workerApi) return showSetup();
+      if (!workerApi) return;
 
-      deviceStates[deviceId].brightness = newBrightnessValue;
+      devicesState[deviceId].brightness = newBrightnessValue;
+      const card = document.getElementById(`card-${deviceId}`);
+      card.classList.add('loading');
+      updateUI(deviceId);
       
-      // Convert UI 10-100 scale back to Tuya 100-1000 scale
+      // Convert UI 100 scale back to Tuya 1000 scale
       const tuyaBrightness = newBrightnessValue * 10;
 
       try {
-        await fetch(`${workerApi}/command`, {
+        await fetch(getUrl('/command'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             device: deviceId,
             commands: [
               { code: 'work_mode', value: 'colour' },
-              { 
-                code: 'colour_data', 
-                value: JSON.stringify({ h: 0, s: 0, v: tuyaBrightness }) 
-              }
+              { code: 'colour_data', value: JSON.stringify({ h: 0, s: 0, v: tuyaBrightness }) }
             ]
           })
         });
       } catch (error) {
         alert('Failed to adjust brightness.');
       }
+      card.classList.remove('loading');
     }
 
-    // --- SETUP / CONFIG ---
-    function showSetup() {
-      document.getElementById('api-url').value = workerApi;
-      document.getElementById('setup-overlay').style.display = 'flex';
+    // --- 3. SETTINGS OVERLAY ---
+    function openSetup() {
+      document.getElementById('worker-url').value = workerApi;
+      document.getElementById('setup-modal').classList.add('active');
+    }
+
+    function closeSetup() {
+      document.getElementById('setup-modal').classList.remove('active');
     }
 
     function saveSetup() {
-      const input = document.getElementById('api-url').value.trim();
-      // Basic formatting to remove trailing slashes
-      workerApi = input.endsWith('/') ? input.slice(0, -1) : input;
-      localStorage.setItem('my_api_url', workerApi);
-      document.getElementById('setup-overlay').style.display = 'none';
+      const input = document.getElementById('worker-url').value.trim();
+      if (!input) return alert("Please enter a valid URL");
+      
+      workerApi = input;
+      localStorage.setItem('apple_home_worker', workerApi);
+      closeSetup();
       fetchAllStatuses();
     }
 
     // --- INIT ---
-    renderLights();
+    renderGrid();
     if (!workerApi) {
-      showSetup();
+      setTimeout(openSetup, 500); // Small delay so the UI loads first
     } else {
       fetchAllStatuses();
     }
