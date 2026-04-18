@@ -908,9 +908,9 @@
          * @constant {Object}
          */
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v5',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v5',
-            WEATHER_CACHE: 'enterprise_weather_cache_v5'
+            WORKER_URL: 'enterprise_tuya_worker_url_v6',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v6',
+            WEATHER_CACHE: 'enterprise_weather_cache_v6'
         };
 
         /**
@@ -969,7 +969,7 @@
 
         /**
          * Manages retrieval, parsing, and caching of meteorological data via SMHI API.
-         * Specifically targets Spånga, Stockholm with sub-zero latency caching.
+         * Specifically targets Spånga, Stockholm with sub-zero latency caching and CORS proxy.
          */
         class WeatherService {
             constructor() {
@@ -978,8 +978,11 @@
                 this.longitude = 17.90;
                 
                 // SMHI requires max 6 decimals for lon/lat, using 2 decimal places as per precise geographic specification
-                this.apiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitude.toFixed(2)}/lat/${this.latitude.toFixed(2)}/data.json`;
+                const smhiApiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitude.toFixed(2)}/lat/${this.latitude.toFixed(2)}/data.json`;
                 
+                // CRITICAL FIX: Route SMHI request through a CORS proxy to prevent browser security errors.
+                this.proxiedApiUrl = `https://corsproxy.io/?${encodeURIComponent(smhiApiUrl)}`;
+
                 // DOM element references
                 this.widgetElement = document.getElementById('weather-dashboard-widget');
             }
@@ -1007,13 +1010,13 @@
             /**
              * Populates the widget with an error message.
              */
-            renderErrorState() {
+            renderErrorState(errorMessage) {
                 if (!this.widgetElement) return;
                 this.widgetElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
                         <h2 class="weather-temperature-display">--</h2>
-                        <span class="weather-condition-description" style="color: #FF453A;">Connection Failed</span>
+                        <span class="weather-condition-description" style="color: #FF453A;">${errorMessage}</span>
                     </div>
                 `;
             }
@@ -1110,13 +1113,13 @@
                 // 2. Fetch fresh SMHI data using robust timeout wrapper
                 try {
                     const abortController = new AbortController();
-                    const timeoutId = setTimeout(() => abortController.abort(), 8000); // 8 second strict timeout
+                    const timeoutId = setTimeout(() => abortController.abort(), 12000); // Increased timeout to 12 seconds
 
-                    const response = await fetch(this.apiUrl, { signal: abortController.signal });
+                    const response = await fetch(this.proxiedApiUrl, { signal: abortController.signal });
                     clearTimeout(timeoutId);
 
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(`Weather Proxy Error! status: ${response.status}`);
                     }
                     
                     const rawData = await response.json();
@@ -1164,13 +1167,10 @@
                 } catch (error) {
                     if (error.name === 'AbortError') {
                         console.warn("WeatherService fetch aborted due to timeout.");
+                        if (!cachedPayload) this.renderErrorState("Connection Timeout");
                     } else {
-                        console.warn("WeatherService encountered a non-fatal error during fetch:", error);
-                    }
-
-                    // If we failed and there was no cache, render the error state.
-                    if (!cachedPayload) {
-                        this.renderErrorState();
+                        console.error("WeatherService encountered a critical error during fetch:", error);
+                        if (!cachedPayload) this.renderErrorState("Data Unavailable");
                     }
                 }
             }
@@ -1186,7 +1186,7 @@
          */
         class NetworkManager {
             constructor() {
-                this.defaultTimeoutMs = 12000; // Increased timeout duration
+                this.defaultTimeoutMs = 12000; // Generous 12-second timeout
             }
 
             /**
@@ -1305,6 +1305,7 @@
 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
+                    ApplicationUI.setDeviceConnectingState(device.id, true);
                     try {
                         const url = this.buildEndpointUrl(`/status?device=${device.id}`);
                         const jsonPayload = await NetworkService.get(url);
@@ -1314,9 +1315,10 @@
                         }
                     } catch (error) {
                         console.warn(`TuyaSmartDeviceManager: Synchronization failed for device [${device.name}].`, error);
+                    } finally {
+                        ApplicationUI.setDeviceConnectingState(device.id, false);
+                        ApplicationUI.updateDeviceCardRender(device.id);
                     }
-                    
-                    ApplicationUI.updateDeviceCardRender(device.id);
                 }
             }
 
