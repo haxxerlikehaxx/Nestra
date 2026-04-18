@@ -968,21 +968,17 @@
            ========================================================================== */
 
         /**
-         * Manages retrieval, parsing, and caching of meteorological data via SMHI API.
-         * Specifically targets Spånga, Stockholm with sub-zero latency caching and CORS proxy.
+         * Manages retrieval, parsing, and caching of meteorological data via Open-Meteo API.
+         * Specifically targets Spånga, Stockholm with sub-zero latency caching.
          */
         class WeatherService {
             constructor() {
                 // Hardcoded coordinates for Spånga, Stockholm
-                this.latitude = 59.38;
-                this.longitude = 17.90;
+                this.latitudeCoordinateForApi = 59.38;
+                this.longitudeCoordinateForApi = 17.90;
                 
-                // SMHI requires max 6 decimals for lon/lat, using 2 decimal places as per precise geographic specification
-                const smhiApiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitude.toFixed(2)}/lat/${this.latitude.toFixed(2)}/data.json`;
+                this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
                 
-                // CRITICAL FIX: Route SMHI request through a CORS proxy to prevent browser security errors.
-                this.proxiedApiUrl = `https://corsproxy.io/?${encodeURIComponent(smhiApiUrl)}`;
-
                 // DOM element references
                 this.widgetElement = document.getElementById('weather-dashboard-widget');
             }
@@ -1022,51 +1018,20 @@
             }
 
             /**
-             * Translates SMHI Wsymb2 interpretation codes into UI-ready text and SVG assets.
-             * @param {number} code - SMHI weather code integer.
+             * Translates WMO Weather interpretation codes into UI-ready text and SVG assets.
+             * @param {number} code - WMO weather code integer.
              * @returns {Object} { text: string, icon: string }
              */
-            parseSmhiSymbolCode(code) {
-                if (code === 1 || code === 2) {
-                    return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
-                }
-                if (code >= 3 && code <= 4) {
-                    return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                }
-                if (code >= 5 && code <= 7) {
-                    return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                }
-                if (code >= 8 && code <= 11) {
-                    return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
-                }
-                if (code >= 12 && code <= 14) {
-                    return { text: "Sleet", icon: SVG_ASSETS.WEATHER_SNOW };
-                }
-                if (code >= 15 && code <= 17) {
-                    return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                }
-                if (code >= 18 && code <= 19) {
-                    return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
-                }
-                if (code >= 20 && code <= 27) {
-                    return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
-                }
-                
-                return { text: "Unknown", icon: SVG_ASSETS.WEATHER_CLOUD }; // Fallback
-            }
-
-            /**
-             * Extracts a specific parameter value from the SMHI parameters array.
-             * @param {Array<Object>} parameters - Array of parameter objects.
-             * @param {string} parameterName - The name of the parameter (e.g., 't', 'Wsymb2').
-             * @returns {number|null} The value, or null if not found.
-             */
-            extractParameterValue(parameters, parameterName) {
-                const targetParameter = parameters.find(param => param.name === parameterName);
-                if (targetParameter && targetParameter.values && targetParameter.values.length > 0) {
-                    return targetParameter.values[0];
-                }
-                return null;
+            parseWmoWeatherCode(code) {
+                if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
+                if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
+                return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD }; // Fallback
             }
 
             /**
@@ -1110,46 +1075,19 @@
                     this.renderLoadingState();
                 }
 
-                // 2. Fetch fresh SMHI data using robust timeout wrapper
+                // 2. Fetch fresh Open-Meteo data using robust timeout wrapper
                 try {
-                    const abortController = new AbortController();
-                    const timeoutId = setTimeout(() => abortController.abort(), 12000); // Increased timeout to 12 seconds
-
-                    const response = await fetch(this.proxiedApiUrl, { signal: abortController.signal });
-                    clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        throw new Error(`Weather Proxy Error! status: ${response.status}`);
-                    }
+                    const rawData = await NetworkService.get(this.apiUrl);
                     
-                    const rawData = await response.json();
-                    
-                    if (!rawData.timeSeries || rawData.timeSeries.length === 0) {
-                        throw new Error("No time series data returned from SMHI API.");
+                    if (!rawData || !rawData.current || !rawData.daily) {
+                        throw new Error("Invalid data structure from Open-Meteo API.");
                     }
 
                     // Extract Current Telemetry
-                    const currentDataEntry = rawData.timeSeries[0];
-                    const currentTemperatureRaw = this.extractParameterValue(currentDataEntry.parameters, 't');
-                    const currentWeatherCodeRaw = this.extractParameterValue(currentDataEntry.parameters, 'Wsymb2');
-
-                    if (currentTemperatureRaw === null || currentWeatherCodeRaw === null) {
-                        throw new Error("Missing required parameters in current SMHI data block.");
-                    }
-
-                    const currentTemperature = Math.round(currentTemperatureRaw);
-                    const weatherCondition = this.parseSmhiSymbolCode(currentWeatherCodeRaw);
-
-                    // Extract Daily High / Low by evaluating all predictions for the current date string
-                    const currentDateString = currentDataEntry.validTime.substring(0, 10);
-                    const todayForecastEntries = rawData.timeSeries.filter(entry => entry.validTime.startsWith(currentDateString));
-                    
-                    const todayTemperatureValues = todayForecastEntries.map(entry => {
-                        return this.extractParameterValue(entry.parameters, 't');
-                    }).filter(temp => temp !== null);
-
-                    const dailyHigh = Math.round(Math.max(...todayTemperatureValues));
-                    const dailyLow = Math.round(Math.min(...todayTemperatureValues));
+                    const currentTemperature = Math.round(rawData.current.temperature_2m);
+                    const weatherCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
+                    const dailyHigh = Math.round(rawData.daily.temperature_2m_max[0]);
+                    const dailyLow = Math.round(rawData.daily.temperature_2m_min[0]);
 
                     // Construct formatted payload
                     const compiledWeatherData = {
@@ -1165,12 +1103,17 @@
                     sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
+                    let errorMessage = "Data Unavailable";
                     if (error.name === 'AbortError') {
+                        errorMessage = "Weather API Timeout";
                         console.warn("WeatherService fetch aborted due to timeout.");
-                        if (!cachedPayload) this.renderErrorState("Connection Timeout");
                     } else {
                         console.error("WeatherService encountered a critical error during fetch:", error);
-                        if (!cachedPayload) this.renderErrorState("Data Unavailable");
+                    }
+
+                    // If we failed and there was no cache, render the error state.
+                    if (!cachedPayload) {
+                        this.renderErrorState(errorMessage);
                     }
                 }
             }
