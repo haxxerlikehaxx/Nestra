@@ -31,15 +31,18 @@
             --icon-active-background-color: #FFCC00; /* Apple System Yellow */
             --icon-active-foreground-color: #FFFFFF;
             --icon-active-box-shadow: 0px 6px 16px rgba(255, 204, 0, 0.35);
-            --slider-active-track-color: rgba(0, 0, 0, 0.06);
-            --slider-active-fill-color: #FFFFFF;
-            --slider-active-fill-shadow: 0px 2px 10px rgba(0, 0, 0, 0.12);
+            
+            /* FIX: Slider Contrast in ON State */
+            --slider-active-track-color: rgba(0, 0, 0, 0.08); /* Deep inset groove */
+            --slider-active-fill-color: #000000; /* Deep black for premium contrast */
+            --slider-active-fill-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
 
             /* Inactive Device States (OFF) - Calibrated for dark mode elegance */
             --card-inactive-text-color: #FFFFFF;
             --card-inactive-subtitle-color: rgba(255, 255, 255, 0.55);
             --icon-inactive-background-color: rgba(255, 255, 255, 0.12);
             --icon-inactive-foreground-color: rgba(255, 255, 255, 0.60);
+            
             --slider-inactive-track-color: rgba(0, 0, 0, 0.25);
             --slider-inactive-fill-color: rgba(255, 255, 255, 0.20);
             --slider-inactive-fill-shadow: none;
@@ -749,13 +752,13 @@
     <section aria-label="Weather Dashboard" id="weather-dashboard-section">
         <div class="weather-dashboard-widget" id="weather-dashboard-widget" style="display: none;">
             <div class="weather-information-left">
-                <span class="weather-city-label" id="weather-label-city">Stockholm</span>
+                <span class="weather-city-label" id="weather-label-city">Spånga</span>
                 <h2 class="weather-temperature-display" id="weather-label-temperature">--°</h2>
                 <span class="weather-condition-description" id="weather-label-description">Loading telemetry...</span>
             </div>
             <div class="weather-graphics-right">
                 <div class="weather-vector-icon" id="weather-vector-container" aria-hidden="true">
-                    <!-- SVG Graphics dynamically injected by WeatherManager class -->
+                    <!-- SVG Graphics dynamically injected by WeatherService class -->
                 </div>
                 <span class="weather-high-low-range" id="weather-label-range">H:--° L:--°</span>
             </div>
@@ -830,8 +833,8 @@
          * @constant {Object}
          */
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v2',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v2'
+            WORKER_URL: 'enterprise_tuya_worker_url_v3',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v3'
         };
 
         /**
@@ -889,42 +892,69 @@
            ========================================================================== */
 
         /**
-         * Manages retrieval and processing of meteorological data via Open-Meteo API.
+         * Manages retrieval and processing of meteorological data via SMHI API.
+         * Refactored to specifically target Spånga, Stockholm.
          */
         class WeatherService {
             constructor() {
-                // Hardcoded coordinates for Stockholm as per initial design
-                this.latitude = 59.3293;
-                this.longitude = 18.0686;
-                this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitude}&longitude=${this.longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+                // Hardcoded coordinates for Spånga, Stockholm
+                this.latitude = 59.38;
+                this.longitude = 17.90;
+                
+                // SMHI requires max 6 decimals for lon/lat, using 2 decimal places as per user request
+                this.apiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitude.toFixed(2)}/lat/${this.latitude.toFixed(2)}/data.json`;
             }
 
             /**
-             * Translates raw WMO Weather interpretation codes into UI-ready text and SVG assets.
-             * @param {number} code - WMO weather code integer.
+             * Translates SMHI Wsymb2 interpretation codes into UI-ready text and SVG assets.
+             * @param {number} code - SMHI weather code integer.
              * @returns {Object} { text: string, icon: string }
              */
-            parseWeatherCode(code) {
-                if (code === 0 || code === 1) {
-                    return { text: "Mostly Clear", icon: SVG_ASSETS.WEATHER_SUN };
+            parseSmhiSymbolCode(code) {
+                if (code === 1 || code === 2) {
+                    return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
                 }
-                if (code >= 2 && code <= 3) {
+                if (code >= 3 && code <= 4) {
+                    return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+                }
+                if (code >= 5 && code <= 7) {
                     return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
                 }
-                if (code >= 51 && code <= 67) {
+                if (code >= 8 && code <= 11) {
+                    return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
+                }
+                if (code >= 12 && code <= 14) {
+                    return { text: "Sleet", icon: SVG_ASSETS.WEATHER_SNOW };
+                }
+                if (code >= 15 && code <= 17) {
                     return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
                 }
-                if (code >= 71 && code <= 86) {
-                    return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
-                }
-                if (code >= 95) {
+                if (code >= 18 && code <= 19) {
                     return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
                 }
-                return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD }; // Fallback
+                if (code >= 20 && code <= 27) {
+                    return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
+                }
+                
+                return { text: "Unknown", icon: SVG_ASSETS.WEATHER_CLOUD }; // Fallback
             }
 
             /**
-             * Fetches data asynchronously and populates the weather DOM widget.
+             * Extracts a specific parameter value from the SMHI parameters array.
+             * @param {Array<Object>} parameters - Array of parameter objects.
+             * @param {string} parameterName - The name of the parameter (e.g., 't', 'Wsymb2').
+             * @returns {number|null} The value, or null if not found.
+             */
+            extractParameterValue(parameters, parameterName) {
+                const targetParameter = parameters.find(param => param.name === parameterName);
+                if (targetParameter && targetParameter.values && targetParameter.values.length > 0) {
+                    return targetParameter.values[0];
+                }
+                return null;
+            }
+
+            /**
+             * Fetches data asynchronously from SMHI and populates the weather DOM widget.
              */
             async fetchAndRender() {
                 try {
@@ -935,11 +965,32 @@
                     
                     const data = await response.json();
                     
-                    // Extract required telemetry, rounding to nearest integer
-                    const currentTemperature = Math.round(data.current.temperature_2m);
-                    const weatherCondition = this.parseWeatherCode(data.current.weather_code);
-                    const dailyHigh = Math.round(data.daily.temperature_2m_max[0]);
-                    const dailyLow = Math.round(data.daily.temperature_2m_min[0]);
+                    if (!data.timeSeries || data.timeSeries.length === 0) {
+                        throw new Error("No time series data returned from SMHI API.");
+                    }
+
+                    // Extract Current Telemetry
+                    const currentDataEntry = data.timeSeries[0];
+                    const currentTemperatureRaw = this.extractParameterValue(currentDataEntry.parameters, 't');
+                    const currentWeatherCodeRaw = this.extractParameterValue(currentDataEntry.parameters, 'Wsymb2');
+
+                    if (currentTemperatureRaw === null || currentWeatherCodeRaw === null) {
+                        throw new Error("Missing required parameters in current SMHI data block.");
+                    }
+
+                    const currentTemperature = Math.round(currentTemperatureRaw);
+                    const weatherCondition = this.parseSmhiSymbolCode(currentWeatherCodeRaw);
+
+                    // Extract Daily High / Low by evaluating all predictions for the current date string
+                    const currentDateString = currentDataEntry.validTime.substring(0, 10);
+                    const todayForecastEntries = data.timeSeries.filter(entry => entry.validTime.startsWith(currentDateString));
+                    
+                    const todayTemperatureValues = todayForecastEntries.map(entry => {
+                        return this.extractParameterValue(entry.parameters, 't');
+                    }).filter(temp => temp !== null);
+
+                    const dailyHigh = Math.round(Math.max(...todayTemperatureValues));
+                    const dailyLow = Math.round(Math.min(...todayTemperatureValues));
 
                     // Map to DOM elements safely
                     const elTemp = document.getElementById('weather-label-temperature');
