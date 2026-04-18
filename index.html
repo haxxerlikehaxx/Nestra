@@ -304,10 +304,15 @@
         .weather-spinner {
             width: 24px;
             height: 24px;
-            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-width: 3px;
+            border-style: solid;
+            border-color: rgba(255, 255, 255, 0.15);
             border-top-color: rgba(255, 255, 255, 0.6);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation-name: spin;
+            animation-duration: 1s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
         }
         @keyframes spin {
             to {
@@ -371,9 +376,9 @@
             
             /* Remove overflow:hidden from the card itself to prevent rendering artifacts */
             
-            transition-property: background-color, color, transform, box-shadow, border-color;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve);
+            transition-property: background-color, color, transform, box-shadow, border-color, opacity;
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-fast);
+            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve);
         }
 
         /* State: Device is ON */
@@ -386,6 +391,12 @@
 
         .smart-device-card:active {
             transform: scale(0.96);
+        }
+
+        /* State: Device is connecting */
+        .smart-device-card.is-connecting {
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         /* Top Area: Icon Toggle */
@@ -420,6 +431,19 @@
             background-color: var(--icon-active-background-color);
             color: var(--icon-active-foreground-color);
             box-shadow: var(--icon-active-box-shadow);
+        }
+        
+        .smart-device-card.is-connecting .device-toggle-icon-container {
+            animation-name: pulse-connecting;
+            animation-duration: 1.5s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+        }
+        
+        @keyframes pulse-connecting {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
         }
 
         .device-toggle-icon-container svg {
@@ -525,8 +549,12 @@
             width: 100%;
             height: 100%;
             background-color: transparent;
-            outline: none;
-            border: none;
+            outline-style: none;
+            outline-color: initial;
+            outline-width: initial;
+            border-style: none;
+            border-color: initial;
+            border-width: initial;
             box-shadow: none;
             margin-top: 0;
             margin-right: 0;
@@ -544,14 +572,18 @@
             width: 40px;
             height: 40px;
             background-color: transparent;
-            border: none;
+            border-style: none;
+            border-color: initial;
+            border-width: initial;
             box-shadow: none;
             cursor: pointer;
         }
         
         .brightness-native-range-input::-webkit-slider-runnable-track {
             background-color: transparent;
-            border: none;
+            border-style: none;
+            border-color: initial;
+            border-width: initial;
             box-shadow: none;
         }
 
@@ -1145,12 +1177,80 @@
         }
 
         /* ==========================================================================
+           NETWORK SERVICE LAYER
+           ========================================================================== */
+
+        /**
+         * A dedicated service for handling all network requests with centralized logic
+         * for timeouts and error handling.
+         */
+        class NetworkManager {
+            constructor() {
+                this.defaultTimeoutMs = 12000; // Increased timeout duration
+            }
+
+            /**
+             * Performs a GET request with a timeout.
+             * @param {string} url - The URL to fetch.
+             * @returns {Promise<Object>} The JSON response.
+             */
+            async get(url) {
+                const abortController = new AbortController();
+                const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
+
+                try {
+                    const response = await fetch(url, { signal: abortController.signal });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId); // Ensure timeout is cleared on early fetch errors too
+                    throw error; // Re-throw for the calling function to handle
+                }
+            }
+
+            /**
+             * Performs a POST request with a timeout.
+             * @param {string} url - The URL to post to.
+             * @param {Object} body - The JSON body of the request.
+             * @returns {Promise<Object>} The JSON response.
+             */
+            async post(url, body) {
+                const abortController = new AbortController();
+                const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                        signal: abortController.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    throw error;
+                }
+            }
+        }
+
+        const NetworkService = new NetworkManager();
+        
+        /* ==========================================================================
            STATE & API MANAGEMENT FOR SMART DEVICES
            ========================================================================== */
 
         /**
          * State management and network controller for Cloudflare Worker Tuya proxy.
-         * Integrates strict AbortController mechanics for enterprise-grade stability.
+         * Now delegates network operations to the dedicated NetworkManager.
          */
         class TuyaSmartDeviceManager {
             constructor() {
@@ -1199,8 +1299,6 @@
 
             /**
              * Synchronizes local state with Tuya cloud via Worker proxy.
-             * Executes concurrently but processes results sequentially to avoid race conditions.
-             * Utilizes a strict 5-second fetch timeout.
              */
             async synchronizeAllDevices() {
                 if (!this.isConfigured()) return;
@@ -1208,20 +1306,8 @@
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
                     try {
-                        const abortController = new AbortController();
-                        const timeoutId = setTimeout(() => abortController.abort(), 5000);
-
-                        const response = await fetch(this.buildEndpointUrl(`/status?device=${device.id}`), {
-                            signal: abortController.signal
-                        });
-                        
-                        clearTimeout(timeoutId);
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status} from Cloudflare Worker`);
-                        }
-
-                        const jsonPayload = await response.json();
+                        const url = this.buildEndpointUrl(`/status?device=${device.id}`);
+                        const jsonPayload = await NetworkService.get(url);
                         
                         if (jsonPayload.success && jsonPayload.result) {
                             this.parseAndApplyTuyaStatusPayload(device.id, jsonPayload.result);
@@ -1230,7 +1316,6 @@
                         console.warn(`TuyaSmartDeviceManager: Synchronization failed for device [${device.name}].`, error);
                     }
                     
-                    // Always inform UI to re-render card based on current (or updated) state
                     ApplicationUI.updateDeviceCardRender(device.id);
                 }
             }
@@ -1241,28 +1326,20 @@
              * @param {Array<Object>} statusArray - Array of code/value objects from Tuya API.
              */
             parseAndApplyTuyaStatusPayload(deviceId, statusArray) {
-                // Parse Power State
                 const powerInstruction = statusArray.find(instruction => instruction.code === 'switch_led');
                 if (powerInstruction !== undefined) {
                     this.devicesState[deviceId].on = powerInstruction.value;
                 }
-
-                // Parse Brightness State (Checking both v1 and v2 formats)
                 const colorInstruction = statusArray.find(instruction => instruction.code === 'colour_data_v2' || instruction.code === 'colour_data');
                 if (colorInstruction !== undefined) {
                     try {
-                        // Tuya sometimes sends JSON strings, sometimes parsed objects
                         const parsedValueObject = typeof colorInstruction.value === 'string' 
                             ? JSON.parse(colorInstruction.value) 
                             : colorInstruction.value;
                             
                         if (parsedValueObject && parsedValueObject.v !== undefined) {
-                            // Tuya defines brightness 'v' on a scale of 10 to 1000.
-                            // Convert this to our 1 to 100 UI scale.
                             let uiBrightness = Math.round(parsedValueObject.v / 10);
-                            // Clamp value to ensure bounds
                             uiBrightness = Math.max(1, Math.min(100, uiBrightness));
-                            
                             this.devicesState[deviceId].brightness = uiBrightness;
                         }
                     } catch (parseError) {
@@ -1273,7 +1350,7 @@
 
             /**
              * Toggles device power locally and transmits command to API.
-             * Employs Optimistic UI principles with AbortController rollback safety.
+             * Employs Optimistic UI principles with rollback safety.
              * @param {string} deviceId - The unique Tuya device identifier.
              */
             async toggleDevicePower(deviceId) {
@@ -1282,38 +1359,31 @@
                     return;
                 }
 
-                // Optimistically invert state
+                // Optimistically invert state and apply connecting UI
                 const previousState = this.devicesState[deviceId].on;
                 this.devicesState[deviceId].on = !previousState;
-                
-                // Instantly reflect optimistic state in DOM
+                ApplicationUI.setDeviceConnectingState(deviceId, true);
                 ApplicationUI.updateDeviceCardRender(deviceId);
 
                 try {
-                    const abortController = new AbortController();
-                    const timeoutId = setTimeout(() => abortController.abort(), 5000);
-
-                    const response = await fetch(this.buildEndpointUrl('/command'), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            device: deviceId,
-                            commands: [{ code: 'switch_led', value: this.devicesState[deviceId].on }]
-                        }),
-                        signal: abortController.signal
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        throw new Error(`Command failed with status ${response.status}`);
-                    }
-
+                    const url = this.buildEndpointUrl('/command');
+                    const body = {
+                        device: deviceId,
+                        commands: [{ code: 'switch_led', value: this.devicesState[deviceId].on }]
+                    };
+                    await NetworkService.post(url, body);
                 } catch (error) {
-                    GlobalToast.show("Network failure. Reverting state.");
+                    if (error.name === 'AbortError') {
+                        GlobalToast.show("Device Unresponsive (Timeout)");
+                    } else {
+                        GlobalToast.show("Network Error. Check Connection.");
+                    }
                     // Revert state on network failure or timeout
                     this.devicesState[deviceId].on = previousState;
                     ApplicationUI.updateDeviceCardRender(deviceId);
+                } finally {
+                    // Always remove connecting state after operation completes
+                    ApplicationUI.setDeviceConnectingState(deviceId, false);
                 }
             }
 
@@ -1325,12 +1395,10 @@
             handleBrightnessChangeIntent(deviceId, newBrightnessPercentage) {
                 if (!this.isConfigured()) return;
 
-                // Clear any existing pending network request for this specific device
                 if (this.debounceTimers[deviceId]) {
                     clearTimeout(this.debounceTimers[deviceId]);
                 }
 
-                // Wait 400ms after user stops moving the slider before dispatching network request
                 this.debounceTimers[deviceId] = setTimeout(() => {
                     this.executeBrightnessCommand(deviceId, newBrightnessPercentage);
                 }, 400);
@@ -1338,45 +1406,37 @@
 
             /**
              * Executes the actual HTTP network transmission for brightness modification.
-             * Utilizes AbortController for network resilience.
              * @param {string} deviceId - The unique Tuya device identifier.
              * @param {number} newBrightnessPercentage - 1-100 integer.
              */
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
-                // If sliding brightness while OFF, automatically turn the light ON optimistically
                 if (this.devicesState[deviceId].on === false) {
                     this.devicesState[deviceId].on = true;
                     ApplicationUI.updateDeviceCardRender(deviceId);
                 }
 
-                // Convert from UI 1-100 scale to Tuya 10-1000 scale explicitly
+                ApplicationUI.setDeviceConnectingState(deviceId, true);
+
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
 
                 try {
-                    const abortController = new AbortController();
-                    const timeoutId = setTimeout(() => abortController.abort(), 6000);
-
-                    const response = await fetch(this.buildEndpointUrl('/command'), {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            device: deviceId,
-                            commands: [
-                                { code: 'work_mode', value: 'colour' },
-                                { code: 'colour_data', value: JSON.stringify({ h: 0, s: 0, v: tuyaFormatBrightness }) }
-                            ]
-                        }),
-                        signal: abortController.signal
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        throw new Error("API rejection during brightness change.");
-                    }
-
+                    const url = this.buildEndpointUrl('/command');
+                    const body = {
+                        device: deviceId,
+                        commands: [
+                            { code: 'work_mode', value: 'colour' },
+                            { code: 'colour_data', value: JSON.stringify({ h: 0, s: 0, v: tuyaFormatBrightness }) }
+                        ]
+                    };
+                    await NetworkService.post(url, body);
                 } catch (error) {
-                    GlobalToast.show("Failed to transmit brightness modification.");
+                    if (error.name === 'AbortError') {
+                        GlobalToast.show("Device Unresponsive (Timeout)");
+                    } else {
+                        GlobalToast.show("Network Error. Check Connection.");
+                    }
+                } finally {
+                    ApplicationUI.setDeviceConnectingState(deviceId, false);
                 }
             }
         }
@@ -1638,6 +1698,22 @@
                 // Assign brightness layout constraints
                 nativeSlider.value = state.brightness;
                 fillLayer.style.setProperty('--current-fill-percentage', `${state.brightness}%`);
+            }
+            
+            /**
+             * Applies or removes the 'is-connecting' class to a device card.
+             * @param {string} deviceId - The unique Tuya device identifier.
+             * @param {boolean} isConnecting - True to apply the connecting state, false to remove.
+             */
+            setDeviceConnectingState(deviceId, isConnecting) {
+                const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
+                if (cardWrapper) {
+                    if (isConnecting) {
+                        cardWrapper.classList.add('is-connecting');
+                    } else {
+                        cardWrapper.classList.remove('is-connecting');
+                    }
+                }
             }
 
             /**
