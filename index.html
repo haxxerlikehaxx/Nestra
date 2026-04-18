@@ -908,9 +908,9 @@
          * @constant {Object}
          */
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v6',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v6',
-            WEATHER_CACHE: 'enterprise_weather_cache_v6'
+            WORKER_URL: 'enterprise_tuya_worker_url_v7',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v7',
+            WEATHER_CACHE: 'enterprise_weather_cache_v7'
         };
 
         /**
@@ -1355,9 +1355,11 @@
              * @param {number} newBrightnessPercentage - 1-100 integer.
              */
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
+                // This logic is now handled in the high-frequency UI update
+                // to prevent the "flash" effect. We ensure the command is only
+                // sent if the light is on, which it will be by this point.
                 if (this.devicesState[deviceId].on === false) {
-                    this.devicesState[deviceId].on = true;
-                    ApplicationUI.updateDeviceCardRender(deviceId);
+                    return; 
                 }
 
                 ApplicationUI.setDeviceConnectingState(deviceId, true);
@@ -1542,6 +1544,10 @@
                                    step="1" 
                                    value="${currentState.brightness}"
                                    aria-label="Brightness Control for ${deviceData.name}"
+                                   aria-valuemin="1"
+                                   aria-valuemax="100"
+                                   aria-valuenow="${currentState.brightness}"
+                                   aria-valuetext="${currentState.brightness} percent"
                                    ${currentState.on ? '' : 'disabled'}>
                         </div>
                     `;
@@ -1584,27 +1590,39 @@
 
             /**
              * Immediately repaints DOM layout variables during high-fps touch interactions.
-             * Operates independent of network latency.
+             * This method now handles the "turn on" logic to prevent the background flash.
              * @param {string} deviceId - The unique Tuya device identifier.
              * @param {string|number} rawValue - Brightness integer from slider input.
              */
             handleHighFrequencySliderDrag(deviceId, rawValue) {
                 const integerValue = parseInt(rawValue, 10);
                 
+                // If the device is currently off, this interaction should turn it on.
+                // This is the critical fix for the background "flash".
+                if (DeviceManager.devicesState[deviceId].on === false) {
+                    DeviceManager.devicesState[deviceId].on = true;
+                    // Trigger a full re-render to apply the 'state-is-on' class immediately.
+                    this.updateDeviceCardRender(deviceId);
+                }
+
                 // Update local memory
                 DeviceManager.devicesState[deviceId].brightness = integerValue;
                 
                 // Target DOM nodes directly for maximum performance
                 const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
                 const statusLabel = document.getElementById(`status-label-${deviceId}`);
+                const nativeSlider = document.getElementById(`native-slider-input-${deviceId}`);
+
                 
                 if (fillLayer) {
                     fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
                 }
 
-                // If device is strictly considered ON, update the text label dynamically
-                if (DeviceManager.devicesState[deviceId].on && statusLabel) {
+                // If device is strictly considered ON, update the text label and accessibility attributes
+                if (DeviceManager.devicesState[deviceId].on && statusLabel && nativeSlider) {
                     statusLabel.innerText = `${integerValue}%`;
+                    nativeSlider.setAttribute('aria-valuenow', integerValue);
+                    nativeSlider.setAttribute('aria-valuetext', `${integerValue} percent`);
                 }
             }
 
@@ -1640,8 +1658,10 @@
                     nativeSlider.disabled = true;
                 }
 
-                // Assign brightness layout constraints
+                // Assign brightness layout constraints and accessibility attributes
                 nativeSlider.value = state.brightness;
+                nativeSlider.setAttribute('aria-valuenow', state.brightness);
+                nativeSlider.setAttribute('aria-valuetext', `${state.brightness} percent`);
                 fillLayer.style.setProperty('--current-fill-percentage', `${state.brightness}%`);
             }
             
