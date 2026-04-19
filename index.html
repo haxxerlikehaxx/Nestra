@@ -7,8 +7,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     <meta name="description" content="Ultimate Premium Apple HomeKit Style Smart Home Controller for iPad Air 2">
-    <link rel="icon" href="/home/favicon.png">
-    <link rel="apple-touch-icon" href="/home/apple-touch-icon.png">
     <title>Smart Home Control Center</title>
 
     <style>
@@ -26,25 +24,24 @@
             --glass-backdrop-filter-blur: blur(45px);
             --glass-backdrop-filter-saturate: saturate(180%);
             
-            /* Active Device States (ON) - Calibrated for absolute premium contrast */
-            --card-active-background-color: #FFFFFF; /* Pure Apple White */
+            /* Active Device States (ON) - Flawless Solid Colors */
+            --card-active-background-color: #FFFFFF; /* Pure Apple White - No Opacity Drop */
             --card-active-text-color: #000000;
             --card-active-subtitle-color: rgba(0, 0, 0, 0.50);
             --icon-active-background-color: #FFCC00; /* Apple System Yellow */
             --icon-active-foreground-color: #FFFFFF;
             --icon-active-box-shadow: 0px 6px 16px rgba(255, 204, 0, 0.35);
             
-            /* The Slider Fix: Premium Frosted Silver (Not Black, Not White) */
+            /* Premium Slider */
             --slider-active-track-color: #F2F2F7; /* Apple Grouped Background Grey */
             --slider-active-fill-color: #D1D1D6; /* Apple System Gray 4 - Beautiful Silver */
             --slider-active-fill-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.8), 0px 1px 4px rgba(0, 0, 0, 0.06);
 
-            /* Inactive Device States (OFF) - Calibrated for dark mode elegance */
+            /* Inactive Device States (OFF) */
             --card-inactive-text-color: #FFFFFF;
             --card-inactive-subtitle-color: rgba(255, 255, 255, 0.55);
             --icon-inactive-background-color: rgba(255, 255, 255, 0.12);
             --icon-inactive-foreground-color: rgba(255, 255, 255, 0.60);
-            
             --slider-inactive-track-color: rgba(0, 0, 0, 0.25);
             --slider-inactive-fill-color: rgba(255, 255, 255, 0.20);
             --slider-inactive-fill-shadow: none;
@@ -95,7 +92,6 @@
             margin-left: auto;
             margin-right: auto;
             min-height: 100vh;
-            /* Safe area insets for notched iPads */
             padding-top: calc(env(safe-area-inset-top, 40px) + 24px);
             padding-right: var(--layout-padding-horizontal-portrait);
             padding-bottom: var(--layout-padding-vertical-bottom);
@@ -103,27 +99,21 @@
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            
-            /* Prevent user selection for app-like feel, except in inputs */
             user-select: none;
             -webkit-user-select: none;
             touch-action: pan-y;
-            
-            /* Max width transitions for layout changes */
             max-width: var(--layout-max-width-portrait);
             transition-property: max-width, padding;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
-        /* Responsive Landscape Injection */
         body.layout-mode-landscape {
             max-width: var(--layout-max-width-landscape);
             padding-right: var(--layout-padding-horizontal-landscape);
             padding-left: var(--layout-padding-horizontal-landscape);
         }
 
-        /* Allow typing explicitly in input fields */
         input, textarea, select {
             user-select: text !important;
             -webkit-user-select: text !important;
@@ -174,11 +164,9 @@
             cursor: pointer;
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
-            
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
             transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
-            
             outline: none;
         }
 
@@ -193,7 +181,7 @@
         }
 
         /* ==========================================================================
-           WEATHER WIDGET COMPONENT
+           WEATHER WIDGET COMPONENT (EXPANDABLE)
            ========================================================================== */
         .weather-dashboard-widget {
             background-color: var(--glass-background-base);
@@ -203,125 +191,90 @@
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             border-radius: 32px;
-            padding-top: 28px;
-            padding-right: 32px;
-            padding-bottom: 28px;
-            padding-left: 32px;
             margin-bottom: 40px;
             display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
-            
-            transition-property: transform;
+            transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-spring-curve);
+            overflow: hidden;
+            cursor: pointer;
         }
 
         .weather-dashboard-widget:active {
             transform: scale(0.98);
+            background-color: var(--glass-background-hover);
         }
 
-        .weather-information-left {
+        .weather-main-row {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .weather-city-label {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--card-inactive-subtitle-color);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        .weather-temperature-display {
-            font-size: 56px;
-            font-weight: 200;
-            letter-spacing: -0.05em;
-            line-height: 1.0;
-            margin-top: 4px;
-            margin-bottom: 4px;
-            color: #FFFFFF;
-        }
-
-        .weather-condition-description {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--card-inactive-subtitle-color);
-        }
-
-        .weather-graphics-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 16px;
-        }
-
-        .weather-vector-icon {
-            width: 64px;
-            height: 64px;
-            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
+            padding-top: 28px;
+            padding-right: 32px;
+            padding-bottom: 28px;
+            padding-left: 32px;
         }
 
-        .weather-vector-icon svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15));
-        }
-
-        .weather-high-low-range {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--card-inactive-subtitle-color);
-        }
+        .weather-information-left { display: flex; flex-direction: column; gap: 6px; }
+        .weather-city-label { font-size: 15px; font-weight: 600; color: var(--card-inactive-subtitle-color); text-transform: uppercase; letter-spacing: 0.06em; }
+        .weather-temperature-display { font-size: 56px; font-weight: 200; letter-spacing: -0.05em; line-height: 1.0; margin-top: 4px; margin-bottom: 4px; color: #FFFFFF; }
+        .weather-condition-description { font-size: 16px; font-weight: 500; color: var(--card-inactive-subtitle-color); }
+        .weather-graphics-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+        .weather-vector-icon { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+        .weather-vector-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); }
+        .weather-high-low-range { font-size: 15px; font-weight: 600; color: var(--card-inactive-subtitle-color); }
         
-        /* Skeleton Loading State for Weather */
-        .skeleton {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-        .skeleton::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            transform: translateX(-100%);
-            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer {
-            100% {
-                transform: translateX(100%);
-            }
-        }
-        .weather-spinner {
-            width: 24px;
-            height: 24px;
-            border-width: 3px;
-            border-style: solid;
-            border-color: rgba(255, 255, 255, 0.15);
-            border-top-color: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation-name: spin;
-            animation-duration: 1s;
-            animation-iteration-count: infinite;
-            animation-timing-function: linear;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        /* Expandable Hourly Section */
+        .weather-hourly-container {
+            max-height: 0;
+            opacity: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            padding-left: 32px;
+            padding-right: 32px;
+            border-top-width: 1px;
+            border-top-style: solid;
+            border-top-color: transparent;
+            transition-property: max-height, opacity, padding, border-top-color;
+            transition-duration: 0.5s;
+            transition-timing-function: var(--animation-spring-curve);
         }
 
+        .weather-hourly-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .weather-dashboard-widget.is-expanded .weather-hourly-container {
+            max-height: 140px;
+            opacity: 1;
+            padding-top: 24px;
+            padding-bottom: 24px;
+            border-top-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .hourly-item-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-width: 48px;
+        }
+
+        .hourly-item-time { font-size: 14px; font-weight: 600; color: var(--card-inactive-subtitle-color); }
+        .hourly-item-icon { width: 28px; height: 28px; }
+        .hourly-item-icon svg { width: 100%; height: 100%; }
+        .hourly-item-temp { font-size: 16px; font-weight: 600; color: #FFFFFF; }
+        
+        /* Skeleton */
+        .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
+        .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); animation: shimmer 2s infinite; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
 
         /* ==========================================================================
            DEVICE GRID LAYOUT
@@ -337,17 +290,15 @@
 
         .device-grid-container {
             display: grid;
-            /* Explicitly set to 2 columns for both portrait and landscape to stretch gracefully */
             grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: minmax(min-content, max-content);
             column-gap: 24px;
             row-gap: 24px;
-            
             transition-property: grid-template-columns, column-gap;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
-        /* Landscape adjustments - Grid columns remain 2, but gap increases for scale */
         body.layout-mode-landscape .device-grid-container {
             grid-template-columns: repeat(2, 1fr);
             column-gap: 32px;
@@ -355,7 +306,7 @@
         }
 
         /* ==========================================================================
-           SMART DEVICE CARD COMPONENT
+           SMART DEVICE CARD COMPONENT (EXPANDABLE)
            ========================================================================== */
         .smart-device-card {
             background-color: var(--glass-background-base);
@@ -371,37 +322,39 @@
             padding-left: 24px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             height: 200px;
             box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.05);
             position: relative;
+            cursor: pointer;
             
-            /* Remove overflow:hidden from the card itself to prevent rendering artifacts */
-            
-            transition-property: background-color, color, transform, box-shadow, border-color, opacity;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-fast);
-            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve);
+            transition-property: background-color, color, transform, box-shadow, border-color, height;
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), 0.5s;
+            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve);
+        }
+
+        /* Expanded State for Color Picker */
+        .smart-device-card.is-expanded {
+            grid-row-end: span 2;
+            height: 480px;
         }
 
         /* State: Device is ON */
         .smart-device-card.state-is-on {
-            background-color: var(--card-active-background-color);
+            background-color: var(--card-active-background-color) !important;
             color: var(--card-active-text-color);
             box-shadow: 0px 16px 40px rgba(0, 0, 0, 0.1), inset 0px 1px 0px rgba(255, 255, 255, 1.0);
             border-color: transparent;
         }
 
-        .smart-device-card:active {
-            transform: scale(0.96);
+        /* Base Content Wrapper */
+        .card-base-content {
+            display: flex;
+            flex-direction: column;
+            height: 152px; /* Fixed height for the non-expanded part */
+            justify-content: space-between;
         }
 
-        /* State: Device is connecting */
-        .smart-device-card.is-connecting {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        /* Top Area: Icon Toggle */
         .device-card-header-row {
             display: flex;
             flex-direction: row;
@@ -419,14 +372,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            
             transition-property: background-color, color, transform, box-shadow;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve);
-        }
-
-        .device-toggle-icon-container:active {
-            transform: scale(0.82);
+            transition-duration: var(--animation-duration-medium);
+            transition-timing-function: var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .device-toggle-icon-container {
@@ -437,79 +385,49 @@
         
         .smart-device-card.is-connecting .device-toggle-icon-container {
             animation-name: pulse-connecting;
-            animation-duration: 1.5s;
+            animation-duration: 1.2s;
             animation-iteration-count: infinite;
             animation-timing-function: ease-in-out;
         }
         
         @keyframes pulse-connecting {
             0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(1.12); }
             100% { transform: scale(1); }
         }
 
-        .device-toggle-icon-container svg {
-            width: 26px;
-            height: 26px;
-        }
+        .device-toggle-icon-container svg { width: 26px; height: 26px; }
 
-        /* Middle Area: Device Information */
         .device-text-information-block {
             display: flex;
             flex-direction: column;
             pointer-events: none;
-            margin-top: auto;
             margin-bottom: 20px;
         }
 
-        .device-display-name {
-            font-size: 17px;
-            font-weight: 600;
-            letter-spacing: -0.015em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .device-display-name { font-size: 17px; font-weight: 600; letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .device-current-status-label { font-size: 15px; font-weight: 500; color: var(--card-inactive-subtitle-color); margin-top: 4px; transition-property: color; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve); }
+        .smart-device-card.state-is-on .device-current-status-label { color: var(--card-active-subtitle-color); }
 
-        .device-current-status-label {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--card-inactive-subtitle-color);
-            margin-top: 4px;
-            
-            transition-property: color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        .smart-device-card.state-is-on .device-current-status-label {
-            color: var(--card-active-subtitle-color);
-        }
-
-        /* Bottom Area: Slider Control (Perfected Architecture) */
+        /* Bottom Area: Slider Control */
         .device-brightness-slider-container {
             width: 100%;
             height: 40px;
             border-radius: 20px;
             background-color: var(--slider-inactive-track-color);
             position: relative;
-            
-            /* Critical fix for iOS Safari border-radius clipping shadow artifacts */
             overflow: hidden;
             -webkit-mask-image: -webkit-linear-gradient(white, white);
             -webkit-mask-repeat: no-repeat;
             -webkit-backface-visibility: hidden;
             -moz-backface-visibility: hidden;
             transform: translate3d(0, 0, 0);
-            
             box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
-            
             transition-property: background-color, box-shadow, opacity;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
-        /* New: Disable slider interaction when light is OFF */
         .smart-device-card:not(.state-is-on) .device-brightness-slider-container {
             pointer-events: none;
             opacity: 0.5;
@@ -521,22 +439,15 @@
         }
 
         .brightness-slider-visual-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
+            position: absolute; top: 0; left: 0; bottom: 0;
             background-color: var(--slider-inactive-fill-color);
-            pointer-events: none;
-            z-index: 1;
-            /* width is controlled via CSS variable dynamically */
+            pointer-events: none; z-index: 1;
             width: var(--current-fill-percentage, 0%);
             border-radius: 20px;
-            
             box-shadow: var(--slider-inactive-fill-shadow);
-            
             transition-property: background-color, box-shadow;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve);
+            transition-duration: var(--animation-duration-medium);
+            transition-timing-function: var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .brightness-slider-visual-fill {
@@ -544,267 +455,105 @@
             box-shadow: var(--slider-active-fill-shadow);
         }
 
-        /* Native Input Overlay */
         .brightness-native-range-input {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
-            outline-style: none;
-            outline-color: initial;
-            outline-width: initial;
-            border-style: none;
-            border-color: initial;
-            border-width: initial;
-            box-shadow: none;
-            margin-top: 0;
-            margin-right: 0;
-            margin-bottom: 0;
-            margin-left: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 100%; background-color: transparent;
+            outline: none; border: none; box-shadow: none; margin: 0;
+            position: absolute; top: 0; left: 0; z-index: 2;
         }
 
         .brightness-native-range-input::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 40px;
-            height: 40px;
-            background-color: transparent;
-            border-style: none;
-            border-color: initial;
-            border-width: initial;
-            box-shadow: none;
-            cursor: pointer;
+            -webkit-appearance: none; appearance: none;
+            width: 40px; height: 40px; background-color: transparent;
+            border: none; box-shadow: none; cursor: pointer;
         }
-        
-        .brightness-native-range-input::-webkit-slider-runnable-track {
-            background-color: transparent;
-            border-style: none;
-            border-color: initial;
-            border-width: initial;
-            box-shadow: none;
+        .brightness-native-range-input::-webkit-slider-runnable-track { background-color: transparent; border: none; box-shadow: none; }
+
+        /* Expansion Area: Color Picker */
+        .color-picker-expansion-area {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 0;
+            transition-property: opacity, max-height, padding;
+            transition-duration: 0.5s;
+            transition-timing-function: var(--animation-spring-curve);
+        }
+
+        .smart-device-card.is-expanded .color-picker-expansion-area {
+            opacity: 1;
+            max-height: 250px;
+            padding-top: 24px;
+        }
+
+        .color-wheel-canvas-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+            cursor: crosshair;
+            background: radial-gradient(circle at center, white 0%, transparent 100%), conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+        }
+
+        .color-wheel-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.5);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: background-color 0.1s;
         }
 
         /* ==========================================================================
            MODALS, OVERLAYS & SETTINGS
            ========================================================================== */
         .application-modal-backdrop {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
+            position: fixed; top: 0; right: 0; bottom: 0; left: 0;
             background-color: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 1000;
-            
-            transition-property: opacity;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; z-index: 1000;
+            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve);
         }
-
-        .application-modal-backdrop.is-visible-active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .application-modal-backdrop.is-visible-active { opacity: 1; pointer-events: auto; }
 
         .settings-modal-sheet {
             background-color: rgba(30, 30, 30, 0.85);
-            backdrop-filter: blur(50px) saturate(200%);
-            -webkit-backdrop-filter: blur(50px) saturate(200%);
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(255, 255, 255, 0.15);
-            width: 380px;
-            border-radius: 36px;
-            padding-top: 36px;
-            padding-right: 28px;
-            padding-bottom: 36px;
-            padding-left: 28px;
-            text-align: center;
-            box-shadow: 0px 24px 80px rgba(0, 0, 0, 0.6);
-            
-            transform: translateY(50px) scale(0.92);
-            transition-property: transform;
-            transition-duration: 0.5s;
-            transition-timing-function: var(--animation-spring-curve);
+            backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            width: 380px; border-radius: 36px; padding: 36px 28px;
+            text-align: center; box-shadow: 0px 24px 80px rgba(0, 0, 0, 0.6);
+            transform: translateY(50px) scale(0.92); transition-property: transform; transition-duration: 0.5s; transition-timing-function: var(--animation-spring-curve);
         }
+        .application-modal-backdrop.is-visible-active .settings-modal-sheet { transform: translateY(0) scale(1); }
 
-        .application-modal-backdrop.is-visible-active .settings-modal-sheet {
-            transform: translateY(0) scale(1);
-        }
+        .settings-modal-heading { font-size: 24px; font-weight: 700; color: #FFFFFF; margin-bottom: 12px; letter-spacing: -0.02em; }
+        .settings-modal-description { font-size: 15px; color: rgba(255, 255, 255, 0.65); margin-bottom: 28px; line-height: 1.5; }
 
-        .settings-modal-heading {
-            font-size: 24px;
-            font-weight: 700;
-            color: #FFFFFF;
-            margin-bottom: 12px;
-            letter-spacing: -0.02em;
-        }
+        .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding: 4px; margin-bottom: 28px; }
+        .ios-segmented-control-button { flex: 1; padding: 12px 0; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; font-weight: 600; cursor: pointer; transition: all var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-modal-description {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.65);
-            margin-bottom: 28px;
-            line-height: 1.5;
-        }
+        .settings-text-input-field { width: 100%; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); color: #FFFFFF; padding: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition: all var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
-        /* Segmented Control for Layout Selection */
-        .ios-segmented-control-container {
-            display: flex;
-            flex-direction: row;
-            background-color: rgba(0, 0, 0, 0.35);
-            border-radius: 14px;
-            padding-top: 4px;
-            padding-right: 4px;
-            padding-bottom: 4px;
-            padding-left: 4px;
-            margin-bottom: 28px;
-        }
+        .settings-action-button-primary { background-color: #FFFFFF; color: #000000; width: 100%; padding: 18px; border-radius: 18px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; margin-bottom: 14px; transition: transform var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
+        .settings-action-button-secondary { background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; padding: 16px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; transition: color var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .settings-action-button-secondary:active { color: #FFFFFF; }
 
-        .ios-segmented-control-button {
-            flex-grow: 1;
-            flex-shrink: 1;
-            flex-basis: 0;
-            padding-top: 12px;
-            padding-bottom: 12px;
-            border-radius: 10px;
-            border: none;
-            background-color: transparent;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            
-            transition-property: background-color, color, box-shadow;
-            transition-duration: var(--animation-duration-fast);
-            transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        .ios-segmented-control-button.is-segment-active {
-            background-color: rgba(255, 255, 255, 0.25);
-            color: #FFFFFF;
-            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
-        }
-
-        /* Form Inputs */
-        .settings-text-input-field {
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #FFFFFF;
-            padding-top: 18px;
-            padding-right: 18px;
-            padding-bottom: 18px;
-            padding-left: 18px;
-            border-radius: 18px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            outline: none;
-            
-            transition-property: border-color, background-color;
-            transition-duration: var(--animation-duration-fast);
-            transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        .settings-text-input-field:focus {
-            border-color: rgba(255, 255, 255, 0.4);
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .settings-action-button-primary {
-            background-color: #FFFFFF;
-            color: #000000;
-            width: 100%;
-            padding-top: 18px;
-            padding-bottom: 18px;
-            border-radius: 18px;
-            font-size: 17px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            margin-bottom: 14px;
-            
-            transition-property: transform, opacity;
-            transition-duration: var(--animation-duration-fast);
-            transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        .settings-action-button-primary:active {
-            transform: scale(0.96);
-            opacity: 0.85;
-        }
-
-        .settings-action-button-secondary {
-            background-color: transparent;
-            color: rgba(255, 255, 255, 0.65);
-            width: 100%;
-            padding-top: 16px;
-            padding-bottom: 16px;
-            font-size: 17px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            
-            transition-property: color;
-            transition-duration: var(--animation-duration-fast);
-            transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        .settings-action-button-secondary:active {
-            color: #FFFFFF;
-        }
-
-        /* ==========================================================================
-           TOAST NOTIFICATION SYSTEM
-           ========================================================================== */
-        .system-toast-notification {
-            position: fixed;
-            bottom: 48px;
-            left: 50%;
-            transform: translateX(-50%) translateY(24px) scale(0.9);
-            background-color: rgba(45, 45, 45, 0.95);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-width: 1px;
-            border-style: solid;
-            border-color: rgba(255, 255, 255, 0.15);
-            color: #FFFFFF;
-            padding-top: 16px;
-            padding-right: 32px;
-            padding-bottom: 16px;
-            padding-left: 32px;
-            border-radius: 32px;
-            font-size: 16px;
-            font-weight: 600;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 2000;
-            box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4);
-            white-space: nowrap;
-            
-            transition-property: opacity, transform;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-spring-curve);
-        }
-
-        .system-toast-notification.is-toast-visible {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0) scale(1);
-        }
-
+        .system-toast-notification { position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.15); color: #FFFFFF; padding: 16px 32px; border-radius: 32px; font-size: 16px; font-weight: 600; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition: all var(--animation-duration-medium) var(--animation-spring-curve); }
+        .system-toast-notification.is-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     </style>
 </head>
 <body>
@@ -815,29 +564,26 @@
     <header class="application-header" aria-label="Main Application Header">
         <h1 class="application-title">My Home</h1>
         <div class="header-controls-container">
-            <!-- Manual Sync / Refresh Button -->
             <button class="circular-icon-button" id="header-btn-refresh" aria-label="Synchronize Devices" title="Force Refresh">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21.5 2v6h-6"></path>
-                    <path d="M21.34 15.57a10 10 0 1 1-.92-10.26l5.08 5.08"></path>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"></path><path d="M21.34 15.57a10 10 0 1 1-.92-10.26l5.08 5.08"></path></svg>
             </button>
-            <!-- Settings Modal Trigger -->
             <button class="circular-icon-button" id="header-btn-settings" aria-label="Open Settings" title="Configure Hub">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </button>
         </div>
     </header>
 
     <!-- ==========================================================================
-         WEATHER WIDGET SECTION
+         WEATHER WIDGET SECTION (EXPANDABLE)
          ========================================================================== -->
     <section aria-label="Weather Dashboard" id="weather-dashboard-section">
-        <div class="weather-dashboard-widget" id="weather-dashboard-widget">
-            <!-- Populated by WeatherService with loading state initially -->
+        <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
+            <div class="weather-main-row" id="weather-main-row-container">
+                <!-- Populated by WeatherService with loading state initially -->
+            </div>
+            <div class="weather-hourly-container" id="weather-hourly-container">
+                <!-- Hourly items injected dynamically -->
+            </div>
         </div>
     </section>
 
@@ -857,16 +603,13 @@
             <h2 class="settings-modal-heading">Hub Configuration</h2>
             <p class="settings-modal-description">Enter your Cloudflare Worker URL to securely establish a connection with your Tuya smart devices.</p>
             
-            <!-- Interface Layout Selection -->
             <div class="ios-segmented-control-container" role="radiogroup" aria-label="Layout Selection">
                 <button class="ios-segmented-control-button is-segment-active" id="segment-btn-portrait" role="radio" aria-checked="true">Portrait</button>
                 <button class="ios-segmented-control-button" id="segment-btn-landscape" role="radio" aria-checked="false">Landscape</button>
             </div>
 
-            <!-- Input Form -->
             <input type="url" class="settings-text-input-field" id="input-field-worker-url" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false" aria-label="Cloudflare Worker URL">
             
-            <!-- Actions -->
             <button class="settings-action-button-primary" id="modal-btn-save">Save & Connect</button>
             <button class="settings-action-button-secondary" id="modal-btn-cancel">Cancel</button>
         </div>
@@ -885,8 +628,8 @@
     <script>
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
-         * Encompasses state management, UI rendering, debounced network requests, and external API integrations.
-         * Implements rigorous architectural patterns, Advanced AbortControllers, and extensive error boundaries.
+         * Encompasses state management, UI rendering, debounced network requests, external API integrations,
+         * advanced HTML5 Canvas color picking, and responsive meteorological forecasting.
          */
 
         "use strict";
@@ -895,30 +638,17 @@
            CONSTANTS & STATIC DATA
            ========================================================================== */
         
-        /**
-         * Hardcoded Tuya Device Data structure.
-         * Must strictly adhere to this format as requested.
-         * @constant {Array<Object>}
-         */
         const TUYA_DEVICES = [
             { id: 'bf8b0e945d8c5f9861fjzy', name: 'Led Lights Tak' },
             { id: 'bf1cf6aca13749cf898g3p', name: 'Led Lights Skrivbord' }
         ];
 
-        /**
-         * Configuration keys for LocalStorage and SessionStorage persistence.
-         * @constant {Object}
-         */
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v7',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v7',
-            WEATHER_CACHE: 'enterprise_weather_cache_v7'
+            WORKER_URL: 'enterprise_tuya_worker_url_v8',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v8',
+            WEATHER_CACHE: 'enterprise_weather_cache_v8'
         };
 
-        /**
-         * Weather Vector Graphics Mapping.
-         * @constant {Object}
-         */
         const SVG_ASSETS = {
             WEATHER_SUN: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFB340" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
             WEATHER_CLOUD: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>`,
@@ -931,38 +661,23 @@
            UTILITY CLASSES
            ========================================================================== */
         
-        /**
-         * Singleton class to manage global toast notifications robustly.
-         */
         class ToastManager {
             constructor() {
                 this.toastElement = document.getElementById('system-toast-notification');
                 this.timeoutReference = null;
                 this.displayDurationMs = 3500;
             }
-
-            /**
-             * Displays a transient notification message to the user.
-             * @param {string} message - The text content to display.
-             */
             show(message) {
                 if (!this.toastElement) return;
-
-                // Clear existing timeout to reset duration if spammed
-                if (this.timeoutReference !== null) {
-                    clearTimeout(this.timeoutReference);
-                }
-
+                if (this.timeoutReference !== null) clearTimeout(this.timeoutReference);
                 this.toastElement.innerText = message;
                 this.toastElement.classList.add('is-toast-visible');
-
                 this.timeoutReference = setTimeout(() => {
                     this.toastElement.classList.remove('is-toast-visible');
                     this.timeoutReference = null;
                 }, this.displayDurationMs);
             }
         }
-
         const GlobalToast = new ToastManager();
 
         /* ==========================================================================
@@ -971,46 +686,37 @@
 
         /**
          * Manages retrieval, parsing, and caching of meteorological data via Open-Meteo API.
-         * Specifically targets Spånga, Stockholm with sub-zero latency caching.
+         * Integrates fully fledged hourly forecasting with horizontal scroll UI mapping.
          */
         class WeatherService {
             constructor() {
-                // Hardcoded coordinates for Spånga, Stockholm
-                this.latitudeCoordinateForApi = 59.38;
-                this.longitudeCoordinateForApi = 17.90;
+                this.latitudeCoordinateForApi = 59.38; // Spånga
+                this.longitudeCoordinateForApi = 17.90; // Spånga
+                // Fetching current, daily, AND hourly telemetry
+                this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
                 
-                this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
-                
-                // DOM element references
-                this.widgetElement = document.getElementById('weather-dashboard-widget');
+                this.mainRowElement = document.getElementById('weather-main-row-container');
+                this.hourlyContainerElement = document.getElementById('weather-hourly-container');
             }
             
-            /**
-             * Populates the widget with a skeleton loading state.
-             */
             renderLoadingState() {
-                if (!this.widgetElement) return;
-                this.widgetElement.innerHTML = `
+                if (!this.mainRowElement) return;
+                this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
                         <h2 class="weather-temperature-display"><div class="skeleton" style="width: 80px; height: 50px;"></div></h2>
                         <span class="weather-condition-description">Fetching Weather...</span>
                     </div>
                     <div class="weather-graphics-right">
-                        <div class="weather-vector-icon">
-                            <div class="weather-spinner"></div>
-                        </div>
+                        <div class="weather-vector-icon"><div class="weather-spinner"></div></div>
                         <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
                     </div>
                 `;
             }
             
-            /**
-             * Populates the widget with an error message.
-             */
             renderErrorState(errorMessage) {
-                if (!this.widgetElement) return;
-                this.widgetElement.innerHTML = `
+                if (!this.mainRowElement) return;
+                this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
                         <h2 class="weather-temperature-display">--</h2>
@@ -1019,11 +725,6 @@
                 `;
             }
 
-            /**
-             * Translates WMO Weather interpretation codes into UI-ready text and SVG assets.
-             * @param {number} code - WMO weather code integer.
-             * @returns {Object} { text: string, icon: string }
-             */
             parseWmoWeatherCode(code) {
                 if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
                 if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
@@ -1033,74 +734,98 @@
                 if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
                 if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
                 if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
-                return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD }; // Fallback
+                return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
             }
 
-            /**
-             * Updates the actual DOM elements with the provided parsed weather data.
-             * @param {Object} data - Formatted weather object { temp, text, icon, high, low }
-             */
             renderSuccessState(data) {
-                if (!this.widgetElement) return;
-                this.widgetElement.innerHTML = `
+                if (!this.mainRowElement) return;
+                
+                // Render main dashboard
+                this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
-                        <span class="weather-city-label" id="weather-label-city">Spånga</span>
-                        <h2 class="weather-temperature-display" id="weather-label-temperature">${data.temp}°</h2>
-                        <span class="weather-condition-description" id="weather-label-description">${data.text}</span>
+                        <span class="weather-city-label">Spånga</span>
+                        <h2 class="weather-temperature-display">${data.current.temp}°</h2>
+                        <span class="weather-condition-description">${data.current.text}</span>
                     </div>
                     <div class="weather-graphics-right">
-                        <div class="weather-vector-icon" id="weather-vector-container" aria-hidden="true">
-                            ${data.icon}
-                        </div>
-                        <span class="weather-high-low-range" id="weather-label-range">H:${data.high}° L:${data.low}°</span>
+                        <div class="weather-vector-icon">${data.current.icon}</div>
+                        <span class="weather-high-low-range">H:${data.current.high}° L:${data.current.low}°</span>
                     </div>
                 `;
+
+                // Render Hourly Forecast if container exists
+                if (this.hourlyContainerElement && data.hourly && data.hourly.length > 0) {
+                    this.hourlyContainerElement.innerHTML = data.hourly.map(hourBlock => `
+                        <div class="hourly-item-block">
+                            <span class="hourly-item-time">${hourBlock.time}</span>
+                            <div class="hourly-item-icon">${hourBlock.icon}</div>
+                            <span class="hourly-item-temp">${hourBlock.temp}°</span>
+                        </div>
+                    `).join('');
+                }
             }
 
-            /**
-             * Primary orchestration method. Attempts to load from cache immediately, 
-             * then fetches fresh data asynchronously in the background.
-             */
             async fetchAndRender() {
-                // 1. Attempt optimistic cache render to prevent layout shift and "Loading..." state
                 const cachedPayload = sessionStorage.getItem(STORAGE_KEYS.WEATHER_CACHE);
                 if (cachedPayload) {
                     try {
-                        const parsedCache = JSON.parse(cachedPayload);
-                        this.renderSuccessState(parsedCache);
+                        this.renderSuccessState(JSON.parse(cachedPayload));
                     } catch (e) {
-                        console.warn("Failed to parse weather cache.", e);
-                        this.renderLoadingState(); // Fallback to loading state if cache is corrupt
+                        this.renderLoadingState(); 
                     }
                 } else {
-                    // No cache, show loading state immediately.
                     this.renderLoadingState();
                 }
 
-                // 2. Fetch fresh Open-Meteo data using robust timeout wrapper
                 try {
                     const rawData = await NetworkService.get(this.apiUrl);
                     
-                    if (!rawData || !rawData.current || !rawData.daily) {
+                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
                         throw new Error("Invalid data structure from Open-Meteo API.");
                     }
 
-                    // Extract Current Telemetry
-                    const currentTemperature = Math.round(rawData.current.temperature_2m);
-                    const weatherCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
-                    const dailyHigh = Math.round(rawData.daily.temperature_2m_max[0]);
-                    const dailyLow = Math.round(rawData.daily.temperature_2m_min[0]);
-
-                    // Construct formatted payload
+                    // Process Current
+                    const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
                     const compiledWeatherData = {
-                        temp: currentTemperature,
-                        text: weatherCondition.text,
-                        icon: weatherCondition.icon,
-                        high: dailyHigh,
-                        low: dailyLow
+                        current: {
+                            temp: Math.round(rawData.current.temperature_2m),
+                            text: currentCondition.text,
+                            icon: currentCondition.icon,
+                            high: Math.round(rawData.daily.temperature_2m_max[0]),
+                            low: Math.round(rawData.daily.temperature_2m_min[0])
+                        },
+                        hourly: []
                     };
 
-                    // 3. Render fresh data to DOM and save to SessionStorage Cache
+                    // Process Hourly (Extract next 24 hours based on current time)
+                    const currentHourIso = new Date().toISOString().substring(0, 14) + "00"; // roughly match "YYYY-MM-DDTHH:00"
+                    
+                    // Find index of current hour in OpenMeteo's time array
+                    let startIndex = 0;
+                    const nowTime = new Date().getTime();
+                    
+                    // Simple search for closest hour
+                    for (let i = 0; i < rawData.hourly.time.length; i++) {
+                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
+                        if (hourTime >= nowTime - 1800000) { // within last half hour
+                            startIndex = i;
+                            break;
+                        }
+                    }
+
+                    // Map 24 hours of data
+                    for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
+                        const dateObj = new Date(rawData.hourly.time[i]);
+                        const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
+                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
+                        
+                        compiledWeatherData.hourly.push({
+                            time: i === startIndex ? "Now" : hoursStr,
+                            temp: Math.round(rawData.hourly.temperature_2m[i]),
+                            icon: hCondition.icon
+                        });
+                    }
+
                     this.renderSuccessState(compiledWeatherData);
                     sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
@@ -1108,12 +833,7 @@
                     let errorMessage = "Data Unavailable";
                     if (error.name === 'AbortError') {
                         errorMessage = "Weather API Timeout";
-                        console.warn("WeatherService fetch aborted due to timeout.");
-                    } else {
-                        console.error("WeatherService encountered a critical error during fetch:", error);
                     }
-
-                    // If we failed and there was no cache, render the error state.
                     if (!cachedPayload) {
                         this.renderErrorState(errorMessage);
                     }
@@ -1125,48 +845,26 @@
            NETWORK SERVICE LAYER
            ========================================================================== */
 
-        /**
-         * A dedicated service for handling all network requests with centralized logic
-         * for timeouts and error handling.
-         */
         class NetworkManager {
             constructor() {
-                this.defaultTimeoutMs = 12000; // Generous 12-second timeout
+                this.defaultTimeoutMs = 15000; // Expanded to 15 seconds for robust resilience
             }
-
-            /**
-             * Performs a GET request with a timeout.
-             * @param {string} url - The URL to fetch.
-             * @returns {Promise<Object>} The JSON response.
-             */
             async get(url) {
                 const abortController = new AbortController();
                 const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
-
                 try {
                     const response = await fetch(url, { signal: abortController.signal });
                     clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return await response.json();
                 } catch (error) {
-                    clearTimeout(timeoutId); // Ensure timeout is cleared on early fetch errors too
-                    throw error; // Re-throw for the calling function to handle
+                    clearTimeout(timeoutId);
+                    throw error;
                 }
             }
-
-            /**
-             * Performs a POST request with a timeout.
-             * @param {string} url - The URL to post to.
-             * @param {Object} body - The JSON body of the request.
-             * @returns {Promise<Object>} The JSON response.
-             */
             async post(url, body) {
                 const abortController = new AbortController();
                 const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
-
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
@@ -1175,10 +873,7 @@
                         signal: abortController.signal
                     });
                     clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return await response.json();
                 } catch (error) {
                     clearTimeout(timeoutId);
@@ -1186,65 +881,184 @@
                 }
             }
         }
-
         const NetworkService = new NetworkManager();
         
+        /* ==========================================================================
+           COLOR WHEEL LOGIC (HTML5 CANVAS)
+           ========================================================================== */
+           
+        /**
+         * Handles rendering and interaction logic for the HSL Color Wheel on HTML5 Canvas.
+         */
+        class ColorWheelManager {
+            /**
+             * Attaches a color wheel to a specific canvas element.
+             * @param {string} deviceId - Tuya device identifier.
+             * @param {HTMLCanvasElement} canvasElement - The target canvas.
+             * @param {HTMLElement} indicatorElement - The circular thumb overlay.
+             */
+            constructor(deviceId, canvasElement, indicatorElement) {
+                this.deviceId = deviceId;
+                this.canvas = canvasElement;
+                this.indicator = indicatorElement;
+                
+                // Track interaction state
+                this.isDragging = false;
+                
+                this.bindEvents();
+            }
+
+            /**
+             * Binds complex multi-touch and mouse tracking events.
+             */
+            bindEvents() {
+                const handleStart = (e) => {
+                    this.isDragging = true;
+                    this.processInteraction(e);
+                    // Prevent scrolling while picking color
+                    if(e.cancelable) e.preventDefault(); 
+                };
+
+                const handleMove = (e) => {
+                    if (!this.isDragging) return;
+                    this.processInteraction(e);
+                    if(e.cancelable) e.preventDefault();
+                };
+
+                const handleEnd = (e) => {
+                    if(this.isDragging) {
+                        this.isDragging = false;
+                        this.dispatchFinalColorCommand();
+                    }
+                };
+
+                this.canvas.addEventListener('mousedown', handleStart, {passive: false});
+                this.canvas.addEventListener('mousemove', handleMove, {passive: false});
+                window.addEventListener('mouseup', handleEnd);
+
+                this.canvas.addEventListener('touchstart', handleStart, {passive: false});
+                this.canvas.addEventListener('touchmove', handleMove, {passive: false});
+                window.addEventListener('touchend', handleEnd);
+            }
+
+            /**
+             * Converts physical touch coordinates into polar Hue/Saturation metrics.
+             * @param {Event} event - Mouse or Touch event.
+             */
+            processInteraction(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                
+                // Handle both touch and mouse coords
+                let clientX = event.clientX;
+                let clientY = event.clientY;
+                if (event.touches && event.touches.length > 0) {
+                    clientX = event.touches[0].clientX;
+                    clientY = event.touches[0].clientY;
+                }
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const radius = centerX;
+
+                const xRelativeToCenter = clientX - rect.left - centerX;
+                const yRelativeToCenter = clientY - rect.top - centerY;
+
+                // Mathematical angle calculation (Hue)
+                let angleRadians = Math.atan2(yRelativeToCenter, xRelativeToCenter);
+                let angleDegrees = angleRadians * (180 / Math.PI) + 90; 
+                if (angleDegrees < 0) angleDegrees += 360;
+                
+                // Distance from center (Saturation)
+                const distanceFromCenter = Math.sqrt(xRelativeToCenter * xRelativeToCenter + yRelativeToCenter * yRelativeToCenter);
+                
+                // Clamp saturation to boundaries of circle
+                const clampedDistance = Math.min(distanceFromCenter, radius);
+                const saturationPercentage = clampedDistance / radius;
+
+                // Update visual thumb placement
+                const thumbX = centerX + Math.cos(angleRadians) * clampedDistance;
+                const thumbY = centerY + Math.sin(angleRadians) * clampedDistance;
+                
+                this.indicator.style.left = `${thumbX}px`;
+                this.indicator.style.top = `${thumbY}px`;
+                this.indicator.style.backgroundColor = `hsl(${angleDegrees}, ${saturationPercentage * 100}%, 50%)`;
+
+                // Update authoritative state locally (Scale: H 0-360, S 0-1000)
+                DeviceManager.devicesState[this.deviceId].hue = Math.round(angleDegrees);
+                DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationPercentage * 1000);
+            }
+
+            /**
+             * Triggers network request after interaction finishes.
+             */
+            dispatchFinalColorCommand() {
+                DeviceManager.executeColorCommand(this.deviceId);
+            }
+            
+            /**
+             * Resets the visual indicator to match memory state if modified externally.
+             */
+            updateIndicatorFromState() {
+                const state = DeviceManager.devicesState[this.deviceId];
+                if(state.hue === undefined || state.saturation === undefined) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                // Avoid calculation if element has zero geometry
+                if(rect.width === 0) return; 
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // Reverse engineering polar coordinates
+                const angleRadians = (state.hue - 90) * (Math.PI / 180);
+                const distance = (state.saturation / 1000) * centerX;
+                
+                const thumbX = centerX + Math.cos(angleRadians) * distance;
+                const thumbY = centerY + Math.sin(angleRadians) * distance;
+                
+                this.indicator.style.left = `${thumbX}px`;
+                this.indicator.style.top = `${thumbY}px`;
+                this.indicator.style.backgroundColor = `hsl(${state.hue}, ${(state.saturation/1000) * 100}%, 50%)`;
+            }
+        }
+
         /* ==========================================================================
            STATE & API MANAGEMENT FOR SMART DEVICES
            ========================================================================== */
 
-        /**
-         * State management and network controller for Cloudflare Worker Tuya proxy.
-         * Now delegates network operations to the dedicated NetworkManager.
-         */
         class TuyaSmartDeviceManager {
             constructor() {
                 this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
-                
-                // Initialize state object with strictly enforced defaults for safety
                 this.devicesState = {};
+                
+                // Map to store instantiated color wheel controllers
+                this.colorWheelControllers = {};
+                
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
                     this.devicesState[device.id] = {
                         on: false,
-                        brightness: 100 // Scale 1-100 for UI purposes
+                        brightness: 100, 
+                        hue: 0,
+                        saturation: 0
                     };
                 }
-
-                // Debounce map to prevent network saturation during slider dragging
                 this.debounceTimers = {};
             }
 
-            /**
-             * Normalizes and returns the current Worker API URL.
-             * @param {string} path - The specific endpoint path (e.g., '/status').
-             * @returns {string} Fully qualified URL string.
-             */
             buildEndpointUrl(path) {
-                // Ensure no trailing slash on base URL before appending path
                 return this.workerApiUrl.replace(/\/$/, '') + path;
             }
 
-            /**
-             * Sets a new Worker API URL and persists to local storage.
-             * @param {string} newUrl - The provided Cloudflare Worker URL.
-             */
             setApiUrl(newUrl) {
                 this.workerApiUrl = newUrl.trim();
                 localStorage.setItem(STORAGE_KEYS.WORKER_URL, this.workerApiUrl);
             }
 
-            /**
-             * Indicates whether the application is configured to make network requests.
-             * @returns {boolean}
-             */
             isConfigured() {
                 return this.workerApiUrl !== null && this.workerApiUrl !== '';
             }
 
-            /**
-             * Synchronizes local state with Tuya cloud via Worker proxy.
-             */
             async synchronizeAllDevices() {
                 if (!this.isConfigured()) return;
 
@@ -1263,15 +1077,15 @@
                     } finally {
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
+                        
+                        // Sync color wheel visual if expanded
+                        if(this.colorWheelControllers[device.id]) {
+                            this.colorWheelControllers[device.id].updateIndicatorFromState();
+                        }
                     }
                 }
             }
 
-            /**
-             * Parses the generic Tuya instruction arrays into our strictly typed local state.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             * @param {Array<Object>} statusArray - Array of code/value objects from Tuya API.
-             */
             parseAndApplyTuyaStatusPayload(deviceId, statusArray) {
                 const powerInstruction = statusArray.find(instruction => instruction.code === 'switch_led');
                 if (powerInstruction !== undefined) {
@@ -1284,10 +1098,17 @@
                             ? JSON.parse(colorInstruction.value) 
                             : colorInstruction.value;
                             
-                        if (parsedValueObject && parsedValueObject.v !== undefined) {
-                            let uiBrightness = Math.round(parsedValueObject.v / 10);
-                            uiBrightness = Math.max(1, Math.min(100, uiBrightness));
-                            this.devicesState[deviceId].brightness = uiBrightness;
+                        if (parsedValueObject) {
+                            if (parsedValueObject.v !== undefined) {
+                                let uiBrightness = Math.round(parsedValueObject.v / 10);
+                                this.devicesState[deviceId].brightness = Math.max(1, Math.min(100, uiBrightness));
+                            }
+                            if (parsedValueObject.h !== undefined) {
+                                this.devicesState[deviceId].hue = parsedValueObject.h;
+                            }
+                            if (parsedValueObject.s !== undefined) {
+                                this.devicesState[deviceId].saturation = parsedValueObject.s;
+                            }
                         }
                     } catch (parseError) {
                         console.error("TuyaSmartDeviceManager: Failed to parse colour_data JSON.", parseError);
@@ -1295,18 +1116,12 @@
                 }
             }
 
-            /**
-             * Toggles device power locally and transmits command to API.
-             * Employs Optimistic UI principles with rollback safety.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             */
             async toggleDevicePower(deviceId) {
                 if (!this.isConfigured()) {
                     ApplicationUI.openSettingsModal();
                     return;
                 }
 
-                // Optimistically invert state and apply connecting UI
                 const previousState = this.devicesState[deviceId].on;
                 this.devicesState[deviceId].on = !previousState;
                 ApplicationUI.setDeviceConnectingState(deviceId, true);
@@ -1325,20 +1140,13 @@
                     } else {
                         GlobalToast.show("Network Error. Check Connection.");
                     }
-                    // Revert state on network failure or timeout
                     this.devicesState[deviceId].on = previousState;
                     ApplicationUI.updateDeviceCardRender(deviceId);
                 } finally {
-                    // Always remove connecting state after operation completes
                     ApplicationUI.setDeviceConnectingState(deviceId, false);
                 }
             }
 
-            /**
-             * Enqueues a brightness command to avoid rate-limiting while dragging sliders.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             * @param {number} newBrightnessPercentage - 1-100 integer.
-             */
             handleBrightnessChangeIntent(deviceId, newBrightnessPercentage) {
                 if (!this.isConfigured()) return;
 
@@ -1351,21 +1159,10 @@
                 }, 400);
             }
 
-            /**
-             * Executes the actual HTTP network transmission for brightness modification.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             * @param {number} newBrightnessPercentage - 1-100 integer.
-             */
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
-                // This logic is now handled in the high-frequency UI update
-                // to prevent the "flash" effect. We ensure the command is only
-                // sent if the light is on, which it will be by this point.
-                if (this.devicesState[deviceId].on === false) {
-                    return; 
-                }
+                if (this.devicesState[deviceId].on === false) return;
 
                 ApplicationUI.setDeviceConnectingState(deviceId, true);
-
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
 
                 try {
@@ -1374,7 +1171,11 @@
                         device: deviceId,
                         commands: [
                             { code: 'work_mode', value: 'colour' },
-                            { code: 'colour_data', value: JSON.stringify({ h: 0, s: 0, v: tuyaFormatBrightness }) }
+                            { code: 'colour_data', value: JSON.stringify({ 
+                                h: this.devicesState[deviceId].hue || 0, 
+                                s: this.devicesState[deviceId].saturation || 0, 
+                                v: tuyaFormatBrightness 
+                            }) }
                         ]
                     };
                     await NetworkService.post(url, body);
@@ -1384,6 +1185,42 @@
                     } else {
                         GlobalToast.show("Network Error. Check Connection.");
                     }
+                } finally {
+                    ApplicationUI.setDeviceConnectingState(deviceId, false);
+                }
+            }
+            
+            /**
+             * Transmits isolated color state modifications to Tuya via Cloudflare Worker.
+             * @param {string} deviceId - Tuya device identifier.
+             */
+            async executeColorCommand(deviceId) {
+                if (!this.isConfigured()) return;
+                
+                // Force turn on if adjusting color while off
+                if (this.devicesState[deviceId].on === false) {
+                    this.devicesState[deviceId].on = true;
+                    ApplicationUI.updateDeviceCardRender(deviceId);
+                }
+
+                ApplicationUI.setDeviceConnectingState(deviceId, true);
+
+                try {
+                    const url = this.buildEndpointUrl('/command');
+                    const body = {
+                        device: deviceId,
+                        commands: [
+                            { code: 'work_mode', value: 'colour' },
+                            { code: 'colour_data', value: JSON.stringify({ 
+                                h: this.devicesState[deviceId].hue, 
+                                s: this.devicesState[deviceId].saturation, 
+                                v: this.devicesState[deviceId].brightness * 10 
+                            }) }
+                        ]
+                    };
+                    await NetworkService.post(url, body);
+                } catch (error) {
+                    GlobalToast.show("Failed to apply color configuration.");
                 } finally {
                     ApplicationUI.setDeviceConnectingState(deviceId, false);
                 }
@@ -1406,23 +1243,16 @@
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
                 this.inputWorkerUrl = document.getElementById('input-field-worker-url');
                 
-                // Bind contexts for event listeners
                 this.handleSettingsSave = this.handleSettingsSave.bind(this);
                 this.handleSettingsCancel = this.handleSettingsCancel.bind(this);
             }
 
-            /**
-             * Initializes the application UI topology.
-             */
             initialize() {
                 this.applyLayoutModeToBody();
                 this.constructDeviceGrid();
                 this.attachStaticEventListeners();
             }
 
-            /**
-             * Applies CSS classes to document body dictating max-width grid columns.
-             */
             applyLayoutModeToBody() {
                 if (this.layoutMode === 'landscape') {
                     document.body.classList.add('layout-mode-landscape');
@@ -1430,7 +1260,6 @@
                     document.body.classList.remove('layout-mode-landscape');
                 }
 
-                // Update Segmented Control visual state
                 const btnPortrait = document.getElementById('segment-btn-portrait');
                 const btnLandscape = document.getElementById('segment-btn-landscape');
                 
@@ -1449,10 +1278,6 @@
                 }
             }
 
-            /**
-             * Sets the layout mode in memory, applies classes, and triggers repaint.
-             * @param {string} mode - 'portrait' or 'landscape'
-             */
             setLayoutMode(mode) {
                 if (mode === 'portrait' || mode === 'landscape') {
                     this.layoutMode = mode;
@@ -1460,11 +1285,7 @@
                 }
             }
 
-            /**
-             * Attaches event listeners to static UI elements defined in HTML.
-             */
             attachStaticEventListeners() {
-                // Header Controls
                 document.getElementById('header-btn-refresh').addEventListener('click', () => {
                     if (!DeviceManager.isConfigured()) {
                         this.openSettingsModal();
@@ -1478,7 +1299,6 @@
                     this.openSettingsModal();
                 });
 
-                // Layout Segment Controls
                 document.getElementById('segment-btn-portrait').addEventListener('click', () => {
                     this.setLayoutMode('portrait');
                 });
@@ -1487,16 +1307,21 @@
                     this.setLayoutMode('landscape');
                 });
 
-                // Settings Modal Actions
                 document.getElementById('modal-btn-save').addEventListener('click', this.handleSettingsSave);
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
             }
-
+            
             /**
-             * Iterates over hardcoded TUYA_DEVICES to construct DOM structure dynamically.
+             * Toggles expanding state for the Weather widget.
              */
+            toggleWeatherExpansion() {
+                const widget = document.getElementById('weather-dashboard-widget');
+                if(widget) {
+                    widget.classList.toggle('is-expanded');
+                }
+            }
+
             constructDeviceGrid() {
-                // Empty existing grid content
                 while (this.deviceGridContainer.firstChild) {
                     this.deviceGridContainer.removeChild(this.deviceGridContainer.firstChild);
                 }
@@ -1504,123 +1329,136 @@
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const deviceData = TUYA_DEVICES[i];
                     const currentState = DeviceManager.devicesState[deviceData.id];
-
-                    // Determine active class inclusion
                     const activeClassString = currentState.on ? 'state-is-on' : '';
 
-                    // Create Card Wrapper
                     const cardElement = document.createElement('article');
                     cardElement.className = `smart-device-card ${activeClassString}`;
                     cardElement.id = `device-card-wrapper-${deviceData.id}`;
                     cardElement.setAttribute('aria-label', `Control for ${deviceData.name}`);
 
-                    // Use explicit, verbose HTML string construction to guarantee architecture adherence
                     cardElement.innerHTML = `
-                        <div class="device-card-header-row">
-                            <div class="device-toggle-icon-container" 
-                                 id="toggle-btn-${deviceData.id}"
-                                 role="button" 
-                                 aria-pressed="${currentState.on ? 'true' : 'false'}" 
-                                 aria-label="Toggle Power for ${deviceData.name}">
-                                ${SVG_ASSETS.LIGHTBULB}
+                        <div class="card-base-content">
+                            <div class="device-card-header-row">
+                                <div class="device-toggle-icon-container" 
+                                     id="toggle-btn-${deviceData.id}"
+                                     role="button" 
+                                     aria-pressed="${currentState.on ? 'true' : 'false'}" 
+                                     aria-label="Toggle Power for ${deviceData.name}">
+                                    ${SVG_ASSETS.LIGHTBULB}
+                                </div>
+                            </div>
+                            
+                            <div class="device-text-information-block">
+                                <div class="device-display-name">${deviceData.name}</div>
+                                <div class="device-current-status-label" id="status-label-${deviceData.id}">
+                                    ${currentState.on ? currentState.brightness + '%' : 'Off'}
+                                </div>
+                            </div>
+
+                            <div class="device-brightness-slider-container">
+                                <div class="brightness-slider-visual-fill" 
+                                     id="slider-fill-layer-${deviceData.id}" 
+                                     style="--current-fill-percentage: ${currentState.brightness}%">
+                                </div>
+                                <input type="range" 
+                                       class="brightness-native-range-input" 
+                                       id="native-slider-input-${deviceData.id}"
+                                       min="1" 
+                                       max="100" 
+                                       step="1" 
+                                       value="${currentState.brightness}"
+                                       aria-label="Brightness Control for ${deviceData.name}"
+                                       aria-valuemin="1"
+                                       aria-valuemax="100"
+                                       aria-valuenow="${currentState.brightness}"
+                                       aria-valuetext="${currentState.brightness} percent"
+                                       ${currentState.on ? '' : 'disabled'}>
                             </div>
                         </div>
                         
-                        <div class="device-text-information-block">
-                            <div class="device-display-name">${deviceData.name}</div>
-                            <div class="device-current-status-label" id="status-label-${deviceData.id}">
-                                ${currentState.on ? currentState.brightness + '%' : 'Off'}
+                        <div class="color-picker-expansion-area" id="expansion-area-${deviceData.id}">
+                            <div class="color-wheel-canvas-container" id="wheel-container-${deviceData.id}">
+                                <canvas class="color-wheel-canvas" id="canvas-${deviceData.id}" width="200" height="200" style="position: absolute; top:0; left:0; width:100%; height:100%; border-radius:50%;"></canvas>
+                                <div class="color-wheel-indicator" id="color-thumb-${deviceData.id}"></div>
                             </div>
-                        </div>
-
-                        <div class="device-brightness-slider-container">
-                            <div class="brightness-slider-visual-fill" 
-                                 id="slider-fill-layer-${deviceData.id}" 
-                                 style="--current-fill-percentage: ${currentState.brightness}%">
-                            </div>
-                            <input type="range" 
-                                   class="brightness-native-range-input" 
-                                   id="native-slider-input-${deviceData.id}"
-                                   min="1" 
-                                   max="100" 
-                                   step="1" 
-                                   value="${currentState.brightness}"
-                                   aria-label="Brightness Control for ${deviceData.name}"
-                                   aria-valuemin="1"
-                                   aria-valuemax="100"
-                                   aria-valuenow="${currentState.brightness}"
-                                   aria-valuetext="${currentState.brightness} percent"
-                                   ${currentState.on ? '' : 'disabled'}>
                         </div>
                     `;
 
                     this.deviceGridContainer.appendChild(cardElement);
-
-                    // Add dynamic event listeners specifically tied to the newly injected elements
                     this.attachDynamicCardListeners(deviceData.id);
+                    
+                    // Initialize Color Wheel Controller for this specific instance
+                    const canvasEl = document.getElementById(`canvas-${deviceData.id}`);
+                    const indicatorEl = document.getElementById(`color-thumb-${deviceData.id}`);
+                    DeviceManager.colorWheelControllers[deviceData.id] = new ColorWheelManager(deviceData.id, canvasEl, indicatorEl);
                 }
             }
 
-            /**
-             * Binds interaction logic to a specifically injected device card.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             */
             attachDynamicCardListeners(deviceId) {
+                const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 const toggleButton = document.getElementById(`toggle-btn-${deviceId}`);
                 const sliderInput = document.getElementById(`native-slider-input-${deviceId}`);
+                const expansionArea = document.getElementById(`expansion-area-${deviceId}`);
+
+                // Main card tap to expand
+                if (cardWrapper) {
+                    cardWrapper.addEventListener('click', (event) => {
+                        // Prevent expansion if clicking specific controls
+                        if (event.target === toggleButton || toggleButton.contains(event.target) || event.target === sliderInput || expansionArea.contains(event.target)) {
+                            return;
+                        }
+                        cardWrapper.classList.toggle('is-expanded');
+                        // Force a redraw of indicator to ensure it's placed correctly if opened for first time
+                        if(cardWrapper.classList.contains('is-expanded') && DeviceManager.colorWheelControllers[deviceId]) {
+                            setTimeout(() => {
+                                DeviceManager.colorWheelControllers[deviceId].updateIndicatorFromState();
+                            }, 50); // slight delay to allow CSS grid expansion to compute
+                        }
+                    });
+                }
 
                 if (toggleButton) {
-                    toggleButton.addEventListener('click', () => {
+                    toggleButton.addEventListener('click', (event) => {
+                        event.stopPropagation(); // prevent card expand
                         DeviceManager.toggleDevicePower(deviceId);
                     });
                 }
 
                 if (sliderInput) {
-                    // onInput fires at 60/120Hz while the user finger drags the track
+                    sliderInput.addEventListener('mousedown', (e) => e.stopPropagation());
+                    sliderInput.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
+                    
                     sliderInput.addEventListener('input', (event) => {
+                        event.stopPropagation();
                         const newBrightnessValue = event.target.value;
                         this.handleHighFrequencySliderDrag(deviceId, newBrightnessValue);
                     });
 
-                    // onChange fires once when the user finger lifts off the screen
                     sliderInput.addEventListener('change', (event) => {
+                        event.stopPropagation();
                         const finalBrightnessValue = event.target.value;
                         DeviceManager.handleBrightnessChangeIntent(deviceId, finalBrightnessValue);
                     });
                 }
             }
 
-            /**
-             * Immediately repaints DOM layout variables during high-fps touch interactions.
-             * This method now handles the "turn on" logic to prevent the background flash.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             * @param {string|number} rawValue - Brightness integer from slider input.
-             */
             handleHighFrequencySliderDrag(deviceId, rawValue) {
                 const integerValue = parseInt(rawValue, 10);
                 
-                // If the device is currently off, this interaction should turn it on.
-                // This is the critical fix for the background "flash".
+                // Crucial Flash Fix: Turn on device *immediately* upon touch logic initiation
                 if (DeviceManager.devicesState[deviceId].on === false) {
                     DeviceManager.devicesState[deviceId].on = true;
-                    // Trigger a full re-render to apply the 'state-is-on' class immediately.
                     this.updateDeviceCardRender(deviceId);
                 }
 
-                // Update local memory
                 DeviceManager.devicesState[deviceId].brightness = integerValue;
                 
-                // Target DOM nodes directly for maximum performance
                 const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
                 const statusLabel = document.getElementById(`status-label-${deviceId}`);
                 const nativeSlider = document.getElementById(`native-slider-input-${deviceId}`);
-
                 
-                if (fillLayer) {
-                    fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
-                }
+                if (fillLayer) fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
 
-                // If device is strictly considered ON, update the text label and accessibility attributes
                 if (DeviceManager.devicesState[deviceId].on && statusLabel && nativeSlider) {
                     statusLabel.innerText = `${integerValue}%`;
                     nativeSlider.setAttribute('aria-valuenow', integerValue);
@@ -1628,26 +1466,16 @@
                 }
             }
 
-            /**
-             * Applies authoritative state data from memory onto the DOM node structurally.
-             * This function is the single source of truth for a card's visual state.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             */
             updateDeviceCardRender(deviceId) {
                 const state = DeviceManager.devicesState[deviceId];
-                
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 const statusLabel = document.getElementById(`status-label-${deviceId}`);
                 const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
                 const nativeSlider = document.getElementById(`native-slider-input-${deviceId}`);
                 const toggleBtn = document.getElementById(`toggle-btn-${deviceId}`);
 
-                if (!cardWrapper || !statusLabel || !fillLayer || !nativeSlider || !toggleBtn) {
-                    console.warn(`UIRenderer: Attempted to update non-existent DOM nodes for device ${deviceId}`);
-                    return;
-                }
+                if (!cardWrapper || !statusLabel || !fillLayer || !nativeSlider || !toggleBtn) return;
 
-                // Handle ON/OFF CSS classifications and structural text
                 if (state.on === true) {
                     cardWrapper.classList.add('state-is-on');
                     statusLabel.innerText = `${state.brightness}%`;
@@ -1660,91 +1488,53 @@
                     nativeSlider.disabled = true;
                 }
 
-                // Assign brightness layout constraints and accessibility attributes
                 nativeSlider.value = state.brightness;
                 nativeSlider.setAttribute('aria-valuenow', state.brightness);
                 nativeSlider.setAttribute('aria-valuetext', `${state.brightness} percent`);
                 fillLayer.style.setProperty('--current-fill-percentage', `${state.brightness}%`);
             }
             
-            /**
-             * Applies or removes the 'is-connecting' class to a device card.
-             * @param {string} deviceId - The unique Tuya device identifier.
-             * @param {boolean} isConnecting - True to apply the connecting state, false to remove.
-             */
             setDeviceConnectingState(deviceId, isConnecting) {
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 if (cardWrapper) {
-                    if (isConnecting) {
-                        cardWrapper.classList.add('is-connecting');
-                    } else {
-                        cardWrapper.classList.remove('is-connecting');
-                    }
+                    if (isConnecting) cardWrapper.classList.add('is-connecting');
+                    else cardWrapper.classList.remove('is-connecting');
                 }
             }
 
-            /**
-             * Makes settings modal visible and populates input with current config.
-             */
             openSettingsModal() {
-                // Ensure Layout Selection reflects persistent memory before opening
                 this.setLayoutMode(localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
-                
-                if (this.inputWorkerUrl) {
-                    this.inputWorkerUrl.value = DeviceManager.workerApiUrl;
-                }
-                
+                if (this.inputWorkerUrl) this.inputWorkerUrl.value = DeviceManager.workerApiUrl;
                 if (this.settingsModalBackdrop) {
                     this.settingsModalBackdrop.classList.add('is-visible-active');
                     this.settingsModalBackdrop.setAttribute('aria-hidden', 'false');
                 }
             }
 
-            /**
-             * Hides settings modal without saving, reverting layout if changed unsaved.
-             */
             handleSettingsCancel() {
-                // Revert any unsaved segmented control tapping
                 const memoryLayout = localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
                 this.setLayoutMode(memoryLayout);
-
                 if (this.settingsModalBackdrop) {
                     this.settingsModalBackdrop.classList.remove('is-visible-active');
                     this.settingsModalBackdrop.setAttribute('aria-hidden', 'true');
                 }
             }
 
-            /**
-             * Extracts inputs, persists to memory, and triggers re-synchronization.
-             */
             handleSettingsSave() {
                 if (!this.inputWorkerUrl) return;
-
                 const inputString = this.inputWorkerUrl.value.trim();
+                if (inputString === '') return GlobalToast.show("Error: Web URL cannot be empty.");
                 
-                if (inputString === '') {
-                    GlobalToast.show("Error: Web URL cannot be empty.");
-                    return;
-                }
-                
-                // Persist Cloudflare Worker URL
                 DeviceManager.setApiUrl(inputString);
-                
-                // Persist Layout Mode
                 localStorage.setItem(STORAGE_KEYS.LAYOUT_MODE, this.layoutMode);
-                
-                // Finalize layout render logic just in case it wasn't triggered
                 this.applyLayoutModeToBody();
 
-                // Close Modal
                 if (this.settingsModalBackdrop) {
                     this.settingsModalBackdrop.classList.remove('is-visible-active');
                     this.settingsModalBackdrop.setAttribute('aria-hidden', 'true');
                 }
 
                 GlobalToast.show("Configuration saved. Connecting...");
-                
-                // Trigger full sync using new credentials
                 DeviceManager.synchronizeAllDevices();
             }
         }
@@ -1756,21 +1546,14 @@
            ========================================================================== */
         
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Initialize DOM structure and attach primary event listeners
             ApplicationUI.initialize();
 
-            // 2. Instantiate and trigger background weather service independently
             const WeatherAPI = new WeatherService();
             WeatherAPI.fetchAndRender();
 
-            // 3. Evaluate configuration readiness
             if (!DeviceManager.isConfigured()) {
-                // Delay modal slightly to allow initial paint and smooth transition
-                setTimeout(() => {
-                    ApplicationUI.openSettingsModal();
-                }, 600);
+                setTimeout(() => ApplicationUI.openSettingsModal(), 600);
             } else {
-                // Valid configuration found, proceed to network synchronization
                 DeviceManager.synchronizeAllDevices();
             }
         });
