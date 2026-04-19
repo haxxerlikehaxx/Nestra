@@ -25,7 +25,7 @@
             --glass-backdrop-filter-saturate: saturate(180%);
             
             /* Active Device States (ON) - Flawless Solid Colors */
-            --card-active-background-color: #FFFFFF; /* Pure Apple White - No Opacity Drop */
+            --card-active-background-color: #FFFFFF; /* Pure Apple White */
             --card-active-text-color: #000000;
             --card-active-subtitle-color: rgba(0, 0, 0, 0.50);
             --icon-active-background-color: #FFCC00; /* Apple System Yellow */
@@ -103,7 +103,8 @@
             -webkit-user-select: none;
             touch-action: pan-y;
             max-width: var(--layout-max-width-portrait);
-            transition-property: max-width, padding;
+            
+            transition-property: max-width, padding-right, padding-left;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
         }
@@ -114,6 +115,7 @@
             padding-left: var(--layout-padding-horizontal-landscape);
         }
 
+        /* Explicitly allow inputs to bypass global user-select none */
         input, textarea, select {
             user-select: text !important;
             -webkit-user-select: text !important;
@@ -154,7 +156,10 @@
             height: 40px;
             border-radius: 50%;
             background-color: var(--glass-background-base);
-            border-width: 1px;
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
             border-style: solid;
             border-color: var(--glass-border-color);
             display: flex;
@@ -164,6 +169,7 @@
             cursor: pointer;
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
+            
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
             transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
@@ -181,11 +187,14 @@
         }
 
         /* ==========================================================================
-           WEATHER WIDGET COMPONENT (EXPANDABLE)
+           WEATHER WIDGET COMPONENT (EXPANDABLE & HARDWARE ACCELERATED)
            ========================================================================== */
         .weather-dashboard-widget {
             background-color: var(--glass-background-base);
-            border-width: 1px;
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
             border-style: solid;
             border-color: var(--glass-border-color);
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
@@ -195,15 +204,21 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            
+            /* Hardware Acceleration for iPad Air 2 */
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-spring-curve);
-            overflow: hidden;
-            cursor: pointer;
         }
 
         .weather-dashboard-widget:active {
-            transform: scale(0.98);
+            transform: scale(0.97) translate3d(0, 0, 0);
             background-color: var(--glass-background-hover);
         }
 
@@ -227,21 +242,30 @@
         .weather-vector-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); }
         .weather-high-low-range { font-size: 15px; font-weight: 600; color: var(--card-inactive-subtitle-color); }
         
-        /* Expandable Hourly Section */
+        /* Expandable Hourly Section with Hardware Compositing Layers */
         .weather-hourly-container {
-            max-height: 0;
+            max-height: 0px;
             opacity: 0;
             overflow-x: auto;
             overflow-y: hidden;
             display: flex;
             flex-direction: row;
-            gap: 20px;
+            gap: 24px;
             padding-left: 32px;
             padding-right: 32px;
+            padding-top: 0px;
+            padding-bottom: 0px;
             border-top-width: 1px;
             border-top-style: solid;
             border-top-color: transparent;
-            transition-property: max-height, opacity, padding, border-top-color;
+            
+            /* Crucial iOS Native Scrolling and GPU Acceleration */
+            -webkit-overflow-scrolling: touch;
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            will-change: max-height, opacity, padding-top, padding-bottom;
+            
+            transition-property: max-height, opacity, padding-top, padding-bottom, border-top-color;
             transition-duration: 0.5s;
             transition-timing-function: var(--animation-spring-curve);
         }
@@ -251,10 +275,10 @@
         }
 
         .weather-dashboard-widget.is-expanded .weather-hourly-container {
-            max-height: 140px;
+            max-height: 160px;
             opacity: 1;
             padding-top: 24px;
-            padding-bottom: 24px;
+            padding-bottom: 28px;
             border-top-color: rgba(255, 255, 255, 0.1);
         }
 
@@ -262,16 +286,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             min-width: 48px;
+            flex-shrink: 0;
         }
 
         .hourly-item-time { font-size: 14px; font-weight: 600; color: var(--card-inactive-subtitle-color); }
-        .hourly-item-icon { width: 28px; height: 28px; }
+        .hourly-item-icon { width: 32px; height: 32px; }
         .hourly-item-icon svg { width: 100%; height: 100%; }
-        .hourly-item-temp { font-size: 16px; font-weight: 600; color: #FFFFFF; }
+        .hourly-item-temp { font-size: 17px; font-weight: 600; color: #FFFFFF; }
         
-        /* Skeleton */
+        /* Skeleton Animation */
         .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
         .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); animation: shimmer 2s infinite; }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
@@ -291,9 +316,10 @@
         .device-grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            grid-auto-rows: minmax(min-content, max-content);
+            grid-auto-rows: minmax(200px, auto); /* Allows cards to expand naturally */
             column-gap: 24px;
             row-gap: 24px;
+            
             transition-property: grid-template-columns, column-gap;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -310,7 +336,10 @@
            ========================================================================== */
         .smart-device-card {
             background-color: var(--glass-background-base);
-            border-width: 1px;
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
             border-style: solid;
             border-color: var(--glass-border-color);
             backdrop-filter: blur(35px) saturate(160%);
@@ -323,23 +352,28 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            height: 200px;
+            height: 200px; /* Default strict height */
             box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.05);
             position: relative;
             cursor: pointer;
+            
+            /* Hardware Acceleration */
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
             
             transition-property: background-color, color, transform, box-shadow, border-color, height;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), 0.5s;
             transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve);
         }
 
-        /* Expanded State for Color Picker */
+        /* Expanded State for Color Picker - Allows natural growth */
         .smart-device-card.is-expanded {
             grid-row-end: span 2;
-            height: 480px;
+            height: auto;
+            min-height: 480px;
         }
 
-        /* State: Device is ON */
+        /* State: Device is ON - Eliminated opacity drops for flawless pure color */
         .smart-device-card.state-is-on {
             background-color: var(--card-active-background-color) !important;
             color: var(--card-active-text-color);
@@ -347,11 +381,11 @@
             border-color: transparent;
         }
 
-        /* Base Content Wrapper */
+        /* Base Content Wrapper isolates the non-expanding elements */
         .card-base-content {
             display: flex;
             flex-direction: column;
-            height: 152px; /* Fixed height for the non-expanded part */
+            height: 152px; /* Fixed height for perfectly locked top content */
             justify-content: space-between;
         }
 
@@ -372,6 +406,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            
             transition-property: background-color, color, transform, box-shadow;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -384,15 +419,15 @@
         }
         
         .smart-device-card.is-connecting .device-toggle-icon-container {
-            animation-name: pulse-connecting;
+            animation-name: pulse-connecting-indicator;
             animation-duration: 1.2s;
             animation-iteration-count: infinite;
             animation-timing-function: ease-in-out;
         }
         
-        @keyframes pulse-connecting {
+        @keyframes pulse-connecting-indicator {
             0% { transform: scale(1); }
-            50% { transform: scale(1.12); }
+            50% { transform: scale(1.15); box-shadow: 0px 0px 20px rgba(255,204,0,0.6); }
             100% { transform: scale(1); }
         }
 
@@ -423,6 +458,7 @@
             -moz-backface-visibility: hidden;
             transform: translate3d(0, 0, 0);
             box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
+            
             transition-property: background-color, box-shadow, opacity;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -430,7 +466,7 @@
 
         .smart-device-card:not(.state-is-on) .device-brightness-slider-container {
             pointer-events: none;
-            opacity: 0.5;
+            opacity: 0.5; /* Visual indicator that slider is locked */
         }
 
         .smart-device-card.state-is-on .device-brightness-slider-container {
@@ -445,6 +481,7 @@
             width: var(--current-fill-percentage, 0%);
             border-radius: 20px;
             box-shadow: var(--slider-inactive-fill-shadow);
+            
             transition-property: background-color, box-shadow;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -469,25 +506,31 @@
         }
         .brightness-native-range-input::-webkit-slider-runnable-track { background-color: transparent; border: none; box-shadow: none; }
 
-        /* Expansion Area: Color Picker */
+        /* Expansion Area: High Fidelity Color Picker */
         .color-picker-expansion-area {
             opacity: 0;
-            max-height: 0;
+            max-height: 0px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 0;
-            transition-property: opacity, max-height, padding;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            will-change: max-height, opacity, padding-top, padding-bottom;
+            
+            transition-property: opacity, max-height, padding-top, padding-bottom;
             transition-duration: 0.5s;
             transition-timing-function: var(--animation-spring-curve);
         }
 
+        /* Fix: Proper bottom space to ensure 200px wheel + shadow is completely visible */
         .smart-device-card.is-expanded .color-picker-expansion-area {
             opacity: 1;
-            max-height: 250px;
-            padding-top: 24px;
+            max-height: 320px; 
+            padding-top: 32px;
+            padding-bottom: 24px; 
+            overflow: visible; /* CRITICAL FIX: Allows shadow to render without clipping */
         }
 
         .color-wheel-canvas-container {
@@ -495,23 +538,31 @@
             height: 200px;
             border-radius: 50%;
             position: relative;
-            box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 24px rgba(0,0,0,0.25);
             cursor: crosshair;
             background: radial-gradient(circle at center, white 0%, transparent 100%), conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+            transform: translate3d(0,0,0);
         }
 
         .color-wheel-indicator {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0px 2px 8px rgba(0,0,0,0.5);
+            border-top-width: 3px;
+            border-right-width: 3px;
+            border-bottom-width: 3px;
+            border-left-width: 3px;
+            border-style: solid;
+            border-color: #FFFFFF;
+            box-shadow: 0px 3px 10px rgba(0,0,0,0.5);
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
-            transition: background-color 0.1s;
+            background-color: #FFFFFF; /* Default Center White */
+            transition-property: background-color;
+            transition-duration: 0.1s;
         }
 
         /* ==========================================================================
@@ -530,8 +581,9 @@
         .settings-modal-sheet {
             background-color: rgba(30, 30, 30, 0.85);
             backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            width: 380px; border-radius: 36px; padding: 36px 28px;
+            border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;
+            border-style: solid; border-color: rgba(255, 255, 255, 0.15);
+            width: 380px; border-radius: 36px; padding-top: 36px; padding-right: 28px; padding-bottom: 36px; padding-left: 28px;
             text-align: center; box-shadow: 0px 24px 80px rgba(0, 0, 0, 0.6);
             transform: translateY(50px) scale(0.92); transition-property: transform; transition-duration: 0.5s; transition-timing-function: var(--animation-spring-curve);
         }
@@ -540,19 +592,19 @@
         .settings-modal-heading { font-size: 24px; font-weight: 700; color: #FFFFFF; margin-bottom: 12px; letter-spacing: -0.02em; }
         .settings-modal-description { font-size: 15px; color: rgba(255, 255, 255, 0.65); margin-bottom: 28px; line-height: 1.5; }
 
-        .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding: 4px; margin-bottom: 28px; }
-        .ios-segmented-control-button { flex: 1; padding: 12px 0; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; font-weight: 600; cursor: pointer; transition: all var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; }
+        .ios-segmented-control-button { flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; font-weight: 600; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
         .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-text-input-field { width: 100%; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); color: #FFFFFF; padding: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition: all var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .settings-text-input-field { width: 100%; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
         .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
-        .settings-action-button-primary { background-color: #FFFFFF; color: #000000; width: 100%; padding: 18px; border-radius: 18px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; margin-bottom: 14px; transition: transform var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .settings-action-button-primary { background-color: #FFFFFF; color: #000000; width: 100%; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
         .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
-        .settings-action-button-secondary { background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; padding: 16px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; transition: color var(--animation-duration-fast) var(--animation-ease-out-curve); }
+        .settings-action-button-secondary { background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; padding-top: 16px; padding-bottom: 16px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; transition-property: color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
         .settings-action-button-secondary:active { color: #FFFFFF; }
 
-        .system-toast-notification { position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.15); color: #FFFFFF; padding: 16px 32px; border-radius: 32px; font-size: 16px; font-weight: 600; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition: all var(--animation-duration-medium) var(--animation-spring-curve); }
+        .system-toast-notification { position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 16px; padding-right: 32px; padding-bottom: 16px; padding-left: 32px; border-radius: 32px; font-size: 16px; font-weight: 600; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition-property: opacity, transform; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-spring-curve); }
         .system-toast-notification.is-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     </style>
 </head>
@@ -579,10 +631,10 @@
     <section aria-label="Weather Dashboard" id="weather-dashboard-section">
         <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
             <div class="weather-main-row" id="weather-main-row-container">
-                <!-- Populated by WeatherService with loading state initially -->
+                <!-- Populated by WeatherService with skeleton loading initially -->
             </div>
             <div class="weather-hourly-container" id="weather-hourly-container">
-                <!-- Hourly items injected dynamically -->
+                <!-- Hourly scroll items injected dynamically -->
             </div>
         </div>
     </section>
@@ -629,7 +681,7 @@
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
          * Encompasses state management, UI rendering, debounced network requests, external API integrations,
-         * advanced HTML5 Canvas color picking, and responsive meteorological forecasting.
+         * advanced HTML5 Canvas color picking with polar coordinate mathematics, and responsive forecasting.
          */
 
         "use strict";
@@ -644,9 +696,9 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v8',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v8',
-            WEATHER_CACHE: 'enterprise_weather_cache_v8'
+            WORKER_URL: 'enterprise_tuya_worker_url_v9',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v9',
+            WEATHER_CACHE: 'enterprise_weather_cache_v9'
         };
 
         const SVG_ASSETS = {
@@ -686,13 +738,14 @@
 
         /**
          * Manages retrieval, parsing, and caching of meteorological data via Open-Meteo API.
-         * Integrates fully fledged hourly forecasting with horizontal scroll UI mapping.
+         * Integrates fully fledged hourly forecasting with hardware accelerated UI mapping.
          */
         class WeatherService {
             constructor() {
-                this.latitudeCoordinateForApi = 59.38; // Spånga
-                this.longitudeCoordinateForApi = 17.90; // Spånga
-                // Fetching current, daily, AND hourly telemetry
+                this.latitudeCoordinateForApi = 59.38; // Hardcoded Spånga
+                this.longitudeCoordinateForApi = 17.90; // Hardcoded Spånga
+                
+                // Endpoint fetching current, daily, AND hourly telemetry
                 this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
                 
                 this.mainRowElement = document.getElementById('weather-main-row-container');
@@ -740,7 +793,7 @@
             renderSuccessState(data) {
                 if (!this.mainRowElement) return;
                 
-                // Render main dashboard
+                // Render main dashboard area
                 this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
@@ -753,7 +806,7 @@
                     </div>
                 `;
 
-                // Render Hourly Forecast if container exists
+                // Render Hourly Forecast expansion
                 if (this.hourlyContainerElement && data.hourly && data.hourly.length > 0) {
                     this.hourlyContainerElement.innerHTML = data.hourly.map(hourBlock => `
                         <div class="hourly-item-block">
@@ -784,7 +837,7 @@
                         throw new Error("Invalid data structure from Open-Meteo API.");
                     }
 
-                    // Process Current
+                    // Process Current Conditions
                     const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
                     const compiledWeatherData = {
                         current: {
@@ -797,32 +850,29 @@
                         hourly: []
                     };
 
-                    // Process Hourly (Extract next 24 hours based on current time)
-                    const currentHourIso = new Date().toISOString().substring(0, 14) + "00"; // roughly match "YYYY-MM-DDTHH:00"
-                    
-                    // Find index of current hour in OpenMeteo's time array
+                    // Process Hourly Data (Extract next 24 hours based on local system time)
                     let startIndex = 0;
-                    const nowTime = new Date().getTime();
+                    const nowTimeMilliseconds = new Date().getTime();
                     
-                    // Simple search for closest hour
+                    // Locate the closest hour array index
                     for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
-                        if (hourTime >= nowTime - 1800000) { // within last half hour
+                        const hourTimeMilliseconds = new Date(rawData.hourly.time[i]).getTime();
+                        if (hourTimeMilliseconds >= nowTimeMilliseconds - 1800000) { // within last 30 mins
                             startIndex = i;
                             break;
                         }
                     }
 
-                    // Map 24 hours of data
+                    // Map the subsequent 24 hours
                     for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
                         const dateObj = new Date(rawData.hourly.time[i]);
-                        const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
-                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
+                        const formattedHoursString = String(dateObj.getHours()).padStart(2, '0') + ":00";
+                        const hourlyCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
                         
                         compiledWeatherData.hourly.push({
-                            time: i === startIndex ? "Now" : hoursStr,
+                            time: i === startIndex ? "Now" : formattedHoursString,
                             temp: Math.round(rawData.hourly.temperature_2m[i]),
-                            icon: hCondition.icon
+                            icon: hourlyCondition.icon
                         });
                     }
 
@@ -847,7 +897,7 @@
 
         class NetworkManager {
             constructor() {
-                this.defaultTimeoutMs = 15000; // Expanded to 15 seconds for robust resilience
+                this.defaultTimeoutMs = 15000; // Expanded to 15 seconds for extreme resilience
             }
             async get(url) {
                 const abortController = new AbortController();
@@ -884,11 +934,11 @@
         const NetworkService = new NetworkManager();
         
         /* ==========================================================================
-           COLOR WHEEL LOGIC (HTML5 CANVAS)
+           COLOR WHEEL LOGIC (HTML5 CANVAS WITH MAGNETIC SNAPPING)
            ========================================================================== */
            
         /**
-         * Handles rendering and interaction logic for the HSL Color Wheel on HTML5 Canvas.
+         * Handles rendering and complex touch/mouse interaction logic for the HSL Color Wheel.
          */
         class ColorWheelManager {
             /**
@@ -901,8 +951,6 @@
                 this.deviceId = deviceId;
                 this.canvas = canvasElement;
                 this.indicator = indicatorElement;
-                
-                // Track interaction state
                 this.isDragging = false;
                 
                 this.bindEvents();
@@ -912,20 +960,19 @@
              * Binds complex multi-touch and mouse tracking events.
              */
             bindEvents() {
-                const handleStart = (e) => {
+                const handleStart = (event) => {
                     this.isDragging = true;
-                    this.processInteraction(e);
-                    // Prevent scrolling while picking color
-                    if(e.cancelable) e.preventDefault(); 
+                    this.processInteraction(event);
+                    if(event.cancelable) event.preventDefault(); 
                 };
 
-                const handleMove = (e) => {
+                const handleMove = (event) => {
                     if (!this.isDragging) return;
-                    this.processInteraction(e);
-                    if(e.cancelable) e.preventDefault();
+                    this.processInteraction(event);
+                    if(event.cancelable) event.preventDefault();
                 };
 
-                const handleEnd = (e) => {
+                const handleEnd = (event) => {
                     if(this.isDragging) {
                         this.isDragging = false;
                         this.dispatchFinalColorCommand();
@@ -943,82 +990,97 @@
 
             /**
              * Converts physical touch coordinates into polar Hue/Saturation metrics.
+             * Incorporates magnetic center snapping for Pure White selection.
              * @param {Event} event - Mouse or Touch event.
              */
             processInteraction(event) {
-                const rect = this.canvas.getBoundingClientRect();
+                const boundingRectangle = this.canvas.getBoundingClientRect();
                 
-                // Handle both touch and mouse coords
-                let clientX = event.clientX;
-                let clientY = event.clientY;
+                let clientXPosition = event.clientX;
+                let clientYPosition = event.clientY;
                 if (event.touches && event.touches.length > 0) {
-                    clientX = event.touches[0].clientX;
-                    clientY = event.touches[0].clientY;
+                    clientXPosition = event.touches[0].clientX;
+                    clientYPosition = event.touches[0].clientY;
                 }
 
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const radius = centerX;
+                const centerPointX = boundingRectangle.width / 2;
+                const centerPointY = boundingRectangle.height / 2;
+                const wheelRadius = centerPointX;
 
-                const xRelativeToCenter = clientX - rect.left - centerX;
-                const yRelativeToCenter = clientY - rect.top - centerY;
+                const xOffsetFromCenter = clientXPosition - boundingRectangle.left - centerPointX;
+                const yOffsetFromCenter = clientYPosition - boundingRectangle.top - centerPointY;
 
-                // Mathematical angle calculation (Hue)
-                let angleRadians = Math.atan2(yRelativeToCenter, xRelativeToCenter);
-                let angleDegrees = angleRadians * (180 / Math.PI) + 90; 
-                if (angleDegrees < 0) angleDegrees += 360;
+                // Mathematical angle calculation for Hue (0-360)
+                let angleInRadians = Math.atan2(yOffsetFromCenter, xOffsetFromCenter);
+                let angleInDegrees = angleInRadians * (180 / Math.PI) + 90; 
+                if (angleInDegrees < 0) angleInDegrees += 360;
                 
-                // Distance from center (Saturation)
-                const distanceFromCenter = Math.sqrt(xRelativeToCenter * xRelativeToCenter + yRelativeToCenter * yRelativeToCenter);
+                // Distance from center calculation for Saturation
+                const distanceFromCenterAbsolute = Math.sqrt((xOffsetFromCenter * xOffsetFromCenter) + (yOffsetFromCenter * yOffsetFromCenter));
                 
-                // Clamp saturation to boundaries of circle
-                const clampedDistance = Math.min(distanceFromCenter, radius);
-                const saturationPercentage = clampedDistance / radius;
-
-                // Update visual thumb placement
-                const thumbX = centerX + Math.cos(angleRadians) * clampedDistance;
-                const thumbY = centerY + Math.sin(angleRadians) * clampedDistance;
+                // Clamp saturation to physical boundaries of the circle
+                let clampedDistanceValue = Math.min(distanceFromCenterAbsolute, wheelRadius);
                 
-                this.indicator.style.left = `${thumbX}px`;
-                this.indicator.style.top = `${thumbY}px`;
-                this.indicator.style.backgroundColor = `hsl(${angleDegrees}, ${saturationPercentage * 100}%, 50%)`;
+                // Magnetic Snapping Logic: If within 18 pixels of center, snap to absolute dead center (White)
+                const MAGNETIC_SNAP_RADIUS_PIXELS = 18;
+                if (clampedDistanceValue <= MAGNETIC_SNAP_RADIUS_PIXELS) {
+                    clampedDistanceValue = 0;
+                }
+                
+                const saturationPercentageRatio = clampedDistanceValue / wheelRadius;
 
-                // Update authoritative state locally (Scale: H 0-360, S 0-1000)
-                DeviceManager.devicesState[this.deviceId].hue = Math.round(angleDegrees);
-                DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationPercentage * 1000);
+                // Update visual thumb placement based on clamped/snapped distance
+                const visualThumbX = centerPointX + Math.cos(angleInRadians - (Math.PI/2)) * clampedDistanceValue;
+                const visualThumbY = centerPointY + Math.sin(angleInRadians - (Math.PI/2)) * clampedDistanceValue;
+                
+                this.indicator.style.left = `${visualThumbX}px`;
+                this.indicator.style.top = `${visualThumbY}px`;
+                
+                // CSS HSL Fix: Interpolate Lightness to achieve Pure White in center
+                // Center (S=0) -> Lightness = 100%
+                // Edge (S=1)   -> Lightness = 50% (Full Hue)
+                const calculatedLightnessPercentage = 100 - (saturationPercentageRatio * 50);
+                this.indicator.style.backgroundColor = `hsl(${angleInDegrees}, 100%, ${calculatedLightnessPercentage}%)`;
+
+                // Update authoritative state memory locally (Scale: Tuya Hue 0-360, Tuya Saturation 0-1000)
+                DeviceManager.devicesState[this.deviceId].hue = Math.round(angleInDegrees);
+                DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationPercentageRatio * 1000);
             }
 
             /**
-             * Triggers network request after interaction finishes.
+             * Triggers network request after the physical interaction finishes.
              */
             dispatchFinalColorCommand() {
                 DeviceManager.executeColorCommand(this.deviceId);
             }
             
             /**
-             * Resets the visual indicator to match memory state if modified externally.
+             * Mathematically reverses Tuya State back into polar coordinates for the UI Indicator.
              */
             updateIndicatorFromState() {
-                const state = DeviceManager.devicesState[this.deviceId];
-                if(state.hue === undefined || state.saturation === undefined) return;
+                const stateObject = DeviceManager.devicesState[this.deviceId];
+                if(stateObject.hue === undefined || stateObject.saturation === undefined) return;
                 
-                const rect = this.canvas.getBoundingClientRect();
-                // Avoid calculation if element has zero geometry
-                if(rect.width === 0) return; 
+                const boundingRectangle = this.canvas.getBoundingClientRect();
+                if(boundingRectangle.width === 0) return; // Skip calculation if UI is currently hidden/unrendered
                 
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
+                const centerPointX = boundingRectangle.width / 2;
+                const centerPointY = boundingRectangle.height / 2;
                 
-                // Reverse engineering polar coordinates
-                const angleRadians = (state.hue - 90) * (Math.PI / 180);
-                const distance = (state.saturation / 1000) * centerX;
+                // Reverse engineer polar coordinates from memory
+                const angleInRadians = (stateObject.hue - 90) * (Math.PI / 180);
+                const distanceRatio = stateObject.saturation / 1000;
+                const absoluteDistance = distanceRatio * centerPointX;
                 
-                const thumbX = centerX + Math.cos(angleRadians) * distance;
-                const thumbY = centerY + Math.sin(angleRadians) * distance;
+                const visualThumbX = centerPointX + Math.cos(angleInRadians) * absoluteDistance;
+                const visualThumbY = centerPointY + Math.sin(angleInRadians) * absoluteDistance;
                 
-                this.indicator.style.left = `${thumbX}px`;
-                this.indicator.style.top = `${thumbY}px`;
-                this.indicator.style.backgroundColor = `hsl(${state.hue}, ${(state.saturation/1000) * 100}%, 50%)`;
+                this.indicator.style.left = `${visualThumbX}px`;
+                this.indicator.style.top = `${visualThumbY}px`;
+                
+                // Recalculate proper HSL CSS Lightness mapping
+                const calculatedLightnessPercentage = 100 - (distanceRatio * 50);
+                this.indicator.style.backgroundColor = `hsl(${stateObject.hue}, 100%, ${calculatedLightnessPercentage}%)`;
             }
         }
 
@@ -1031,11 +1093,12 @@
                 this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
                 
-                // Map to store instantiated color wheel controllers
+                // Map to store instantiated canvas controllers
                 this.colorWheelControllers = {};
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
+                    // Strict initialization. Default Hue 0, Saturation 0 = Pure White.
                     this.devicesState[device.id] = {
                         on: false,
                         brightness: 100, 
@@ -1078,7 +1141,7 @@
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
                         
-                        // Sync color wheel visual if expanded
+                        // Force color wheel UI to match synchronized state memory
                         if(this.colorWheelControllers[device.id]) {
                             this.colorWheelControllers[device.id].updateIndicatorFromState();
                         }
@@ -1091,6 +1154,7 @@
                 if (powerInstruction !== undefined) {
                     this.devicesState[deviceId].on = powerInstruction.value;
                 }
+                
                 const colorInstruction = statusArray.find(instruction => instruction.code === 'colour_data_v2' || instruction.code === 'colour_data');
                 if (colorInstruction !== undefined) {
                     try {
@@ -1122,25 +1186,26 @@
                     return;
                 }
 
-                const previousState = this.devicesState[deviceId].on;
-                this.devicesState[deviceId].on = !previousState;
+                const previousStateMemory = this.devicesState[deviceId].on;
+                this.devicesState[deviceId].on = !previousStateMemory;
+                
                 ApplicationUI.setDeviceConnectingState(deviceId, true);
                 ApplicationUI.updateDeviceCardRender(deviceId);
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    const body = {
+                    const requestBodyPayload = {
                         device: deviceId,
                         commands: [{ code: 'switch_led', value: this.devicesState[deviceId].on }]
                     };
-                    await NetworkService.post(url, body);
+                    await NetworkService.post(url, requestBodyPayload);
                 } catch (error) {
                     if (error.name === 'AbortError') {
                         GlobalToast.show("Device Unresponsive (Timeout)");
                     } else {
                         GlobalToast.show("Network Error. Check Connection.");
                     }
-                    this.devicesState[deviceId].on = previousState;
+                    this.devicesState[deviceId].on = previousStateMemory;
                     ApplicationUI.updateDeviceCardRender(deviceId);
                 } finally {
                     ApplicationUI.setDeviceConnectingState(deviceId, false);
@@ -1163,11 +1228,12 @@
                 if (this.devicesState[deviceId].on === false) return;
 
                 ApplicationUI.setDeviceConnectingState(deviceId, true);
+                
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    const body = {
+                    const requestBodyPayload = {
                         device: deviceId,
                         commands: [
                             { code: 'work_mode', value: 'colour' },
@@ -1178,7 +1244,7 @@
                             }) }
                         ]
                     };
-                    await NetworkService.post(url, body);
+                    await NetworkService.post(url, requestBodyPayload);
                 } catch (error) {
                     if (error.name === 'AbortError') {
                         GlobalToast.show("Device Unresponsive (Timeout)");
@@ -1192,12 +1258,13 @@
             
             /**
              * Transmits isolated color state modifications to Tuya via Cloudflare Worker.
+             * Utilizes state properties manipulated directly by the ColorWheelManager.
              * @param {string} deviceId - Tuya device identifier.
              */
             async executeColorCommand(deviceId) {
                 if (!this.isConfigured()) return;
                 
-                // Force turn on if adjusting color while off
+                // Optimistic turn ON if color modified while off
                 if (this.devicesState[deviceId].on === false) {
                     this.devicesState[deviceId].on = true;
                     ApplicationUI.updateDeviceCardRender(deviceId);
@@ -1207,7 +1274,7 @@
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    const body = {
+                    const requestBodyPayload = {
                         device: deviceId,
                         commands: [
                             { code: 'work_mode', value: 'colour' },
@@ -1218,7 +1285,7 @@
                             }) }
                         ]
                     };
-                    await NetworkService.post(url, body);
+                    await NetworkService.post(url, requestBodyPayload);
                 } catch (error) {
                     GlobalToast.show("Failed to apply color configuration.");
                 } finally {
@@ -1311,9 +1378,6 @@
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
             }
             
-            /**
-             * Toggles expanding state for the Weather widget.
-             */
             toggleWeatherExpansion() {
                 const widget = document.getElementById('weather-dashboard-widget');
                 if(widget) {
@@ -1367,12 +1431,7 @@
                                        max="100" 
                                        step="1" 
                                        value="${currentState.brightness}"
-                                       aria-label="Brightness Control for ${deviceData.name}"
-                                       aria-valuemin="1"
-                                       aria-valuemax="100"
-                                       aria-valuenow="${currentState.brightness}"
-                                       aria-valuetext="${currentState.brightness} percent"
-                                       ${currentState.on ? '' : 'disabled'}>
+                                       aria-label="Brightness Control for ${deviceData.name}">
                             </div>
                         </div>
                         
@@ -1387,10 +1446,13 @@
                     this.deviceGridContainer.appendChild(cardElement);
                     this.attachDynamicCardListeners(deviceData.id);
                     
-                    // Initialize Color Wheel Controller for this specific instance
+                    // Initialize isolated Color Wheel Controller
                     const canvasEl = document.getElementById(`canvas-${deviceData.id}`);
                     const indicatorEl = document.getElementById(`color-thumb-${deviceData.id}`);
                     DeviceManager.colorWheelControllers[deviceData.id] = new ColorWheelManager(deviceData.id, canvasEl, indicatorEl);
+                    
+                    // Force an initial update so indicator is correctly at white center
+                    DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                 }
             }
 
@@ -1400,26 +1462,29 @@
                 const sliderInput = document.getElementById(`native-slider-input-${deviceId}`);
                 const expansionArea = document.getElementById(`expansion-area-${deviceId}`);
 
-                // Main card tap to expand
+                // Main card container tap to expand layout
                 if (cardWrapper) {
                     cardWrapper.addEventListener('click', (event) => {
-                        // Prevent expansion if clicking specific controls
+                        // Prevent expansion trigger if clicking interior interactive controls
                         if (event.target === toggleButton || toggleButton.contains(event.target) || event.target === sliderInput || expansionArea.contains(event.target)) {
                             return;
                         }
                         cardWrapper.classList.toggle('is-expanded');
-                        // Force a redraw of indicator to ensure it's placed correctly if opened for first time
+                        
+                        // Redraw indicator mathematics to compensate for grid expansion offset changes
                         if(cardWrapper.classList.contains('is-expanded') && DeviceManager.colorWheelControllers[deviceId]) {
-                            setTimeout(() => {
-                                DeviceManager.colorWheelControllers[deviceId].updateIndicatorFromState();
-                            }, 50); // slight delay to allow CSS grid expansion to compute
+                            window.requestAnimationFrame(() => {
+                                setTimeout(() => {
+                                    DeviceManager.colorWheelControllers[deviceId].updateIndicatorFromState();
+                                }, 80); 
+                            });
                         }
                     });
                 }
 
                 if (toggleButton) {
                     toggleButton.addEventListener('click', (event) => {
-                        event.stopPropagation(); // prevent card expand
+                        event.stopPropagation(); // Shield card expansion
                         DeviceManager.toggleDevicePower(deviceId);
                     });
                 }
@@ -1445,7 +1510,7 @@
             handleHighFrequencySliderDrag(deviceId, rawValue) {
                 const integerValue = parseInt(rawValue, 10);
                 
-                // Crucial Flash Fix: Turn on device *immediately* upon touch logic initiation
+                // Fast-path ON state invocation immediately upon interaction
                 if (DeviceManager.devicesState[deviceId].on === false) {
                     DeviceManager.devicesState[deviceId].on = true;
                     this.updateDeviceCardRender(deviceId);
@@ -1455,19 +1520,16 @@
                 
                 const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
                 const statusLabel = document.getElementById(`status-label-${deviceId}`);
-                const nativeSlider = document.getElementById(`native-slider-input-${deviceId}`);
                 
                 if (fillLayer) fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
 
-                if (DeviceManager.devicesState[deviceId].on && statusLabel && nativeSlider) {
+                if (DeviceManager.devicesState[deviceId].on && statusLabel) {
                     statusLabel.innerText = `${integerValue}%`;
-                    nativeSlider.setAttribute('aria-valuenow', integerValue);
-                    nativeSlider.setAttribute('aria-valuetext', `${integerValue} percent`);
                 }
             }
 
             updateDeviceCardRender(deviceId) {
-                const state = DeviceManager.devicesState[deviceId];
+                const stateObject = DeviceManager.devicesState[deviceId];
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 const statusLabel = document.getElementById(`status-label-${deviceId}`);
                 const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
@@ -1476,27 +1538,24 @@
 
                 if (!cardWrapper || !statusLabel || !fillLayer || !nativeSlider || !toggleBtn) return;
 
-                if (state.on === true) {
+                if (stateObject.on === true) {
                     cardWrapper.classList.add('state-is-on');
-                    statusLabel.innerText = `${state.brightness}%`;
+                    statusLabel.innerText = `${stateObject.brightness}%`;
                     toggleBtn.setAttribute('aria-pressed', 'true');
-                    nativeSlider.disabled = false;
                 } else {
                     cardWrapper.classList.remove('state-is-on');
                     statusLabel.innerText = 'Off';
                     toggleBtn.setAttribute('aria-pressed', 'false');
-                    nativeSlider.disabled = true;
                 }
 
-                nativeSlider.value = state.brightness;
-                nativeSlider.setAttribute('aria-valuenow', state.brightness);
-                nativeSlider.setAttribute('aria-valuetext', `${state.brightness} percent`);
-                fillLayer.style.setProperty('--current-fill-percentage', `${state.brightness}%`);
+                nativeSlider.value = stateObject.brightness;
+                fillLayer.style.setProperty('--current-fill-percentage', `${stateObject.brightness}%`);
             }
             
             setDeviceConnectingState(deviceId, isConnecting) {
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 if (cardWrapper) {
+                    // Directly manipulate classes to trigger subtle CSS animations
                     if (isConnecting) cardWrapper.classList.add('is-connecting');
                     else cardWrapper.classList.remove('is-connecting');
                 }
