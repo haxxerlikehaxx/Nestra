@@ -56,12 +56,22 @@
             --animation-duration-medium: 0.4s;
             --animation-duration-slow: 0.6s;
 
-            /* Layout Constraints */
+            /* Layout Constraints & Mathematical Animation Bounds */
             --layout-max-width-portrait: 768px;
             --layout-max-width-landscape: 1024px;
             --layout-padding-horizontal-portrait: 32px;
             --layout-padding-horizontal-landscape: 48px;
             --layout-padding-vertical-bottom: 40px;
+            
+            /* Card Height Mathematics (Critical for smooth expansion animation) */
+            --card-base-height: 200px;
+            --grid-gap-portrait: 24px;
+            /* Expanded height precisely matches 2 rows + gap (200 + 200 + 24) to prevent layout jitter */
+            --card-expanded-height-portrait: 424px; 
+            
+            --grid-gap-landscape: 32px;
+            /* Expanded height landscape (200 + 200 + 32) */
+            --card-expanded-height-landscape: 432px;
         }
 
         /* ==========================================================================
@@ -109,13 +119,14 @@
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
+        /* Responsive Landscape Injection */
         body.layout-mode-landscape {
             max-width: var(--layout-max-width-landscape);
             padding-right: var(--layout-padding-horizontal-landscape);
             padding-left: var(--layout-padding-horizontal-landscape);
         }
 
-        /* Explicitly allow inputs to bypass global user-select none */
+        /* Allow typing explicitly in input fields */
         input, textarea, select {
             user-select: text !important;
             -webkit-user-select: text !important;
@@ -173,6 +184,7 @@
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
             transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
+            
             outline: none;
         }
 
@@ -206,11 +218,13 @@
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
             cursor: pointer;
             
-            /* Hardware Acceleration for iPad Air 2 */
+            /* Hardware Acceleration for iPad Air 2 Rendering Performance */
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
+            perspective: 1000px;
+            -webkit-perspective: 1000px;
             
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium);
@@ -259,7 +273,7 @@
             border-top-style: solid;
             border-top-color: transparent;
             
-            /* Crucial iOS Native Scrolling and GPU Acceleration */
+            /* Crucial iOS Native Scrolling and GPU Acceleration bounds */
             -webkit-overflow-scrolling: touch;
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
@@ -316,23 +330,23 @@
         .device-grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            grid-auto-rows: minmax(200px, auto); /* Allows cards to expand naturally */
-            column-gap: 24px;
-            row-gap: 24px;
+            grid-auto-rows: minmax(var(--card-base-height), auto);
+            column-gap: var(--grid-gap-portrait);
+            row-gap: var(--grid-gap-portrait);
             
-            transition-property: grid-template-columns, column-gap;
+            transition-property: grid-template-columns, column-gap, row-gap;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
         body.layout-mode-landscape .device-grid-container {
             grid-template-columns: repeat(2, 1fr);
-            column-gap: 32px;
-            row-gap: 32px;
+            column-gap: var(--grid-gap-landscape);
+            row-gap: var(--grid-gap-landscape);
         }
 
         /* ==========================================================================
-           SMART DEVICE CARD COMPONENT (EXPANDABLE)
+           SMART DEVICE CARD COMPONENT (EXPANDABLE & ACCELERATED)
            ========================================================================== */
         .smart-device-card {
             background-color: var(--glass-background-base);
@@ -352,7 +366,10 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            height: 200px; /* Default strict height */
+            
+            /* Explicit Initial Height enabling pure CSS interpolation */
+            height: var(--card-base-height); 
+            
             box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.05);
             position: relative;
             cursor: pointer;
@@ -360,17 +377,22 @@
             /* Hardware Acceleration */
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
+            will-change: height, background-color, transform;
             
-            transition-property: background-color, color, transform, box-shadow, border-color, height;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), 0.5s;
-            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve);
+            /* The holy grail of smooth expansion: animating explicit height variables */
+            transition-property: height, background-color, color, transform, box-shadow, border-color;
+            transition-duration: 0.5s, var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
+            transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve);
         }
 
-        /* Expanded State for Color Picker - Allows natural growth */
+        /* Expanded State: Explicitly dictates pixel height to perfectly bridge 2 tracks */
         .smart-device-card.is-expanded {
             grid-row-end: span 2;
-            height: auto;
-            min-height: 480px;
+            height: var(--card-expanded-height-portrait);
+        }
+        
+        body.layout-mode-landscape .smart-device-card.is-expanded {
+            height: var(--card-expanded-height-landscape);
         }
 
         /* State: Device is ON - Eliminated opacity drops for flawless pure color */
@@ -385,7 +407,7 @@
         .card-base-content {
             display: flex;
             flex-direction: column;
-            height: 152px; /* Fixed height for perfectly locked top content */
+            height: 152px; /* 200px container - 48px padding = 152px locked internal space */
             justify-content: space-between;
         }
 
@@ -458,7 +480,6 @@
             -moz-backface-visibility: hidden;
             transform: translate3d(0, 0, 0);
             box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
-            
             transition-property: background-color, box-shadow, opacity;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -481,7 +502,6 @@
             width: var(--current-fill-percentage, 0%);
             border-radius: 20px;
             box-shadow: var(--slider-inactive-fill-shadow);
-            
             transition-property: background-color, box-shadow;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -524,13 +544,13 @@
             transition-timing-function: var(--animation-spring-curve);
         }
 
-        /* Fix: Proper bottom space to ensure 200px wheel + shadow is completely visible */
+        /* Fix: Use visible overflow ONLY when fully expanded so shadow doesn't clip */
         .smart-device-card.is-expanded .color-picker-expansion-area {
             opacity: 1;
-            max-height: 320px; 
+            max-height: 280px; 
             padding-top: 32px;
             padding-bottom: 24px; 
-            overflow: visible; /* CRITICAL FIX: Allows shadow to render without clipping */
+            overflow: visible; 
         }
 
         .color-wheel-canvas-container {
@@ -545,8 +565,8 @@
         }
 
         .color-wheel-indicator {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border-top-width: 3px;
             border-right-width: 3px;
@@ -554,13 +574,13 @@
             border-left-width: 3px;
             border-style: solid;
             border-color: #FFFFFF;
-            box-shadow: 0px 3px 10px rgba(0,0,0,0.5);
+            box-shadow: 0px 3px 12px rgba(0,0,0,0.4);
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
-            background-color: #FFFFFF; /* Default Center White */
+            background-color: #FFFFFF; /* Pure White default */
             transition-property: background-color;
             transition-duration: 0.1s;
         }
@@ -631,7 +651,7 @@
     <section aria-label="Weather Dashboard" id="weather-dashboard-section">
         <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
             <div class="weather-main-row" id="weather-main-row-container">
-                <!-- Populated by WeatherService with skeleton loading initially -->
+                <!-- Populated by WeatherService with loading state initially -->
             </div>
             <div class="weather-hourly-container" id="weather-hourly-container">
                 <!-- Hourly scroll items injected dynamically -->
@@ -696,9 +716,9 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v9',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v9',
-            WEATHER_CACHE: 'enterprise_weather_cache_v9'
+            WORKER_URL: 'enterprise_tuya_worker_url_v10',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v10',
+            WEATHER_CACHE: 'enterprise_weather_cache_v10'
         };
 
         const SVG_ASSETS = {
@@ -742,10 +762,9 @@
          */
         class WeatherService {
             constructor() {
-                this.latitudeCoordinateForApi = 59.38; // Hardcoded Spånga
-                this.longitudeCoordinateForApi = 17.90; // Hardcoded Spånga
-                
-                // Endpoint fetching current, daily, AND hourly telemetry
+                this.latitudeCoordinateForApi = 59.38; // Spånga
+                this.longitudeCoordinateForApi = 17.90; // Spånga
+                // Fetching current, daily, AND hourly telemetry
                 this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
                 
                 this.mainRowElement = document.getElementById('weather-main-row-container');
@@ -793,7 +812,7 @@
             renderSuccessState(data) {
                 if (!this.mainRowElement) return;
                 
-                // Render main dashboard area
+                // Render main dashboard
                 this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
@@ -806,7 +825,7 @@
                     </div>
                 `;
 
-                // Render Hourly Forecast expansion
+                // Render Hourly Forecast if container exists
                 if (this.hourlyContainerElement && data.hourly && data.hourly.length > 0) {
                     this.hourlyContainerElement.innerHTML = data.hourly.map(hourBlock => `
                         <div class="hourly-item-block">
@@ -837,7 +856,7 @@
                         throw new Error("Invalid data structure from Open-Meteo API.");
                     }
 
-                    // Process Current Conditions
+                    // Process Current
                     const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
                     const compiledWeatherData = {
                         current: {
@@ -850,29 +869,32 @@
                         hourly: []
                     };
 
-                    // Process Hourly Data (Extract next 24 hours based on local system time)
-                    let startIndex = 0;
-                    const nowTimeMilliseconds = new Date().getTime();
+                    // Process Hourly (Extract next 24 hours based on current time)
+                    const currentHourIso = new Date().toISOString().substring(0, 14) + "00"; // roughly match "YYYY-MM-DDTHH:00"
                     
-                    // Locate the closest hour array index
+                    // Find index of current hour in OpenMeteo's time array
+                    let startIndex = 0;
+                    const nowTime = new Date().getTime();
+                    
+                    // Simple search for closest hour
                     for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        const hourTimeMilliseconds = new Date(rawData.hourly.time[i]).getTime();
-                        if (hourTimeMilliseconds >= nowTimeMilliseconds - 1800000) { // within last 30 mins
+                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
+                        if (hourTime >= nowTime - 1800000) { // within last half hour
                             startIndex = i;
                             break;
                         }
                     }
 
-                    // Map the subsequent 24 hours
+                    // Map 24 hours of data
                     for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
                         const dateObj = new Date(rawData.hourly.time[i]);
-                        const formattedHoursString = String(dateObj.getHours()).padStart(2, '0') + ":00";
-                        const hourlyCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
+                        const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
+                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
                         
                         compiledWeatherData.hourly.push({
-                            time: i === startIndex ? "Now" : formattedHoursString,
+                            time: i === startIndex ? "Now" : hoursStr,
                             temp: Math.round(rawData.hourly.temperature_2m[i]),
-                            icon: hourlyCondition.icon
+                            icon: hCondition.icon
                         });
                     }
 
@@ -897,7 +919,7 @@
 
         class NetworkManager {
             constructor() {
-                this.defaultTimeoutMs = 15000; // Expanded to 15 seconds for extreme resilience
+                this.defaultTimeoutMs = 15000; // Expanded to 15 seconds for robust resilience
             }
             async get(url) {
                 const abortController = new AbortController();
@@ -934,11 +956,13 @@
         const NetworkService = new NetworkManager();
         
         /* ==========================================================================
-           COLOR WHEEL LOGIC (HTML5 CANVAS WITH MAGNETIC SNAPPING)
+           COLOR WHEEL LOGIC (HTML5 CANVAS)
            ========================================================================== */
            
         /**
-         * Handles rendering and complex touch/mouse interaction logic for the HSL Color Wheel.
+         * Handles rendering and interaction logic for the HSL Color Wheel on HTML5 Canvas.
+         * Mathematically rebuilt to perfectly track the user's touch point with zero offset,
+         * and snap magnetically to pure white in the dead center.
          */
         class ColorWheelManager {
             /**
@@ -951,6 +975,8 @@
                 this.deviceId = deviceId;
                 this.canvas = canvasElement;
                 this.indicator = indicatorElement;
+                
+                // Track interaction state
                 this.isDragging = false;
                 
                 this.bindEvents();
@@ -960,19 +986,19 @@
              * Binds complex multi-touch and mouse tracking events.
              */
             bindEvents() {
-                const handleStart = (event) => {
+                const handleStart = (e) => {
                     this.isDragging = true;
-                    this.processInteraction(event);
-                    if(event.cancelable) event.preventDefault(); 
+                    this.processInteraction(e);
+                    if(e.cancelable) e.preventDefault(); 
                 };
 
-                const handleMove = (event) => {
+                const handleMove = (e) => {
                     if (!this.isDragging) return;
-                    this.processInteraction(event);
-                    if(event.cancelable) event.preventDefault();
+                    this.processInteraction(e);
+                    if(e.cancelable) e.preventDefault();
                 };
 
-                const handleEnd = (event) => {
+                const handleEnd = (e) => {
                     if(this.isDragging) {
                         this.isDragging = false;
                         this.dispatchFinalColorCommand();
@@ -990,65 +1016,66 @@
 
             /**
              * Converts physical touch coordinates into polar Hue/Saturation metrics.
-             * Incorporates magnetic center snapping for Pure White selection.
+             * Ensures perfect 1:1 tracking mapping finger directly to the UI thumb.
              * @param {Event} event - Mouse or Touch event.
              */
             processInteraction(event) {
-                const boundingRectangle = this.canvas.getBoundingClientRect();
+                const rect = this.canvas.getBoundingClientRect();
                 
-                let clientXPosition = event.clientX;
-                let clientYPosition = event.clientY;
+                let clientX = event.clientX;
+                let clientY = event.clientY;
                 if (event.touches && event.touches.length > 0) {
-                    clientXPosition = event.touches[0].clientX;
-                    clientYPosition = event.touches[0].clientY;
+                    clientX = event.touches[0].clientX;
+                    clientY = event.touches[0].clientY;
                 }
 
-                const centerPointX = boundingRectangle.width / 2;
-                const centerPointY = boundingRectangle.height / 2;
-                const wheelRadius = centerPointX;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const radius = centerX;
 
-                const xOffsetFromCenter = clientXPosition - boundingRectangle.left - centerPointX;
-                const yOffsetFromCenter = clientYPosition - boundingRectangle.top - centerPointY;
+                const xOffset = clientX - rect.left - centerX;
+                const yOffset = clientY - rect.top - centerY;
 
-                // Mathematical angle calculation for Hue (0-360)
-                let angleInRadians = Math.atan2(yOffsetFromCenter, xOffsetFromCenter);
-                let angleInDegrees = angleInRadians * (180 / Math.PI) + 90; 
-                if (angleInDegrees < 0) angleInDegrees += 360;
+                // Absolute true radians for pixel-perfect tracking
+                const rawAngleRadians = Math.atan2(yOffset, xOffset);
                 
-                // Distance from center calculation for Saturation
-                const distanceFromCenterAbsolute = Math.sqrt((xOffsetFromCenter * xOffsetFromCenter) + (yOffsetFromCenter * yOffsetFromCenter));
+                // Mathematical distance from center calculation
+                const rawDistance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
                 
                 // Clamp saturation to physical boundaries of the circle
-                let clampedDistanceValue = Math.min(distanceFromCenterAbsolute, wheelRadius);
+                let clampedDistance = Math.min(rawDistance, radius);
                 
                 // Magnetic Snapping Logic: If within 18 pixels of center, snap to absolute dead center (White)
-                const MAGNETIC_SNAP_RADIUS_PIXELS = 18;
-                if (clampedDistanceValue <= MAGNETIC_SNAP_RADIUS_PIXELS) {
-                    clampedDistanceValue = 0;
+                const SNAP_RADIUS = 18;
+                if (clampedDistance <= SNAP_RADIUS) {
+                    clampedDistance = 0;
                 }
                 
-                const saturationPercentageRatio = clampedDistanceValue / wheelRadius;
+                const saturationRatio = clampedDistance / radius;
 
-                // Update visual thumb placement based on clamped/snapped distance
-                const visualThumbX = centerPointX + Math.cos(angleInRadians - (Math.PI/2)) * clampedDistanceValue;
-                const visualThumbY = centerPointY + Math.sin(angleInRadians - (Math.PI/2)) * clampedDistanceValue;
+                // Visual thumb placement strictly follows raw interaction angle, resulting in zero offset bug
+                const visualThumbX = centerX + Math.cos(rawAngleRadians) * clampedDistance;
+                const visualThumbY = centerY + Math.sin(rawAngleRadians) * clampedDistance;
                 
                 this.indicator.style.left = `${visualThumbX}px`;
                 this.indicator.style.top = `${visualThumbY}px`;
                 
-                // CSS HSL Fix: Interpolate Lightness to achieve Pure White in center
-                // Center (S=0) -> Lightness = 100%
-                // Edge (S=1)   -> Lightness = 50% (Full Hue)
-                const calculatedLightnessPercentage = 100 - (saturationPercentageRatio * 50);
-                this.indicator.style.backgroundColor = `hsl(${angleInDegrees}, 100%, ${calculatedLightnessPercentage}%)`;
+                // Now, separately map the angle to Tuya's Hue definition (Where top is 0/360)
+                let hueDegrees = (rawAngleRadians * 180 / Math.PI) + 90; 
+                if (hueDegrees < 0) hueDegrees += 360;
+                if (hueDegrees >= 360) hueDegrees -= 360;
+                
+                // Dynamic Lightness computation to ensure the center is pure #FFFFFF white.
+                const lightnessPct = 100 - (saturationRatio * 50);
+                this.indicator.style.backgroundColor = `hsl(${hueDegrees}, 100%, ${lightnessPct}%)`;
 
-                // Update authoritative state memory locally (Scale: Tuya Hue 0-360, Tuya Saturation 0-1000)
-                DeviceManager.devicesState[this.deviceId].hue = Math.round(angleInDegrees);
-                DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationPercentageRatio * 1000);
+                // Update authoritative state locally (Scale: H 0-360, S 0-1000)
+                DeviceManager.devicesState[this.deviceId].hue = Math.round(hueDegrees);
+                DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationRatio * 1000);
             }
 
             /**
-             * Triggers network request after the physical interaction finishes.
+             * Triggers network request after interaction finishes.
              */
             dispatchFinalColorCommand() {
                 DeviceManager.executeColorCommand(this.deviceId);
@@ -1058,29 +1085,32 @@
              * Mathematically reverses Tuya State back into polar coordinates for the UI Indicator.
              */
             updateIndicatorFromState() {
-                const stateObject = DeviceManager.devicesState[this.deviceId];
-                if(stateObject.hue === undefined || stateObject.saturation === undefined) return;
+                const state = DeviceManager.devicesState[this.deviceId];
+                // Failsafe for uninitialized data
+                if(state.hue === undefined || state.saturation === undefined) return;
                 
-                const boundingRectangle = this.canvas.getBoundingClientRect();
-                if(boundingRectangle.width === 0) return; // Skip calculation if UI is currently hidden/unrendered
+                const rect = this.canvas.getBoundingClientRect();
+                // Skip calculation if UI is currently hidden/unrendered
+                if(rect.width === 0) return; 
                 
-                const centerPointX = boundingRectangle.width / 2;
-                const centerPointY = boundingRectangle.height / 2;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
                 
-                // Reverse engineer polar coordinates from memory
-                const angleInRadians = (stateObject.hue - 90) * (Math.PI / 180);
-                const distanceRatio = stateObject.saturation / 1000;
-                const absoluteDistance = distanceRatio * centerPointX;
+                // Reverse engineering polar coordinates to place the thumb
+                // Angle must be mapped back to standard radians where 0 is at 3 o'clock
+                const angleRadians = (state.hue - 90) * (Math.PI / 180);
+                const distanceRatio = state.saturation / 1000;
+                const absoluteDistance = distanceRatio * centerX;
                 
-                const visualThumbX = centerPointX + Math.cos(angleInRadians) * absoluteDistance;
-                const visualThumbY = centerPointY + Math.sin(angleInRadians) * absoluteDistance;
+                const visualThumbX = centerX + Math.cos(angleRadians) * absoluteDistance;
+                const visualThumbY = centerY + Math.sin(angleRadians) * absoluteDistance;
                 
                 this.indicator.style.left = `${visualThumbX}px`;
                 this.indicator.style.top = `${visualThumbY}px`;
                 
-                // Recalculate proper HSL CSS Lightness mapping
-                const calculatedLightnessPercentage = 100 - (distanceRatio * 50);
-                this.indicator.style.backgroundColor = `hsl(${stateObject.hue}, 100%, ${calculatedLightnessPercentage}%)`;
+                // Dynamic lightness interpolation for Pure White handling
+                const lightnessPct = 100 - (distanceRatio * 50);
+                this.indicator.style.backgroundColor = `hsl(${state.hue}, 100%, ${lightnessPct}%)`;
             }
         }
 
@@ -1093,7 +1123,7 @@
                 this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
                 
-                // Map to store instantiated canvas controllers
+                // Map to store instantiated color wheel controllers
                 this.colorWheelControllers = {};
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
@@ -1141,7 +1171,7 @@
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
                         
-                        // Force color wheel UI to match synchronized state memory
+                        // Sync color wheel visual if expanded
                         if(this.colorWheelControllers[device.id]) {
                             this.colorWheelControllers[device.id].updateIndicatorFromState();
                         }
@@ -1228,7 +1258,6 @@
                 if (this.devicesState[deviceId].on === false) return;
 
                 ApplicationUI.setDeviceConnectingState(deviceId, true);
-                
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
 
                 try {
@@ -1258,13 +1287,12 @@
             
             /**
              * Transmits isolated color state modifications to Tuya via Cloudflare Worker.
-             * Utilizes state properties manipulated directly by the ColorWheelManager.
              * @param {string} deviceId - Tuya device identifier.
              */
             async executeColorCommand(deviceId) {
                 if (!this.isConfigured()) return;
                 
-                // Optimistic turn ON if color modified while off
+                // Force turn on if adjusting color while off
                 if (this.devicesState[deviceId].on === false) {
                     this.devicesState[deviceId].on = true;
                     ApplicationUI.updateDeviceCardRender(deviceId);
@@ -1469,6 +1497,8 @@
                         if (event.target === toggleButton || toggleButton.contains(event.target) || event.target === sliderInput || expansionArea.contains(event.target)) {
                             return;
                         }
+                        
+                        // Toggle CSS class that drives explicitly defined height variables
                         cardWrapper.classList.toggle('is-expanded');
                         
                         // Redraw indicator mathematics to compensate for grid expansion offset changes
