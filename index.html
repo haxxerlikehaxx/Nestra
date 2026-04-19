@@ -502,6 +502,7 @@
             width: var(--current-fill-percentage, 0%);
             border-radius: 20px;
             box-shadow: var(--slider-inactive-fill-shadow);
+            
             transition-property: background-color, box-shadow;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -544,7 +545,7 @@
             transition-timing-function: var(--animation-spring-curve);
         }
 
-        /* Fix: Use visible overflow ONLY when fully expanded so shadow doesn't clip */
+        /* Use visible overflow ONLY when fully expanded so shadow doesn't clip */
         .smart-device-card.is-expanded .color-picker-expansion-area {
             opacity: 1;
             max-height: 280px; 
@@ -651,7 +652,7 @@
     <section aria-label="Weather Dashboard" id="weather-dashboard-section">
         <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
             <div class="weather-main-row" id="weather-main-row-container">
-                <!-- Populated by WeatherService with loading state initially -->
+                <!-- Populated by WeatherService with skeleton loading initially -->
             </div>
             <div class="weather-hourly-container" id="weather-hourly-container">
                 <!-- Hourly scroll items injected dynamically -->
@@ -716,9 +717,9 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v10',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v10',
-            WEATHER_CACHE: 'enterprise_weather_cache_v10'
+            WORKER_URL: 'enterprise_tuya_worker_url_v11',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v11',
+            WEATHER_CACHE: 'enterprise_weather_cache_v11'
         };
 
         const SVG_ASSETS = {
@@ -780,7 +781,9 @@
                         <span class="weather-condition-description">Fetching Weather...</span>
                     </div>
                     <div class="weather-graphics-right">
-                        <div class="weather-vector-icon"><div class="weather-spinner"></div></div>
+                        <div class="weather-vector-icon">
+                            <div class="weather-spinner"></div>
+                        </div>
                         <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
                     </div>
                 `;
@@ -1036,7 +1039,7 @@
                 const xOffset = clientX - rect.left - centerX;
                 const yOffset = clientY - rect.top - centerY;
 
-                // Absolute true radians for pixel-perfect tracking
+                // Absolute true radians for pixel-perfect tracking (0 is at 3 o'clock)
                 const rawAngleRadians = Math.atan2(yOffset, xOffset);
                 
                 // Mathematical distance from center calculation
@@ -1053,23 +1056,25 @@
                 
                 const saturationRatio = clampedDistance / radius;
 
-                // Visual thumb placement strictly follows raw interaction angle, resulting in zero offset bug
+                // Visual thumb placement strictly follows raw interaction angle, resulting in perfect sync
                 const visualThumbX = centerX + Math.cos(rawAngleRadians) * clampedDistance;
                 const visualThumbY = centerY + Math.sin(rawAngleRadians) * clampedDistance;
                 
                 this.indicator.style.left = `${visualThumbX}px`;
                 this.indicator.style.top = `${visualThumbY}px`;
                 
-                // Now, separately map the angle to Tuya's Hue definition (Where top is 0/360)
+                // Separately map the raw angle to Tuya's specific Hue definition (Where top/12 o'clock is 0/360)
                 let hueDegrees = (rawAngleRadians * 180 / Math.PI) + 90; 
                 if (hueDegrees < 0) hueDegrees += 360;
                 if (hueDegrees >= 360) hueDegrees -= 360;
                 
                 // Dynamic Lightness computation to ensure the center is pure #FFFFFF white.
+                // When Saturation = 0, Lightness = 100%
+                // When Saturation = 1, Lightness = 50% (Standard vibrant HSL color)
                 const lightnessPct = 100 - (saturationRatio * 50);
                 this.indicator.style.backgroundColor = `hsl(${hueDegrees}, 100%, ${lightnessPct}%)`;
 
-                // Update authoritative state locally (Scale: H 0-360, S 0-1000)
+                // Update authoritative state memory locally (Scale: Tuya Hue 0-360, Tuya Saturation 0-1000)
                 DeviceManager.devicesState[this.deviceId].hue = Math.round(hueDegrees);
                 DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationRatio * 1000);
             }
@@ -1086,8 +1091,14 @@
              */
             updateIndicatorFromState() {
                 const state = DeviceManager.devicesState[this.deviceId];
-                // Failsafe for uninitialized data
-                if(state.hue === undefined || state.saturation === undefined) return;
+                
+                // Strict Failsafe: Initialize to dead center (Pure White) if state data is missing or precisely zero
+                if(state.hue === undefined || state.saturation === undefined || (state.hue === 0 && state.saturation === 0)) {
+                    this.indicator.style.left = `50%`;
+                    this.indicator.style.top = `50%`;
+                    this.indicator.style.backgroundColor = `#FFFFFF`;
+                    return;
+                }
                 
                 const rect = this.canvas.getBoundingClientRect();
                 // Skip calculation if UI is currently hidden/unrendered
@@ -1097,7 +1108,7 @@
                 const centerY = rect.height / 2;
                 
                 // Reverse engineering polar coordinates to place the thumb
-                // Angle must be mapped back to standard radians where 0 is at 3 o'clock
+                // Angle must be mapped back to standard geometric radians where 0 is at 3 o'clock
                 const angleRadians = (state.hue - 90) * (Math.PI / 180);
                 const distanceRatio = state.saturation / 1000;
                 const absoluteDistance = distanceRatio * centerX;
@@ -1108,7 +1119,7 @@
                 this.indicator.style.left = `${visualThumbX}px`;
                 this.indicator.style.top = `${visualThumbY}px`;
                 
-                // Dynamic lightness interpolation for Pure White handling
+                // Dynamic lightness interpolation for Pure White rendering when pulled from memory
                 const lightnessPct = 100 - (distanceRatio * 50);
                 this.indicator.style.backgroundColor = `hsl(${state.hue}, 100%, ${lightnessPct}%)`;
             }
@@ -1123,7 +1134,7 @@
                 this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
                 
-                // Map to store instantiated color wheel controllers
+                // Map to store instantiated canvas controllers
                 this.colorWheelControllers = {};
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
@@ -1171,7 +1182,7 @@
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
                         
-                        // Sync color wheel visual if expanded
+                        // Force color wheel UI to match synchronized state memory
                         if(this.colorWheelControllers[device.id]) {
                             this.colorWheelControllers[device.id].updateIndicatorFromState();
                         }
@@ -1258,6 +1269,7 @@
                 if (this.devicesState[deviceId].on === false) return;
 
                 ApplicationUI.setDeviceConnectingState(deviceId, true);
+                
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
 
                 try {
@@ -1287,12 +1299,13 @@
             
             /**
              * Transmits isolated color state modifications to Tuya via Cloudflare Worker.
+             * Utilizes state properties manipulated directly by the ColorWheelManager.
              * @param {string} deviceId - Tuya device identifier.
              */
             async executeColorCommand(deviceId) {
                 if (!this.isConfigured()) return;
                 
-                // Force turn on if adjusting color while off
+                // Optimistic turn ON if color modified while off
                 if (this.devicesState[deviceId].on === false) {
                     this.devicesState[deviceId].on = true;
                     ApplicationUI.updateDeviceCardRender(deviceId);
@@ -1459,7 +1472,12 @@
                                        max="100" 
                                        step="1" 
                                        value="${currentState.brightness}"
-                                       aria-label="Brightness Control for ${deviceData.name}">
+                                       aria-label="Brightness Control for ${deviceData.name}"
+                                       aria-valuemin="1"
+                                       aria-valuemax="100"
+                                       aria-valuenow="${currentState.brightness}"
+                                       aria-valuetext="${currentState.brightness} percent"
+                                       ${currentState.on ? '' : 'disabled'}>
                             </div>
                         </div>
                         
@@ -1498,7 +1516,13 @@
                             return;
                         }
                         
-                        // Toggle CSS class that drives explicitly defined height variables
+                        // ARCHITECTURAL ENFORCEMENT: 
+                        // Do not allow the detailed color wheel expansion if the primary power state is OFF.
+                        if (DeviceManager.devicesState[deviceId].on === false) {
+                            return;
+                        }
+                        
+                        // Toggle CSS class that drives explicitly defined mathematical height variables
                         cardWrapper.classList.toggle('is-expanded');
                         
                         // Redraw indicator mathematics to compensate for grid expansion offset changes
@@ -1550,11 +1574,14 @@
                 
                 const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
                 const statusLabel = document.getElementById(`status-label-${deviceId}`);
+                const nativeSlider = document.getElementById(`native-slider-input-${deviceId}`);
                 
                 if (fillLayer) fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
 
-                if (DeviceManager.devicesState[deviceId].on && statusLabel) {
+                if (DeviceManager.devicesState[deviceId].on && statusLabel && nativeSlider) {
                     statusLabel.innerText = `${integerValue}%`;
+                    nativeSlider.setAttribute('aria-valuenow', integerValue);
+                    nativeSlider.setAttribute('aria-valuetext', `${integerValue} percent`);
                 }
             }
 
@@ -1572,13 +1599,24 @@
                     cardWrapper.classList.add('state-is-on');
                     statusLabel.innerText = `${stateObject.brightness}%`;
                     toggleBtn.setAttribute('aria-pressed', 'true');
+                    nativeSlider.disabled = false;
                 } else {
                     cardWrapper.classList.remove('state-is-on');
                     statusLabel.innerText = 'Off';
                     toggleBtn.setAttribute('aria-pressed', 'false');
+                    nativeSlider.disabled = true;
+                    
+                    // ARCHITECTURAL ENFORCEMENT:
+                    // If the device is turned off (locally or via remote sync), we must ensure 
+                    // the expanded color wheel interface is securely collapsed.
+                    if (cardWrapper.classList.contains('is-expanded')) {
+                        cardWrapper.classList.remove('is-expanded');
+                    }
                 }
 
                 nativeSlider.value = stateObject.brightness;
+                nativeSlider.setAttribute('aria-valuenow', stateObject.brightness);
+                nativeSlider.setAttribute('aria-valuetext', `${stateObject.brightness} percent`);
                 fillLayer.style.setProperty('--current-fill-percentage', `${stateObject.brightness}%`);
             }
             
