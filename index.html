@@ -13,6 +13,22 @@
 
     <style>
         /* ==========================================================================
+           CUSTOM TYPOGRAPHY INTEGRATION
+           ========================================================================== */
+        /* 
+           USER INSTRUCTION: 
+           Place the "SFProMedium.ttf" file in the exact same directory as this HTML file.
+           The browser will automatically load and apply it to the entire application. 
+        */
+        @font-face {
+            font-family: 'SF Pro Medium';
+            src: url('./SFProMedium.ttf') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* ==========================================================================
            GLOBAL DESIGN TOKENS & VARIABLES
            ========================================================================== */
         :root {
@@ -53,8 +69,8 @@
             --link-active-foreground-color: #FFFFFF;
             --link-active-box-shadow: 0px 4px 16px rgba(10, 132, 255, 0.4);
 
-            /* Typography */
-            --system-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            /* Typography Configuration - Custom Font injected globally */
+            --system-font-family: 'SF Pro Medium', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
             
             /* Physics & Animation Curves */
             --animation-spring-curve: cubic-bezier(0.32, 0.72, 0, 1.0);
@@ -142,7 +158,7 @@
         }
 
         /* ==========================================================================
-           HEADER COMPONENT
+           HEADER COMPONENT (WITH REAL-TIME CLOCK)
            ========================================================================== */
         .application-header {
             display: flex;
@@ -154,14 +170,13 @@
             padding-right: 8px;
         }
 
+        /* Redesigned specifically for the real-time clock to look majestic with SFProMedium */
         .application-title {
-            font-size: 40px;
-            font-weight: 700;
-            letter-spacing: -0.04em;
+            font-size: 38px;
+            font-weight: 500; /* Maps beautifully to the SF Pro Medium custom font */
+            letter-spacing: -0.02em;
             line-height: 1.2;
             color: #FFFFFF;
-            /* Monospaced numbers for smooth clock ticking */
-            font-variant-numeric: tabular-nums;
         }
 
         .header-controls-container {
@@ -325,7 +340,7 @@
         @keyframes shimmer { 100% { transform: translateX(100%); } }
 
         /* ==========================================================================
-           DEVICE GRID LAYOUT & LINK COMPONENT
+           DEVICE GRID LAYOUT & GLOBAL LINK COMPONENT
            ========================================================================== */
         
         /* Wrapper to facilitate absolute positioning of the Sync/Link button */
@@ -343,12 +358,13 @@
             color: #FFFFFF;
         }
 
-        /* The Global Sync / Link Button */
+        /* The Global Sync / Link Button - PERFECTLY REPOSITIONED */
         .global-link-synchronization-button {
             position: absolute;
             /* Perfectly centered mathematically between the two columns */
             left: 50%;
-            top: 24px; /* Aligned gracefully with the top padding of the device cards */
+            /* Shifted up to sit elegantly exactly in the empty space between the title and the cards */
+            top: -26px; 
             transform: translateX(-50%);
             width: 36px;
             height: 36px;
@@ -608,7 +624,7 @@
             transition-timing-function: var(--animation-spring-curve);
         }
 
-        /* Fix: Use visible overflow ONLY when fully expanded so shadow doesn't clip */
+        /* Use visible overflow ONLY when fully expanded so shadow doesn't clip */
         .smart-device-card.is-expanded .color-picker-expansion-area {
             opacity: 1;
             max-height: 280px; 
@@ -698,7 +714,7 @@
          APPLICATION HEADER
          ========================================================================== -->
     <header class="application-header" aria-label="Main Application Header">
-        <!-- Live Clock Display replacing static text -->
+        <!-- Live Clock Display elegantly rendered with custom font -->
         <h1 class="application-title" id="live-clock-display">00:00</h1>
         <div class="header-controls-container">
             <button class="circular-icon-button" id="header-btn-refresh" aria-label="Synchronize Devices" title="Force Refresh">
@@ -793,10 +809,10 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v12',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v12',
-            WEATHER_CACHE: 'enterprise_weather_cache_v12',
-            DEVICES_LINKED: 'enterprise_devices_linked_v12'
+            WORKER_URL: 'enterprise_tuya_worker_url_v13',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v13',
+            WEATHER_CACHE: 'enterprise_weather_cache_v13',
+            DEVICES_LINKED: 'enterprise_devices_linked_v13'
         };
 
         const SVG_ASSETS = {
@@ -1204,10 +1220,13 @@
             constructor() {
                 this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
+                
+                // Map to store instantiated canvas controllers
                 this.colorWheelControllers = {};
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
+                    // Strict initialization. Default Hue 0, Saturation 0 = Pure White.
                     this.devicesState[device.id] = {
                         on: false,
                         brightness: 100, 
@@ -1249,6 +1268,8 @@
                     } finally {
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
+                        
+                        // Force color wheel UI to match synchronized state memory
                         if(this.colorWheelControllers[device.id]) {
                             this.colorWheelControllers[device.id].updateIndicatorFromState();
                         }
@@ -1672,6 +1693,7 @@
                             return;
                         }
                         
+                        // Toggle CSS class that drives explicitly defined mathematical height variables
                         cardWrapper.classList.toggle('is-expanded');
                         
                         // Redraw indicator mathematics to compensate for grid expansion offset changes
