@@ -176,17 +176,19 @@
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
+        /* Responsive Landscape Injection */
         body.layout-mode-landscape {
             max-width: var(--layout-max-width-landscape);
             padding-right: var(--layout-padding-horizontal-landscape);
             padding-left: var(--layout-padding-horizontal-landscape);
         }
 
+        /* Explicitly allow inputs to bypass global user-select none */
         input, textarea, select {
             user-select: text !important;
             -webkit-user-select: text !important;
             -webkit-touch-callout: default !important;
-            font-family: var(--font-regular);
+            font-family: inherit;
         }
 
         /* ==========================================================================
@@ -205,23 +207,44 @@
         }
 
         @keyframes checkmark-pop-animation {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+            0% { 
+                transform: scale(0.8); 
+                opacity: 0; 
+            }
+            50% { 
+                transform: scale(1.2); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
         }
 
         @keyframes subtle-pulse-glow {
-            0% { box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.2); }
-            50% { box-shadow: 0px 4px 24px rgba(50, 215, 75, 0.6); }
-            100% { box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.2); }
+            0% { 
+                box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.2); 
+            }
+            50% { 
+                box-shadow: 0px 4px 24px rgba(50, 215, 75, 0.6); 
+            }
+            100% { 
+                box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.2); 
+            }
         }
 
         @keyframes hourly-item-fade-in {
-            0% { opacity: 0; transform: translateX(20px); }
-            100% { opacity: 1; transform: translateX(0); }
+            0% { 
+                opacity: 0; 
+                transform: translateX(20px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
         }
 
-        /* Initial state for elements waiting to be animated in */
+        /* Initial state for elements waiting to be animated in via JS */
         .awaits-animation {
             opacity: 0;
             transform: translateY(40px) scale(0.95);
@@ -235,7 +258,7 @@
         }
 
         /* ==========================================================================
-           HEADER COMPONENT
+           HEADER COMPONENT (WITH REAL-TIME CLOCK)
            ========================================================================== */
         .application-header {
             display: flex;
@@ -247,6 +270,7 @@
             padding-right: 8px;
         }
 
+        /* CRITICAL TYPOGRAPHY FIX: Proportional Numbers for perfectly kerned Clock Digits */
         .application-title {
             font-family: var(--font-medium);
             font-weight: normal; 
@@ -287,11 +311,13 @@
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
             transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
-            outline: none;
+            
+            outline-style: none;
+            outline-width: 0px;
         }
 
         .circular-icon-button:active {
-            transform: scale(0.85);
+            transform: scale(0.88);
             background-color: var(--glass-background-hover);
         }
 
@@ -301,7 +327,7 @@
         }
 
         /* ==========================================================================
-           WEATHER WIDGET COMPONENT
+           WEATHER WIDGET COMPONENT (EXPANDABLE & HARDWARE ACCELERATED)
            ========================================================================== */
         .weather-dashboard-widget {
             background-color: var(--glass-background-base);
@@ -320,6 +346,7 @@
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
             cursor: pointer;
             
+            /* Hardware Acceleration for iPad Air 2 Rendering Performance */
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
@@ -333,7 +360,7 @@
         }
 
         .weather-dashboard-widget:active {
-            transform: scale(0.96) translate3d(0, 0, 0);
+            transform: scale(0.97) translate3d(0, 0, 0);
             background-color: var(--glass-background-hover);
         }
 
@@ -348,7 +375,11 @@
             padding-left: 32px;
         }
 
-        .weather-information-left { display: flex; flex-direction: column; gap: 6px; }
+        .weather-information-left { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+        }
         
         .weather-city-label { 
             font-family: var(--font-bold);
@@ -379,9 +410,26 @@
             color: var(--card-inactive-subtitle-color); 
         }
         
-        .weather-graphics-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
-        .weather-vector-icon { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
-        .weather-vector-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); }
+        .weather-graphics-right { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-end; 
+            gap: 16px; 
+        }
+        
+        .weather-vector-icon { 
+            width: 64px; 
+            height: 64px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        
+        .weather-vector-icon svg { 
+            width: 100%; 
+            height: 100%; 
+            filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); 
+        }
         
         .weather-high-low-range { 
             font-family: var(--font-medium);
@@ -390,6 +438,7 @@
             color: var(--card-inactive-subtitle-color); 
         }
         
+        /* Expandable Hourly Section with Hardware Compositing Layers */
         .weather-hourly-container {
             max-height: 0px;
             opacity: 0;
@@ -406,6 +455,7 @@
             border-top-style: solid;
             border-top-color: transparent;
             
+            /* Crucial iOS Native Scrolling and GPU Acceleration bounds */
             -webkit-overflow-scrolling: touch;
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
@@ -416,7 +466,9 @@
             transition-timing-function: var(--animation-spring-curve);
         }
 
-        .weather-hourly-container::-webkit-scrollbar { display: none; }
+        .weather-hourly-container::-webkit-scrollbar { 
+            display: none; 
+        }
 
         .weather-dashboard-widget.is-expanded .weather-hourly-container {
             max-height: 160px;
@@ -443,21 +495,91 @@
             animation-fill-mode: forwards;
         }
 
-        .hourly-item-time { font-family: var(--font-regular); font-weight: normal; font-size: 14px; color: var(--card-inactive-subtitle-color); }
-        .hourly-item-icon { width: 32px; height: 32px; }
-        .hourly-item-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.1)); }
-        .hourly-item-temp { font-family: var(--font-medium); font-weight: normal; font-size: 17px; color: #FFFFFF; }
+        .hourly-item-time { 
+            font-family: var(--font-regular); 
+            font-weight: normal; 
+            font-size: 14px; 
+            color: var(--card-inactive-subtitle-color); 
+        }
+        
+        .hourly-item-icon { 
+            width: 32px; 
+            height: 32px; 
+        }
+        
+        .hourly-item-icon svg { 
+            width: 100%; 
+            height: 100%; 
+            filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.1)); 
+        }
+        
+        .hourly-item-temp { 
+            font-family: var(--font-medium); 
+            font-weight: normal; 
+            font-size: 17px; 
+            color: #FFFFFF; 
+        }
         
         /* Skeleton Animation */
-        .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
-        .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); animation: shimmer 2s infinite; }
-        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .skeleton { 
+            background-color: rgba(255, 255, 255, 0.1); 
+            border-radius: 8px; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        
+        .skeleton::after { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            transform: translateX(-100%); 
+            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); 
+            animation-name: shimmer;
+            animation-duration: 2s;
+            animation-iteration-count: infinite; 
+        }
+        
+        @keyframes shimmer { 
+            100% { 
+                transform: translateX(100%); 
+            } 
+        }
 
         /* ==========================================================================
-           AGENDA DASHBOARD WIDGET
+           AGENDA DASHBOARD WIDGET (DYNAMICALLY VISIBLE WITH ANIMATIONS)
            ========================================================================== */
-        #agenda-dashboard-section {
-            display: none; 
+        
+        /* Root section wraps the agenda to allow smooth programmatic display toggling */
+        .agenda-dashboard-section-wrapper {
+            /* Initial state: Fully collapsed and invisible */
+            max-height: 0px;
+            opacity: 0;
+            overflow: hidden;
+            margin-bottom: 0px;
+            pointer-events: none;
+            
+            /* Hardware Acceleration */
+            transform: translate3d(0, 40px, 0) scale(0.95);
+            -webkit-transform: translate3d(0, 40px, 0) scale(0.95);
+            will-change: max-height, opacity, transform, margin-bottom;
+            
+            transition-property: max-height, opacity, transform, margin-bottom;
+            transition-duration: 0.6s;
+            transition-timing-function: var(--animation-spring-curve);
+        }
+
+        /* Active State: Triggered via JS when a routine matches the current time */
+        .agenda-dashboard-section-wrapper.is-routine-active {
+            max-height: 1000px; /* Safe upper bound for dynamic list content */
+            opacity: 1;
+            margin-bottom: 24px;
+            pointer-events: auto;
+            
+            transform: translate3d(0, 0, 0) scale(1);
+            -webkit-transform: translate3d(0, 0, 0) scale(1);
         }
 
         .agenda-dashboard-widget {
@@ -475,13 +597,9 @@
             padding-right: 32px;
             padding-bottom: 32px;
             padding-left: 32px;
-            margin-bottom: 40px;
             display: flex;
             flex-direction: column;
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
-            
-            transform: translate3d(0, 0, 0);
-            -webkit-transform: translate3d(0, 0, 0);
         }
 
         .agenda-header-row {
@@ -541,8 +659,9 @@
         .agenda-item-row.is-task-completed {
             opacity: 0.5;
         }
+        
         .agenda-item-row.is-task-completed .agenda-item-title {
-            text-decoration: line-through;
+            text-decoration-line: line-through;
             color: var(--card-inactive-subtitle-color);
         }
 
@@ -575,6 +694,7 @@
             animation-timing-function: ease-in-out;
         }
 
+        /* Advanced SVG Drawing Animation for Checkmark */
         .agenda-checkbox-svg {
             width: 16px;
             height: 16px;
@@ -609,12 +729,14 @@
             font-weight: normal;
             font-size: 18px;
             color: #FFFFFF;
+            
             transition-property: color;
             transition-duration: var(--animation-duration-medium);
         }
 
         .agenda-empty-state {
             font-family: var(--font-regular);
+            font-weight: normal;
             font-size: 15px;
             color: var(--card-inactive-subtitle-color);
             text-align: center;
@@ -781,13 +903,10 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            
             transition-property: background-color, color, transform, box-shadow;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        .device-toggle-icon-container:active {
-            transform: scale(0.85);
         }
 
         .smart-device-card.state-is-on .device-toggle-icon-container {
@@ -834,6 +953,7 @@
             font-size: 15px; 
             color: var(--card-inactive-subtitle-color); 
             margin-top: 4px; 
+            
             transition-property: color; 
             transition-duration: var(--animation-duration-medium); 
             transition-timing-function: var(--animation-ease-out-curve); 
@@ -841,6 +961,7 @@
         
         .smart-device-card.state-is-on .device-current-status-label { color: var(--card-active-subtitle-color); }
 
+        /* Bottom Area: Slider Control */
         .device-brightness-slider-container {
             width: 100%;
             height: 40px;
@@ -854,6 +975,7 @@
             -moz-backface-visibility: hidden;
             transform: translate3d(0, 0, 0);
             box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
+            
             transition-property: background-color, box-shadow, opacity;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -876,6 +998,7 @@
             width: var(--current-fill-percentage, 0%);
             border-radius: 20px;
             box-shadow: var(--slider-inactive-fill-shadow);
+            
             transition-property: background-color, box-shadow;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -889,17 +1012,21 @@
         .brightness-native-range-input {
             -webkit-appearance: none; appearance: none;
             width: 100%; height: 100%; background-color: transparent;
-            outline: none; border: none; box-shadow: none; margin: 0;
+            outline-style: none; outline-color: initial; outline-width: initial;
+            border-style: none; border-color: initial; border-width: initial;
+            box-shadow: none; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;
             position: absolute; top: 0; left: 0; z-index: 2;
         }
 
         .brightness-native-range-input::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
             width: 40px; height: 40px; background-color: transparent;
-            border: none; box-shadow: none; cursor: pointer;
+            border-style: none; border-color: initial; border-width: initial;
+            box-shadow: none; cursor: pointer;
         }
-        .brightness-native-range-input::-webkit-slider-runnable-track { background-color: transparent; border: none; box-shadow: none; }
+        .brightness-native-range-input::-webkit-slider-runnable-track { background-color: transparent; border-style: none; border-color: initial; border-width: initial; box-shadow: none; }
 
+        /* Expansion Area: High Fidelity Color Picker */
         .color-picker-expansion-area {
             opacity: 0;
             max-height: 0px;
@@ -911,6 +1038,7 @@
             padding-top: 0px;
             padding-bottom: 0px;
             will-change: max-height, opacity, padding-top, padding-bottom;
+            
             transition-property: opacity, max-height, padding-top, padding-bottom;
             transition-duration: 0.5s;
             transition-timing-function: var(--animation-spring-curve);
@@ -952,6 +1080,7 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
             background-color: #FFFFFF; 
+            
             transition-property: background-color;
             transition-duration: 0.1s;
         }
@@ -965,7 +1094,10 @@
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; z-index: 1000;
-            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve);
+            
+            transition-property: opacity; 
+            transition-duration: var(--animation-duration-medium); 
+            transition-timing-function: var(--animation-ease-out-curve);
         }
         
         .application-modal-backdrop.is-visible-active { 
@@ -983,13 +1115,16 @@
             border-radius: 36px; 
             box-shadow: 0px 24px 80px rgba(0, 0, 0, 0.6);
             transform: translateY(60px) scale(0.90); 
-            transition-property: transform; transition-duration: 0.5s; transition-timing-function: var(--animation-spring-curve);
+            
+            transition-property: transform; 
+            transition-duration: 0.5s; 
+            transition-timing-function: var(--animation-spring-curve);
             
             /* Mathematical constraints ensuring it fits on iPad screen */
             max-height: 90vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Contains the internal scroll logic perfectly */
+            overflow: hidden; 
         }
         
         .application-modal-backdrop.is-visible-active .settings-modal-sheet { 
@@ -1054,48 +1189,332 @@
         }
 
         /* Form Inputs & Controls */
-        .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; flex-shrink: 0;}
-        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
-        .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
-
-        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
-        .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
-
-        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
-        .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
+        .ios-segmented-control-container { 
+            display: flex; 
+            flex-direction: row; 
+            background-color: rgba(0, 0, 0, 0.35); 
+            border-radius: 14px; 
+            padding-top: 4px; 
+            padding-right: 4px; 
+            padding-bottom: 4px; 
+            padding-left: 4px; 
+            margin-bottom: 28px; 
+            flex-shrink: 0;
+        }
         
-        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
-        .settings-action-button-secondary:active { color: #FFFFFF; transform: scale(0.96); opacity: 0.85;}
+        .ios-segmented-control-button { 
+            font-family: var(--font-medium); 
+            font-weight: normal; 
+            flex-grow: 1; 
+            padding-top: 12px; 
+            padding-bottom: 12px; 
+            border-radius: 10px; 
+            border-style: none; 
+            background-color: transparent; 
+            color: rgba(255, 255, 255, 0.6); 
+            font-size: 15px; 
+            cursor: pointer; 
+            
+            transition-property: background-color, color, box-shadow; 
+            transition-duration: var(--animation-duration-fast); 
+            transition-timing-function: var(--animation-ease-out-curve); 
+        }
+        
+        .ios-segmented-control-button.is-segment-active { 
+            background-color: rgba(255, 255, 255, 0.25); 
+            color: #FFFFFF; 
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); 
+        }
+
+        .settings-text-input-field { 
+            font-family: var(--font-regular); 
+            font-weight: normal; 
+            width: 100%; 
+            box-sizing: border-box; 
+            background-color: rgba(0, 0, 0, 0.4); 
+            border-top-width: 1px; 
+            border-right-width: 1px; 
+            border-bottom-width: 1px; 
+            border-left-width: 1px; 
+            border-style: solid; 
+            border-color: rgba(255, 255, 255, 0.15); 
+            color: #FFFFFF; 
+            padding-top: 18px; 
+            padding-right: 18px; 
+            padding-bottom: 18px; 
+            padding-left: 18px; 
+            border-radius: 18px; 
+            font-size: 16px; 
+            margin-bottom: 20px; 
+            outline-style: none; 
+            
+            transition-property: border-color, background-color; 
+            transition-duration: var(--animation-duration-fast); 
+            transition-timing-function: var(--animation-ease-out-curve); 
+            flex-shrink:0;
+        }
+        
+        .settings-text-input-field:focus { 
+            border-color: rgba(255, 255, 255, 0.4); 
+            background-color: rgba(0, 0, 0, 0.5); 
+        }
+
+        .settings-action-button-primary { 
+            font-family: var(--font-bold); 
+            font-weight: normal; 
+            background-color: #FFFFFF; 
+            color: #000000; 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding-top: 18px; 
+            padding-bottom: 18px; 
+            border-radius: 18px; 
+            font-size: 17px; 
+            border-style: none; 
+            cursor: pointer; 
+            margin-bottom: 14px; 
+            
+            transition-property: transform, opacity; 
+            transition-duration: var(--animation-duration-fast); 
+            transition-timing-function: var(--animation-ease-out-curve); 
+            flex-shrink:0;
+        }
+        
+        .settings-action-button-primary:active { 
+            transform: scale(0.96); 
+            opacity: 0.85; 
+        }
+        
+        .settings-action-button-secondary { 
+            font-family: var(--font-medium); 
+            font-weight: normal; 
+            background-color: transparent; 
+            color: rgba(255, 255, 255, 0.65); 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding-top: 16px; 
+            padding-bottom: 16px; 
+            font-size: 17px; 
+            border-style: none; 
+            cursor: pointer; 
+            
+            transition-property: color, transform, opacity; 
+            transition-duration: var(--animation-duration-fast); 
+            transition-timing-function: var(--animation-ease-out-curve); 
+            flex-shrink:0;
+        }
+        
+        .settings-action-button-secondary:active { 
+            color: #FFFFFF; 
+            transform: scale(0.96); 
+            opacity: 0.85;
+        }
 
         /* Agenda Modal Editor Specifics */
-        .modal-section-divider { height: 1px; background-color: rgba(255,255,255,0.1); margin-top: 16px; margin-bottom: 24px; flex-shrink: 0; }
-        .modal-section-title { font-family: var(--font-semibold-soft); font-size: 16px; color: #FFFFFF; text-align: left; margin-bottom: 12px; margin-top: 8px; flex-shrink:0;}
-
-        .agenda-routine-block { background-color: rgba(0,0,0,0.25); border-radius: 20px; padding: 16px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
-        .agenda-routine-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .agenda-routine-title-info { display: flex; flex-direction: column; align-items: flex-start; }
-        .agenda-routine-title-text { font-family: var(--font-semibold-soft); font-size: 17px; color: #FFFFFF; }
-        .agenda-routine-time-text { font-family: var(--font-regular); font-size: 13px; color: var(--card-inactive-subtitle-color); }
-
-        .agenda-edit-action-btn { width: 32px; height: 32px; border-radius: 8px; background-color: rgba(255,255,255,0.1); border: none; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform var(--animation-duration-fast), opacity var(--animation-duration-fast); }
-        .agenda-edit-action-btn:active { transform: scale(0.90); opacity: 0.8;}
-        .agenda-edit-action-btn.delete { background-color: rgba(255, 69, 58, 0.2); color: #FF453A; }
-
-        .agenda-task-edit-item { background-color: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .agenda-task-edit-title { font-family: var(--font-regular); font-size: 15px; color: #FFFFFF; }
-        .agenda-task-edit-controls { display: flex; gap: 6px; }
-
-        .agenda-add-task-form { display: flex; gap: 8px; margin-top: 12px; }
-        .agenda-add-routine-form { background-color: rgba(255,255,255,0.05); border-radius: 20px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
-
-        .agenda-time-inputs { display: flex; gap: 12px; }
-        .agenda-time-input-wrapper { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-        .agenda-time-label { font-family: var(--font-regular); font-size: 13px; color: rgba(255,255,255,0.6); }
+        .modal-section-divider { 
+            height: 1px; 
+            background-color: rgba(255,255,255,0.1); 
+            margin-top: 16px; 
+            margin-bottom: 24px; 
+            flex-shrink: 0; 
+        }
         
-        input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        .modal-section-title { 
+            font-family: var(--font-semibold-soft); 
+            font-weight: normal;
+            font-size: 16px; 
+            color: #FFFFFF; 
+            text-align: left; 
+            margin-bottom: 12px; 
+            margin-top: 8px; 
+            flex-shrink:0;
+        }
 
-        .system-toast-notification { font-family: var(--font-bold); font-weight: normal; position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 16px; padding-right: 32px; padding-bottom: 16px; padding-left: 32px; border-radius: 32px; font-size: 16px; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition-property: opacity, transform; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-spring-curve); }
-        .system-toast-notification.is-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        .agenda-routine-block { 
+            background-color: rgba(0,0,0,0.25); 
+            border-radius: 20px; 
+            padding-top: 16px; 
+            padding-right: 16px; 
+            padding-bottom: 16px; 
+            padding-left: 16px; 
+            margin-bottom: 20px; 
+            border-top-width: 1px; 
+            border-right-width: 1px; 
+            border-bottom-width: 1px; 
+            border-left-width: 1px; 
+            border-style: solid; 
+            border-color: rgba(255,255,255,0.05); 
+            flex-shrink: 0; 
+        }
+        
+        .agenda-routine-header { 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 16px; 
+        }
+        
+        .agenda-routine-title-info { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; 
+        }
+        
+        .agenda-routine-title-text { 
+            font-family: var(--font-semibold-soft); 
+            font-weight: normal;
+            font-size: 17px; 
+            color: #FFFFFF; 
+        }
+        
+        .agenda-routine-time-text { 
+            font-family: var(--font-regular); 
+            font-weight: normal;
+            font-size: 13px; 
+            color: var(--card-inactive-subtitle-color); 
+        }
+
+        .agenda-edit-action-btn { 
+            width: 32px; 
+            height: 32px; 
+            border-radius: 8px; 
+            background-color: rgba(255,255,255,0.1); 
+            border-style: none; 
+            color: #FFFFFF; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            
+            transition-property: transform, opacity; 
+            transition-duration: var(--animation-duration-fast); 
+        }
+        
+        .agenda-edit-action-btn:active { 
+            transform: scale(0.90); 
+            opacity: 0.8;
+        }
+        
+        .agenda-edit-action-btn.delete { 
+            background-color: rgba(255, 69, 58, 0.2); 
+            color: #FF453A; 
+        }
+
+        .agenda-task-edit-item { 
+            background-color: rgba(255,255,255,0.05); 
+            border-radius: 12px; 
+            padding-top: 10px; 
+            padding-right: 12px; 
+            padding-bottom: 10px; 
+            padding-left: 12px; 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 8px; 
+        }
+        
+        .agenda-task-edit-title { 
+            font-family: var(--font-regular); 
+            font-weight: normal;
+            font-size: 15px; 
+            color: #FFFFFF; 
+        }
+        
+        .agenda-task-edit-controls { 
+            display: flex; 
+            flex-direction: row; 
+            gap: 6px; 
+        }
+
+        .agenda-add-task-form { 
+            display: flex; 
+            flex-direction: row; 
+            gap: 8px; 
+            margin-top: 12px; 
+        }
+        
+        .agenda-add-routine-form { 
+            background-color: rgba(255,255,255,0.05); 
+            border-radius: 20px; 
+            padding-top: 16px; 
+            padding-right: 16px; 
+            padding-bottom: 16px; 
+            padding-left: 16px; 
+            margin-bottom: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            flex-shrink: 0; 
+        }
+
+        .agenda-time-inputs { 
+            display: flex; 
+            flex-direction: row; 
+            gap: 12px; 
+        }
+        
+        .agenda-time-input-wrapper { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; 
+            gap: 4px; 
+        }
+        
+        .agenda-time-label { 
+            font-family: var(--font-regular); 
+            font-weight: normal;
+            font-size: 13px; 
+            color: rgba(255,255,255,0.6); 
+        }
+        
+        input[type="time"]::-webkit-calendar-picker-indicator { 
+            filter: invert(1); 
+        }
+
+        /* ==========================================================================
+           TOAST NOTIFICATION SYSTEM
+           ========================================================================== */
+        .system-toast-notification { 
+            font-family: var(--font-bold); 
+            font-weight: normal; 
+            position: fixed; 
+            bottom: 48px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(24px) scale(0.9); 
+            background-color: rgba(45, 45, 45, 0.95); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px); 
+            border-top-width: 1px; 
+            border-right-width: 1px; 
+            border-bottom-width: 1px; 
+            border-left-width: 1px; 
+            border-style: solid; 
+            border-color: rgba(255, 255, 255, 0.15); 
+            color: #FFFFFF; 
+            padding-top: 16px; 
+            padding-right: 32px; 
+            padding-bottom: 16px; 
+            padding-left: 32px; 
+            border-radius: 32px; 
+            font-size: 16px; 
+            opacity: 0; 
+            pointer-events: none; 
+            z-index: 2000; 
+            box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); 
+            white-space: nowrap; 
+            
+            transition-property: opacity, transform; 
+            transition-duration: var(--animation-duration-medium); 
+            transition-timing-function: var(--animation-spring-curve); 
+        }
+        
+        .system-toast-notification.is-toast-visible { 
+            opacity: 1; 
+            transform: translateX(-50%) translateY(0) scale(1); 
+        }
     </style>
 </head>
 <body>
@@ -1104,6 +1523,7 @@
          APPLICATION HEADER
          ========================================================================== -->
     <header class="application-header awaits-animation" id="anim-target-1" aria-label="Main Application Header">
+        <!-- Live Clock Display elegantly rendered with perfectly proportioned custom font -->
         <h1 class="application-title" id="live-clock-display">00:00</h1>
         <div class="header-controls-container">
             <button class="circular-icon-button" id="header-btn-refresh" aria-label="Synchronize Devices" title="Force Refresh">
@@ -1116,7 +1536,7 @@
     </header>
 
     <!-- ==========================================================================
-         WEATHER WIDGET SECTION
+         WEATHER WIDGET SECTION (EXPANDABLE)
          ========================================================================== -->
     <section class="awaits-animation" id="anim-target-2" aria-label="Weather Dashboard">
         <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
@@ -1130,44 +1550,50 @@
     </section>
 
     <!-- ==========================================================================
-         DAILY AGENDA SECTION
+         DAILY AGENDA SECTION (SMOOTH DYNAMIC VISIBILITY)
          ========================================================================== -->
-    <section class="awaits-animation" id="anim-target-3" aria-label="Daily Agenda" id="agenda-dashboard-section">
-        <div class="agenda-dashboard-widget">
-            <div class="agenda-header-row">
-                <h2 class="agenda-title">Daily Routine</h2>
-                <span class="agenda-time-period-label" id="agenda-active-time-label">--:-- - --:--</span>
-            </div>
-            <div class="agenda-list-container" id="agenda-main-list-container">
-                <!-- Active Routine Tasks dynamically injected here -->
+    <section class="awaits-animation" id="anim-target-3" aria-label="Daily Agenda">
+        <!-- The wrapper handles the smooth max-height transitions so it doesn't snap -->
+        <div class="agenda-dashboard-section-wrapper" id="agenda-dashboard-section-wrapper">
+            <div class="agenda-dashboard-widget">
+                <div class="agenda-header-row">
+                    <h2 class="agenda-title">Daily Routine</h2>
+                    <span class="agenda-time-period-label" id="agenda-active-time-label">--:-- - --:--</span>
+                </div>
+                <div class="agenda-list-container" id="agenda-main-list-container">
+                    <!-- Active Routine Tasks dynamically injected here -->
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ==========================================================================
-         DEVICES GRID SECTION
+         DEVICES GRID SECTION & GLOBAL SYNC LINK
          ========================================================================== -->
     <div class="awaits-animation" id="anim-target-4">
         <h2 class="section-heading-title">Rooms & Devices</h2>
+        
         <div class="device-grid-wrapper">
+            <!-- The Global Link / Synchronization Button positioned perfectly between cards -->
             <button id="global-link-synchronization-button" class="global-link-synchronization-button" aria-pressed="false" title="Synchronize Devices">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                 </svg>
             </button>
+            
             <main class="device-grid-container" id="main-device-grid" aria-live="polite">
-                <!-- Cards injected here -->
+                <!-- Smart Device Cards are dynamically constructed and injected here by UIRenderer class -->
             </main>
         </div>
     </div>
 
     <!-- ==========================================================================
-         SETTINGS MODAL (FLEXBOX OVERFLOW ARCHITECTURE)
+         SETTINGS MODAL BACKDROP & SHEET (INCLUDES AGENDA EDITOR)
          ========================================================================== -->
     <div class="application-modal-backdrop" id="modal-backdrop-settings" aria-hidden="true" role="dialog" aria-modal="true">
         <div class="settings-modal-sheet">
-            <!-- Fixed Header -->
+            <!-- Fixed Header for Context -->
             <div class="settings-modal-header-fixed">
                 <h2 class="settings-modal-heading">Hub Configuration</h2>
                 <p class="settings-modal-description" style="margin-bottom:0;">Core settings for Tuya smart devices and daily routines.</p>
@@ -1183,8 +1609,10 @@
                 <input type="url" class="settings-text-input-field" id="input-field-worker-url" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false" aria-label="Cloudflare Worker URL">
                 
                 <div class="modal-section-divider"></div>
+                
                 <h2 class="settings-modal-heading" style="margin-bottom:24px;">Routine Management</h2>
                 
+                <!-- Injection point for full Agenda Editing UI -->
                 <div id="settings-agenda-editor-container"></div>
                 
                 <div class="modal-section-title">Create New Routine</div>
@@ -1193,21 +1621,21 @@
                     <div class="agenda-time-inputs">
                         <div class="agenda-time-input-wrapper">
                             <span class="agenda-time-label">Start Time</span>
-                            <input type="time" class="settings-text-input-field" style="margin-bottom:0; padding:12px;" id="agenda-new-routine-start" value="06:00">
+                            <input type="time" class="settings-text-input-field" style="margin-bottom:0; padding-top:12px; padding-bottom:12px;" id="agenda-new-routine-start" value="06:00">
                         </div>
                         <div class="agenda-time-input-wrapper">
                             <span class="agenda-time-label">End Time</span>
-                            <input type="time" class="settings-text-input-field" style="margin-bottom:0; padding:12px;" id="agenda-new-routine-end" value="09:00">
+                            <input type="time" class="settings-text-input-field" style="margin-bottom:0; padding-top:12px; padding-bottom:12px;" id="agenda-new-routine-end" value="09:00">
                         </div>
                     </div>
-                    <button class="settings-action-button-secondary" style="background: rgba(255,255,255,0.1); border-radius: 12px; margin-top: 4px; padding:12px;" onclick="AgendaSystem.handleCreateNewRoutine()">+ Create Routine</button>
+                    <button class="settings-action-button-secondary" style="background-color: rgba(255,255,255,0.1); border-radius: 12px; margin-top: 4px; padding-top:12px; padding-bottom:12px;" onclick="AgendaSystem.handleCreateNewRoutine()">+ Create Routine</button>
                 </div>
             </div>
 
-            <!-- Fixed Footer -->
+            <!-- Fixed Footer Actions -->
             <div class="settings-modal-footer-fixed">
                 <button class="settings-action-button-primary" id="modal-btn-save" style="margin-top:0; margin-bottom:12px;">Save & Close</button>
-                <button class="settings-action-button-secondary" id="modal-btn-cancel" style="padding:12px;">Cancel</button>
+                <button class="settings-action-button-secondary" id="modal-btn-cancel" style="padding-top:12px; padding-bottom:12px;">Cancel</button>
             </div>
         </div>
     </div>
@@ -1225,6 +1653,9 @@
     <script>
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
+         * Encompasses state management, UI rendering, debounced network requests, external API integrations,
+         * advanced HTML5 Canvas color picking with polar coordinate mathematics, responsive forecasting,
+         * real-time clock rendering, synchronized device dispatch, and a comprehensive Routine/Agenda Engine.
          */
 
         "use strict";
@@ -1239,12 +1670,12 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v18',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v18',
-            WEATHER_CACHE: 'enterprise_weather_cache_v18',
-            DEVICES_LINKED: 'enterprise_devices_linked_v18',
-            AGENDA_ROUTINES: 'enterprise_agenda_routines_v18',
-            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v18'
+            WORKER_URL: 'enterprise_tuya_worker_url_v19',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v19',
+            WEATHER_CACHE: 'enterprise_weather_cache_v19',
+            DEVICES_LINKED: 'enterprise_devices_linked_v19',
+            AGENDA_ROUTINES: 'enterprise_agenda_routines_v19',
+            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v19'
         };
 
         const SVG_ASSETS = {
@@ -1263,6 +1694,10 @@
            ANIMATION ORCHESTRATION
            ========================================================================== */
         
+        /**
+         * Fires initial load animations systematically to ensure the DOM is ready 
+         * and hardware composition layers are built before moving.
+         */
         function triggerEntryAnimations() {
             const targets = [
                 document.getElementById('anim-target-1'),
@@ -1303,6 +1738,9 @@
         }
         const GlobalToast = new ToastManager();
 
+        /**
+         * Orchestrates the real-time digital clock and triggers chronological state validations.
+         */
         class RealTimeClockManager {
             constructor(elementId) {
                 this.clockElement = document.getElementById(elementId);
@@ -1310,6 +1748,7 @@
             }
             start() {
                 this.updateClock();
+                // Tick every 1000ms ensures perfect synchronization
                 this.intervalId = setInterval(() => this.updateClock(), 1000);
             }
             updateClock() {
@@ -1319,6 +1758,7 @@
                 const formattedMinutes = String(now.getMinutes()).padStart(2, '0');
                 this.clockElement.innerText = `${formattedHours}:${formattedMinutes}`;
                 
+                // Every minute (when seconds hit 00), validate the active Agenda Routine
                 if (now.getSeconds() === 0 && window.ApplicationUI) {
                     window.ApplicationUI.evaluateAndRenderActiveRoutine();
                 }
@@ -1347,9 +1787,11 @@
                     try {
                         this.routines = JSON.parse(storedData);
                     } catch (e) {
+                        console.error("AgendaManager: Corrupt data in storage. Resetting.");
                         this.routines = [];
                     }
                 } else {
+                    // Seed sophisticated default data illustrating the architecture
                     this.routines = [
                         {
                             id: this.generateUUID(),
@@ -1361,6 +1803,17 @@
                                 { id: this.generateUUID(), title: "Make Coffee", completed: false, order: 0 },
                                 { id: this.generateUUID(), title: "Check Emails", completed: false, order: 1 }
                             ]
+                        },
+                        {
+                            id: this.generateUUID(),
+                            title: "Evening Routine",
+                            startTime: "18:00",
+                            endTime: "22:00",
+                            order: 1,
+                            tasks: [
+                                { id: this.generateUUID(), title: "Dim the lights", completed: false, order: 0 },
+                                { id: this.generateUUID(), title: "Read a book", completed: false, order: 1 }
+                            ]
                         }
                     ];
                     this.saveToStorage();
@@ -1368,6 +1821,7 @@
             }
 
             saveToStorage() {
+                // Mathematically enforce serialization of order attributes before saving
                 this.routines.sort((a,b) => a.order - b.order).forEach((routine, rIndex) => {
                     routine.order = rIndex;
                     routine.tasks.sort((a,b) => a.order - b.order).forEach((task, tIndex) => {
@@ -1383,33 +1837,52 @@
 
                 if (lastRecordedResetDate !== currentLocalDateString) {
                     this.routines.forEach(routine => {
-                        routine.tasks.forEach(task => task.completed = false);
+                        routine.tasks.forEach(task => {
+                            task.completed = false;
+                        });
                     });
                     this.saveToStorage();
                     localStorage.setItem(STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
+                    console.log(`AgendaManager: System performed daily automated reset for ${currentLocalDateString}.`);
                 }
             }
 
+            /**
+             * Mathematically evaluates time boundaries to find the currently active routine.
+             * Supports midnight-crossing brackets (e.g. 22:00 to 02:00).
+             */
             getActiveRoutine() {
                 const now = new Date();
-                const currentAbsoluteMinutes = (now.getHours() * 60) + now.getMinutes();
+                const currentHours = now.getHours();
+                const currentMinutes = now.getMinutes();
+                const currentAbsoluteMinutes = (currentHours * 60) + currentMinutes;
 
                 for (let i = 0; i < this.routines.length; i++) {
                     const routine = this.routines[i];
+                    
                     const [startH, startM] = routine.startTime.split(':').map(Number);
                     const startAbsoluteMinutes = (startH * 60) + startM;
+                    
                     const [endH, endM] = routine.endTime.split(':').map(Number);
                     const endAbsoluteMinutes = (endH * 60) + endM;
 
+                    // Standard chronological bracket
                     if (startAbsoluteMinutes <= endAbsoluteMinutes) {
-                        if (currentAbsoluteMinutes >= startAbsoluteMinutes && currentAbsoluteMinutes <= endAbsoluteMinutes) return routine;
-                    } else {
-                        if (currentAbsoluteMinutes >= startAbsoluteMinutes || currentAbsoluteMinutes <= endAbsoluteMinutes) return routine;
+                        if (currentAbsoluteMinutes >= startAbsoluteMinutes && currentAbsoluteMinutes <= endAbsoluteMinutes) {
+                            return routine;
+                        }
+                    } 
+                    // Midnight-crossing chronological bracket
+                    else {
+                        if (currentAbsoluteMinutes >= startAbsoluteMinutes || currentAbsoluteMinutes <= endAbsoluteMinutes) {
+                            return routine;
+                        }
                     }
                 }
-                return null; 
+                return null; // No routine active
             }
 
+            // Routine CRUD Operations
             addRoutine(title, startTime, endTime) {
                 this.routines.push({
                     id: this.generateUUID(),
@@ -1427,10 +1900,16 @@
                 this.saveToStorage();
             }
 
+            // Task CRUD Operations
             addTaskToRoutine(routineId, taskTitle) {
                 const routine = this.routines.find(r => r.id === routineId);
                 if (routine && taskTitle.trim() !== '') {
-                    routine.tasks.push({ id: this.generateUUID(), title: taskTitle.trim(), completed: false, order: routine.tasks.length });
+                    routine.tasks.push({
+                        id: this.generateUUID(),
+                        title: taskTitle.trim(),
+                        completed: false,
+                        order: routine.tasks.length
+                    });
                     this.saveToStorage();
                 }
             }
@@ -1478,6 +1957,7 @@
                 }
             }
         }
+        
         const AgendaSystem = new AgendaManager();
 
         /* ==========================================================================
@@ -1570,7 +2050,9 @@
 
                 try {
                     const rawData = await NetworkService.get(this.apiUrl);
-                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) throw new Error("API Failure");
+                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
+                        throw new Error("Invalid data structure from Open-Meteo API.");
+                    }
 
                     const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
                     const compiledWeatherData = {
@@ -1586,9 +2068,12 @@
 
                     let startIndex = 0;
                     const nowTime = new Date().getTime();
+                    
                     for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        if (new Date(rawData.hourly.time[i]).getTime() >= nowTime - 1800000) { 
-                            startIndex = i; break;
+                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
+                        if (hourTime >= nowTime - 1800000) { 
+                            startIndex = i;
+                            break;
                         }
                     }
 
@@ -1596,6 +2081,7 @@
                         const dateObj = new Date(rawData.hourly.time[i]);
                         const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
                         const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
+                        
                         compiledWeatherData.hourly.push({
                             time: i === startIndex ? "Now" : hoursStr,
                             temp: Math.round(rawData.hourly.temperature_2m[i]),
@@ -1607,7 +2093,9 @@
                     sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
-                    if (!cachedPayload) this.renderErrorState("Data Unavailable");
+                    let errorMessage = "Data Unavailable";
+                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
+                    if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
         }
@@ -1618,7 +2106,7 @@
 
         class NetworkManager {
             constructor() {
-                this.defaultTimeoutMs = 12000; 
+                this.defaultTimeoutMs = 15000; 
             }
             async get(url) {
                 const abortController = new AbortController();
@@ -1664,19 +2152,37 @@
                 this.canvas = canvasElement;
                 this.indicator = indicatorElement;
                 this.isDragging = false;
+                
                 this.fixedCanvasDimension = 200;
                 this.fixedCenterPoint = this.fixedCanvasDimension / 2; 
+                
                 this.bindEvents();
             }
 
             bindEvents() {
-                const handleStart = (e) => { this.isDragging = true; this.processInteraction(e); if(e.cancelable) e.preventDefault(); };
-                const handleMove = (e) => { if (!this.isDragging) return; this.processInteraction(e); if(e.cancelable) e.preventDefault(); };
-                const handleEnd = (e) => { if(this.isDragging) { this.isDragging = false; this.dispatchFinalColorCommand(); }};
+                const handleStart = (e) => {
+                    this.isDragging = true;
+                    this.processInteraction(e);
+                    if(e.cancelable) e.preventDefault(); 
+                };
+
+                const handleMove = (e) => {
+                    if (!this.isDragging) return;
+                    this.processInteraction(e);
+                    if(e.cancelable) e.preventDefault();
+                };
+
+                const handleEnd = (e) => {
+                    if(this.isDragging) {
+                        this.isDragging = false;
+                        this.dispatchFinalColorCommand();
+                    }
+                };
 
                 this.canvas.addEventListener('mousedown', handleStart, {passive: false});
                 this.canvas.addEventListener('mousemove', handleMove, {passive: false});
                 window.addEventListener('mouseup', handleEnd);
+
                 this.canvas.addEventListener('touchstart', handleStart, {passive: false});
                 this.canvas.addEventListener('touchmove', handleMove, {passive: false});
                 window.addEventListener('touchend', handleEnd);
@@ -1684,6 +2190,7 @@
 
             processInteraction(event) {
                 const rect = this.canvas.getBoundingClientRect();
+                
                 let clientX = event.clientX;
                 let clientY = event.clientY;
                 if (event.touches && event.touches.length > 0) {
@@ -1701,8 +2208,11 @@
                 const rawDistance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
                 
                 let clampedDistance = Math.min(rawDistance, this.fixedCenterPoint);
+                
                 const SNAP_RADIUS = 18;
-                if (clampedDistance <= SNAP_RADIUS) clampedDistance = 0;
+                if (clampedDistance <= SNAP_RADIUS) {
+                    clampedDistance = 0;
+                }
                 
                 const saturationRatio = clampedDistance / this.fixedCenterPoint;
 
@@ -1727,6 +2237,7 @@
                         if (deviceData.id !== this.deviceId) {
                             DeviceManager.devicesState[deviceData.id].hue = Math.round(hueDegrees);
                             DeviceManager.devicesState[deviceData.id].saturation = Math.round(saturationRatio * 1000);
+                            
                             if (DeviceManager.colorWheelControllers[deviceData.id]) {
                                 DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                             }
@@ -1737,7 +2248,9 @@
 
             dispatchFinalColorCommand() {
                 const targetIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
-                targetIds.forEach(id => DeviceManager.executeColorCommand(id));
+                targetIds.forEach(id => {
+                    DeviceManager.executeColorCommand(id);
+                });
             }
             
             updateIndicatorFromState() {
@@ -1777,51 +2290,91 @@
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
-                    this.devicesState[device.id] = { on: false, brightness: 100, hue: 0, saturation: 0 };
+                    this.devicesState[device.id] = {
+                        on: false,
+                        brightness: 100, 
+                        hue: 0,
+                        saturation: 0
+                    };
                 }
                 this.debounceTimers = {};
             }
 
-            buildEndpointUrl(path) { return this.workerApiUrl.replace(/\/$/, '') + path; }
-            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); localStorage.setItem(STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
-            isConfigured() { return this.workerApiUrl !== null && this.workerApiUrl !== ''; }
+            buildEndpointUrl(path) {
+                return this.workerApiUrl.replace(/\/$/, '') + path;
+            }
+
+            setApiUrl(newUrl) {
+                this.workerApiUrl = newUrl.trim();
+                localStorage.setItem(STORAGE_KEYS.WORKER_URL, this.workerApiUrl);
+            }
+
+            isConfigured() {
+                return this.workerApiUrl !== null && this.workerApiUrl !== '';
+            }
 
             async synchronizeAllDevices() {
                 if (!this.isConfigured()) return;
+
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
                     ApplicationUI.setDeviceConnectingState(device.id, true);
                     try {
-                        const jsonPayload = await NetworkService.get(this.buildEndpointUrl(`/status?device=${device.id}`));
-                        if (jsonPayload.success && jsonPayload.result) this.parseAndApplyTuyaStatusPayload(device.id, jsonPayload.result);
+                        const url = this.buildEndpointUrl(`/status?device=${device.id}`);
+                        const jsonPayload = await NetworkService.get(url);
+                        
+                        if (jsonPayload.success && jsonPayload.result) {
+                            this.parseAndApplyTuyaStatusPayload(device.id, jsonPayload.result);
+                        }
                     } catch (error) {
+                        console.warn(`TuyaSmartDeviceManager: Synchronization failed for device [${device.name}].`, error);
                     } finally {
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
-                        if(this.colorWheelControllers[device.id]) this.colorWheelControllers[device.id].updateIndicatorFromState();
+                        
+                        if(this.colorWheelControllers[device.id]) {
+                            this.colorWheelControllers[device.id].updateIndicatorFromState();
+                        }
                     }
                 }
             }
 
             parseAndApplyTuyaStatusPayload(deviceId, statusArray) {
                 const powerInstruction = statusArray.find(instruction => instruction.code === 'switch_led');
-                if (powerInstruction !== undefined) this.devicesState[deviceId].on = powerInstruction.value;
+                if (powerInstruction !== undefined) {
+                    this.devicesState[deviceId].on = powerInstruction.value;
+                }
                 
                 const colorInstruction = statusArray.find(instruction => instruction.code === 'colour_data_v2' || instruction.code === 'colour_data');
                 if (colorInstruction !== undefined) {
                     try {
-                        const parsedValueObject = typeof colorInstruction.value === 'string' ? JSON.parse(colorInstruction.value) : colorInstruction.value;
+                        const parsedValueObject = typeof colorInstruction.value === 'string' 
+                            ? JSON.parse(colorInstruction.value) 
+                            : colorInstruction.value;
+                            
                         if (parsedValueObject) {
-                            if (parsedValueObject.v !== undefined) this.devicesState[deviceId].brightness = Math.max(1, Math.min(100, Math.round(parsedValueObject.v / 10)));
-                            if (parsedValueObject.h !== undefined) this.devicesState[deviceId].hue = parsedValueObject.h;
-                            if (parsedValueObject.s !== undefined) this.devicesState[deviceId].saturation = parsedValueObject.s;
+                            if (parsedValueObject.v !== undefined) {
+                                let uiBrightness = Math.round(parsedValueObject.v / 10);
+                                this.devicesState[deviceId].brightness = Math.max(1, Math.min(100, uiBrightness));
+                            }
+                            if (parsedValueObject.h !== undefined) {
+                                this.devicesState[deviceId].hue = parsedValueObject.h;
+                            }
+                            if (parsedValueObject.s !== undefined) {
+                                this.devicesState[deviceId].saturation = parsedValueObject.s;
+                            }
                         }
-                    } catch (parseError) {}
+                    } catch (parseError) {
+                        console.error("TuyaSmartDeviceManager: Failed to parse colour_data JSON.", parseError);
+                    }
                 }
             }
 
             async toggleDevicePower(deviceId) {
-                if (!this.isConfigured()) return ApplicationUI.openSettingsModal();
+                if (!this.isConfigured()) {
+                    ApplicationUI.openSettingsModal();
+                    return;
+                }
 
                 const targetState = !this.devicesState[deviceId].on;
                 const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
@@ -1834,22 +2387,42 @@
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    await Promise.all(targetDeviceIds.map(id => NetworkService.post(url, { device: id, commands: [{ code: 'switch_led', value: targetState }] })));
+                    
+                    await Promise.all(targetDeviceIds.map(id => {
+                        const body = {
+                            device: id,
+                            commands: [{ code: 'switch_led', value: targetState }]
+                        };
+                        return NetworkService.post(url, body);
+                    }));
+
                 } catch (error) {
-                    GlobalToast.show("Network Error. Reverting.");
+                    if (error.name === 'AbortError') {
+                        GlobalToast.show("Device Unresponsive (Timeout)");
+                    } else {
+                        GlobalToast.show("Network Error. Check Connection.");
+                    }
                     targetDeviceIds.forEach(id => {
                         this.devicesState[id].on = !targetState;
                         ApplicationUI.updateDeviceCardRender(id);
                     });
                 } finally {
-                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
+                    targetDeviceIds.forEach(id => {
+                        ApplicationUI.setDeviceConnectingState(id, false);
+                    });
                 }
             }
 
             handleBrightnessChangeIntent(deviceId, newBrightnessPercentage) {
                 if (!this.isConfigured()) return;
-                if (this.debounceTimers[deviceId]) clearTimeout(this.debounceTimers[deviceId]);
-                this.debounceTimers[deviceId] = setTimeout(() => this.executeBrightnessCommand(deviceId, newBrightnessPercentage), 400);
+
+                if (this.debounceTimers[deviceId]) {
+                    clearTimeout(this.debounceTimers[deviceId]);
+                }
+
+                this.debounceTimers[deviceId] = setTimeout(() => {
+                    this.executeBrightnessCommand(deviceId, newBrightnessPercentage);
+                }, 400);
             }
 
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
@@ -1857,21 +2430,42 @@
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
                 
                 let dispatchNeeded = false;
+
                 targetDeviceIds.forEach(id => {
-                    if (this.devicesState[id].on === true) { dispatchNeeded = true; ApplicationUI.setDeviceConnectingState(id, true); }
+                    if (this.devicesState[id].on === true) {
+                        dispatchNeeded = true;
+                        ApplicationUI.setDeviceConnectingState(id, true);
+                    }
                 });
+                
                 if(!dispatchNeeded) return;
 
                 try {
                     const url = this.buildEndpointUrl('/command');
+                    
                     await Promise.all(targetDeviceIds.map(id => {
                         if (this.devicesState[id].on === false) return Promise.resolve();
-                        return NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue || 0, s: this.devicesState[id].saturation || 0, v: tuyaFormatBrightness }) } ] });
+                        
+                        const body = {
+                            device: id,
+                            commands: [
+                                { code: 'work_mode', value: 'colour' },
+                                { code: 'colour_data', value: JSON.stringify({ 
+                                    h: this.devicesState[id].hue || 0, 
+                                    s: this.devicesState[id].saturation || 0, 
+                                    v: tuyaFormatBrightness 
+                                }) }
+                            ]
+                        };
+                        return NetworkService.post(url, body);
                     }));
                 } catch (error) {
-                    GlobalToast.show("Network Error.");
+                    if (error.name === 'AbortError') GlobalToast.show("Device Unresponsive (Timeout)");
+                    else GlobalToast.show("Network Error. Check Connection.");
                 } finally {
-                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
+                    targetDeviceIds.forEach(id => {
+                        ApplicationUI.setDeviceConnectingState(id, false);
+                    });
                 }
             }
             
@@ -1890,16 +2484,32 @@
 
                 try {
                     const url = this.buildEndpointUrl('/command');
+                    
                     await Promise.all(targetDeviceIds.map(id => {
-                        return NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue, s: this.devicesState[id].saturation, v: this.devicesState[id].brightness * 10 }) } ] });
+                        const body = {
+                            device: id,
+                            commands: [
+                                { code: 'work_mode', value: 'colour' },
+                                { code: 'colour_data', value: JSON.stringify({ 
+                                    h: this.devicesState[id].hue, 
+                                    s: this.devicesState[id].saturation, 
+                                    v: this.devicesState[id].brightness * 10 
+                                }) }
+                            ]
+                        };
+                        return NetworkService.post(url, body);
                     }));
+
                 } catch (error) {
                     GlobalToast.show("Failed to apply color configuration.");
                 } finally {
-                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
+                    targetDeviceIds.forEach(id => {
+                        ApplicationUI.setDeviceConnectingState(id, false);
+                    });
                 }
             }
         }
+
         const DeviceManager = new TuyaSmartDeviceManager();
 
         /* ==========================================================================
@@ -1915,6 +2525,8 @@
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
                 this.inputWorkerUrl = document.getElementById('input-field-worker-url');
                 
+                this.currentActiveRoutineId = null;
+                
                 this.handleSettingsSave = this.handleSettingsSave.bind(this);
                 this.handleSettingsCancel = this.handleSettingsCancel.bind(this);
             }
@@ -1928,8 +2540,11 @@
             }
 
             applyLayoutModeToBody() {
-                if (this.layoutMode === 'landscape') document.body.classList.add('layout-mode-landscape');
-                else document.body.classList.remove('layout-mode-landscape');
+                if (this.layoutMode === 'landscape') {
+                    document.body.classList.add('layout-mode-landscape');
+                } else {
+                    document.body.classList.remove('layout-mode-landscape');
+                }
 
                 const btnPortrait = document.getElementById('segment-btn-portrait');
                 const btnLandscape = document.getElementById('segment-btn-landscape');
@@ -1974,48 +2589,70 @@
                 localStorage.setItem(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
                 this.applyGlobalLinkStateToButton();
                 
-                if (this.isDevicesLinked) GlobalToast.show("Devices Synced");
-                else GlobalToast.show("Devices Unlinked");
+                if (this.isDevicesLinked) {
+                    GlobalToast.show("Devices Synced");
+                } else {
+                    GlobalToast.show("Devices Unlinked");
+                }
             }
 
             attachStaticEventListeners() {
                 document.getElementById('header-btn-refresh').addEventListener('click', () => {
-                    if (!DeviceManager.isConfigured()) return this.openSettingsModal();
-                    GlobalToast.show("Synchronizing...");
+                    if (!DeviceManager.isConfigured()) {
+                        this.openSettingsModal();
+                        return;
+                    }
+                    GlobalToast.show("Synchronizing telemetry...");
                     DeviceManager.synchronizeAllDevices();
                 });
 
-                document.getElementById('header-btn-settings').addEventListener('click', () => this.openSettingsModal());
-                document.getElementById('segment-btn-portrait').addEventListener('click', () => this.setLayoutMode('portrait'));
-                document.getElementById('segment-btn-landscape').addEventListener('click', () => this.setLayoutMode('landscape'));
+                document.getElementById('header-btn-settings').addEventListener('click', () => {
+                    this.openSettingsModal();
+                });
+
+                document.getElementById('segment-btn-portrait').addEventListener('click', () => {
+                    this.setLayoutMode('portrait');
+                });
+                
+                document.getElementById('segment-btn-landscape').addEventListener('click', () => {
+                    this.setLayoutMode('landscape');
+                });
+
                 document.getElementById('modal-btn-save').addEventListener('click', this.handleSettingsSave);
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
-                document.getElementById('global-link-synchronization-button').addEventListener('click', () => this.toggleGlobalLinkState());
+                
+                document.getElementById('global-link-synchronization-button').addEventListener('click', () => {
+                    this.toggleGlobalLinkState();
+                });
             }
             
             toggleWeatherExpansion() {
                 const widget = document.getElementById('weather-dashboard-widget');
-                if(widget) widget.classList.toggle('is-expanded');
+                if(widget) {
+                    widget.classList.toggle('is-expanded');
+                }
             }
 
             // ================== AGENDA UI METHODS ==================
 
             evaluateAndRenderActiveRoutine() {
                 const activeRoutine = AgendaSystem.getActiveRoutine();
-                const sectionContainer = document.getElementById('agenda-dashboard-section');
+                const sectionWrapper = document.getElementById('agenda-dashboard-section-wrapper');
                 const timeLabel = document.getElementById('agenda-active-time-label');
                 const listContainer = document.getElementById('agenda-main-list-container');
 
-                if (!sectionContainer || !timeLabel || !listContainer) return;
+                if (!sectionWrapper || !timeLabel || !listContainer) return;
 
                 if (!activeRoutine) {
-                    sectionContainer.style.display = 'none';
+                    sectionWrapper.classList.remove('is-routine-active');
+                    this.currentActiveRoutineId = null;
                     return;
                 }
 
-                sectionContainer.style.display = 'block';
-                timeLabel.innerText = `${activeRoutine.startTime} - ${activeRoutine.endTime}`;
+                sectionWrapper.classList.add('is-routine-active');
                 
+                timeLabel.innerText = `${activeRoutine.startTime} - ${activeRoutine.endTime}`;
+
                 const sortedTasks = [...activeRoutine.tasks].sort((a, b) => a.order - b.order);
 
                 if (sortedTasks.length === 0) {
@@ -2024,7 +2661,9 @@
                     listContainer.innerHTML = sortedTasks.map(task => `
                         <div class="agenda-item-row ${task.completed ? 'is-task-completed' : ''}" onclick="ApplicationUI.handleDashboardTaskToggle('${activeRoutine.id}', '${task.id}')">
                             <div class="agenda-checkbox-container">
-                                <svg class="agenda-checkbox-svg" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+                                <svg class="agenda-checkbox-svg" viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7"></path>
+                                </svg>
                             </div>
                             <div class="agenda-item-content">
                                 <span class="agenda-item-title">${task.title}</span>
@@ -2032,6 +2671,8 @@
                         </div>
                     `).join('');
                 }
+
+                this.currentActiveRoutineId = activeRoutine.id;
             }
 
             handleDashboardTaskToggle(routineId, taskId) {
@@ -2085,7 +2726,11 @@
                                 </div>
                                 <button class="agenda-edit-action-btn delete" onclick="AgendaSystem.deleteRoutine('${routine.id}'); ApplicationUI.renderAgendaEditorSettings();" title="Delete Routine">${trashIcon}</button>
                             </div>
-                            <div style="display:flex; flex-direction:column; gap:8px;">${tasksHtml}</div>
+                            
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                ${tasksHtml}
+                            </div>
+                            
                             <div class="agenda-add-task-form">
                                 <input type="text" class="settings-text-input-field" style="margin-bottom:0; padding:12px; font-size:14px; border-radius:12px;" id="add-task-input-${routine.id}" placeholder="New task..." autocomplete="off">
                                 <button class="settings-action-button-primary" style="margin:0; width:auto; padding:12px 16px; border-radius:12px;" onclick="ApplicationUI.handleAddNewTaskToRoutine('${routine.id}')">${plusIcon}</button>
@@ -2177,6 +2822,7 @@
                     const canvasEl = document.getElementById(`canvas-${deviceData.id}`);
                     const indicatorEl = document.getElementById(`color-thumb-${deviceData.id}`);
                     DeviceManager.colorWheelControllers[deviceData.id] = new ColorWheelManager(deviceData.id, canvasEl, indicatorEl);
+                    
                     DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                 }
             }
@@ -2192,9 +2838,13 @@
                         if (event.target === toggleButton || toggleButton.contains(event.target) || event.target === sliderInput || expansionArea.contains(event.target)) {
                             return;
                         }
-                        if (DeviceManager.devicesState[deviceId].on === false) return;
+                        
+                        if (DeviceManager.devicesState[deviceId].on === false) {
+                            return;
+                        }
                         
                         cardWrapper.classList.toggle('is-expanded');
+                        
                         if(cardWrapper.classList.contains('is-expanded') && DeviceManager.colorWheelControllers[deviceId]) {
                             window.requestAnimationFrame(() => {
                                 setTimeout(() => {
@@ -2371,7 +3021,9 @@
             WeatherAPI.fetchAndRender();
 
             if (!DeviceManager.isConfigured()) {
-                setTimeout(() => ApplicationUI.openSettingsModal(), 1200);
+                setTimeout(() => {
+                    ApplicationUI.openSettingsModal();
+                }, 1200);
             } else {
                 DeviceManager.synchronizeAllDevices();
             }
