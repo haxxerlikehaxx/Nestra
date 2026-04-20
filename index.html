@@ -45,7 +45,6 @@
 
         @font-face {
             font-family: 'SF Pro Semibold Soft Custom';
-            /* URL encoded spaces for maximum browser compatibility */
             src: url('./SF%20Pro%20-%20Semibold%20Soft.otf') format('opentype');
             font-weight: normal;
             font-style: normal;
@@ -111,12 +110,13 @@
             
             /* Physics & Animation Curves */
             --animation-spring-curve: cubic-bezier(0.32, 0.72, 0, 1.0);
+            --animation-bouncy-curve: cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --animation-ease-out-curve: cubic-bezier(0.25, 1.0, 0.5, 1.0);
             --animation-duration-fast: 0.2s;
             --animation-duration-medium: 0.4s;
             --animation-duration-slow: 0.6s;
 
-            /* Layout Constraints & Mathematical Animation Bounds */
+            /* Layout Constraints */
             --layout-max-width-portrait: 768px;
             --layout-max-width-landscape: 1024px;
             --layout-padding-horizontal-portrait: 32px;
@@ -190,6 +190,51 @@
         }
 
         /* ==========================================================================
+           HARDWARE ACCELERATED ANIMATION KEYFRAMES
+           ========================================================================== */
+        
+        @keyframes staggered-spring-up {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes checkmark-pop-animation {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes subtle-pulse-glow {
+            0% { box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.2); }
+            50% { box-shadow: 0px 4px 24px rgba(50, 215, 75, 0.6); }
+            100% { box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.2); }
+        }
+
+        @keyframes hourly-item-fade-in {
+            0% { opacity: 0; transform: translateX(20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Initial state for elements waiting to be animated in */
+        .awaits-animation {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+
+        .animate-entry {
+            animation-name: staggered-spring-up;
+            animation-duration: 0.8s;
+            animation-timing-function: var(--animation-spring-curve);
+            animation-fill-mode: forwards;
+        }
+
+        /* ==========================================================================
            HEADER COMPONENT
            ========================================================================== */
         .application-header {
@@ -246,7 +291,7 @@
         }
 
         .circular-icon-button:active {
-            transform: scale(0.88);
+            transform: scale(0.85);
             background-color: var(--glass-background-hover);
         }
 
@@ -269,7 +314,7 @@
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             border-radius: 32px;
-            margin-bottom: 24px;
+            margin-bottom: 24px; 
             display: flex;
             flex-direction: column;
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
@@ -288,7 +333,7 @@
         }
 
         .weather-dashboard-widget:active {
-            transform: scale(0.97) translate3d(0, 0, 0);
+            transform: scale(0.96) translate3d(0, 0, 0);
             background-color: var(--glass-background-hover);
         }
 
@@ -367,7 +412,7 @@
             will-change: max-height, opacity, padding-top, padding-bottom;
             
             transition-property: max-height, opacity, padding-top, padding-bottom, border-top-color;
-            transition-duration: 0.5s;
+            transition-duration: 0.6s;
             transition-timing-function: var(--animation-spring-curve);
         }
 
@@ -381,23 +426,38 @@
             border-top-color: rgba(255, 255, 255, 0.1);
         }
 
-        .hourly-item-block { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 48px; flex-shrink: 0; }
+        .hourly-item-block { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 10px; 
+            min-width: 48px; 
+            flex-shrink: 0; 
+            opacity: 0; /* Handled by JS staggering */
+        }
+        
+        .weather-dashboard-widget.is-expanded .hourly-item-block {
+            animation-name: hourly-item-fade-in;
+            animation-duration: 0.5s;
+            animation-timing-function: var(--animation-ease-out-curve);
+            animation-fill-mode: forwards;
+        }
+
         .hourly-item-time { font-family: var(--font-regular); font-weight: normal; font-size: 14px; color: var(--card-inactive-subtitle-color); }
         .hourly-item-icon { width: 32px; height: 32px; }
-        .hourly-item-icon svg { width: 100%; height: 100%; }
+        .hourly-item-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.1)); }
         .hourly-item-temp { font-family: var(--font-medium); font-weight: normal; font-size: 17px; color: #FFFFFF; }
         
+        /* Skeleton Animation */
         .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
         .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); animation: shimmer 2s infinite; }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
 
         /* ==========================================================================
-           AGENDA DASHBOARD WIDGET (DYNAMICALLY VISIBLE)
+           AGENDA DASHBOARD WIDGET
            ========================================================================== */
-        
-        /* Root section wraps the agenda to allow programmatic display toggling */
         #agenda-dashboard-section {
-            display: none; /* Default to hidden until Routine validation passes */
+            display: none; 
         }
 
         .agenda-dashboard-widget {
@@ -422,10 +482,6 @@
             
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            perspective: 1000px;
-            -webkit-perspective: 1000px;
         }
 
         .agenda-header-row {
@@ -469,19 +525,21 @@
             padding-left: 8px;
             padding-right: 8px;
             cursor: pointer;
-            border-radius: 12px;
-            transition-property: opacity, background-color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            border-radius: 16px;
+            
+            transition-property: opacity, background-color, transform;
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-fast), var(--animation-duration-fast);
+            transition-timing-function: var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve);
         }
 
         .agenda-item-row:active {
-            background-color: rgba(255,255,255,0.05);
+            background-color: rgba(255,255,255,0.08);
+            transform: scale(0.97);
         }
 
-        /* Completed Task Styles */
+        /* Completed Task Styles with Advanced Animations */
         .agenda-item-row.is-task-completed {
-            opacity: 0.6;
+            opacity: 0.5;
         }
         .agenda-item-row.is-task-completed .agenda-item-title {
             text-decoration: line-through;
@@ -489,8 +547,8 @@
         }
 
         .agenda-checkbox-container {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border-top-width: 2px;
             border-right-width: 2px;
@@ -502,6 +560,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            
             transition-property: background-color, border-color, box-shadow;
             transition-duration: var(--animation-duration-fast);
             transition-timing-function: var(--animation-ease-out-curve);
@@ -510,13 +569,15 @@
         .agenda-item-row.is-task-completed .agenda-checkbox-container {
             background-color: var(--success-color);
             border-color: var(--success-color);
-            box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.3);
+            animation-name: subtle-pulse-glow;
+            animation-duration: 2s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
         }
 
-        /* Advanced SVG Drawing Animation for Checkmark */
         .agenda-checkbox-svg {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             stroke: #FFFFFF;
             stroke-width: 3;
             stroke-linecap: round;
@@ -525,13 +586,16 @@
             /* Mathematics for drawing animation */
             stroke-dasharray: 24;
             stroke-dashoffset: 24;
-            transition-property: stroke-dashoffset;
-            transition-duration: 0.3s;
-            transition-timing-function: cubic-bezier(0.65, 0, 0.45, 1);
+            opacity: 0;
         }
 
         .agenda-item-row.is-task-completed .agenda-checkbox-svg {
             stroke-dashoffset: 0;
+            opacity: 1;
+            animation-name: checkmark-pop-animation;
+            animation-duration: 0.4s;
+            animation-timing-function: var(--animation-bouncy-curve);
+            animation-fill-mode: forwards;
         }
 
         .agenda-item-content {
@@ -543,7 +607,7 @@
         .agenda-item-title {
             font-family: var(--font-medium);
             font-weight: normal;
-            font-size: 17px;
+            font-size: 18px;
             color: #FFFFFF;
             transition-property: color;
             transition-duration: var(--animation-duration-medium);
@@ -583,9 +647,9 @@
             left: 50%;
             top: -26px; 
             transform: translateX(-50%);
-            width: 36px;
-            height: 36px;
-            border-radius: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 19px;
             background-color: var(--glass-background-base);
             border-top-width: 1px;
             border-right-width: 1px;
@@ -720,6 +784,10 @@
             transition-property: background-color, color, transform, box-shadow;
             transition-duration: var(--animation-duration-medium);
             transition-timing-function: var(--animation-ease-out-curve);
+        }
+
+        .device-toggle-icon-container:active {
+            transform: scale(0.85);
         }
 
         .smart-device-card.state-is-on .device-toggle-icon-container {
@@ -889,7 +957,7 @@
         }
 
         /* ==========================================================================
-           MODALS, OVERLAYS & SETTINGS (INCLUDES COMPLEX AGENDA BUILDER)
+           MODALS, OVERLAYS & SETTINGS (RIGID FLEXBOX FIX)
            ========================================================================== */
         .application-modal-backdrop {
             position: fixed; top: 0; right: 0; bottom: 0; left: 0;
@@ -899,162 +967,132 @@
             opacity: 0; pointer-events: none; z-index: 1000;
             transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve);
         }
-        .application-modal-backdrop.is-visible-active { opacity: 1; pointer-events: auto; }
+        
+        .application-modal-backdrop.is-visible-active { 
+            opacity: 1; 
+            pointer-events: auto; 
+        }
 
+        /* Strict Flexbox Architecture to prevent overflow */
         .settings-modal-sheet {
             background-color: rgba(30, 30, 30, 0.85);
             backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
             border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;
             border-style: solid; border-color: rgba(255, 255, 255, 0.15);
-            width: 480px; /* Expanded for Agenda UI */
-            border-radius: 36px; padding-top: 36px; padding-right: 28px; padding-bottom: 36px; padding-left: 28px;
+            width: 480px; 
+            border-radius: 36px; 
             box-shadow: 0px 24px 80px rgba(0, 0, 0, 0.6);
-            transform: translateY(50px) scale(0.92); transition-property: transform; transition-duration: 0.5s; transition-timing-function: var(--animation-spring-curve);
-            max-height: 85vh;
+            transform: translateY(60px) scale(0.90); 
+            transition-property: transform; transition-duration: 0.5s; transition-timing-function: var(--animation-spring-curve);
+            
+            /* Mathematical constraints ensuring it fits on iPad screen */
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Contains the internal scroll logic perfectly */
         }
         
-        .settings-modal-sheet-scrollable {
+        .application-modal-backdrop.is-visible-active .settings-modal-sheet { 
+            transform: translateY(0) scale(1); 
+        }
+
+        .settings-modal-header-fixed {
+            padding-top: 32px;
+            padding-right: 32px;
+            padding-bottom: 24px;
+            padding-left: 32px;
+            flex-shrink: 0;
+            text-align: center;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-modal-heading { 
+            font-family: var(--font-bold);
+            font-weight: normal;
+            font-size: 24px; 
+            color: #FFFFFF; 
+            margin-bottom: 8px; 
+            letter-spacing: -0.02em; 
+        }
+        
+        .settings-modal-description { 
+            font-family: var(--font-regular);
+            font-weight: normal;
+            font-size: 15px; 
+            color: rgba(255, 255, 255, 0.65); 
+            line-height: 1.4; 
+        }
+
+        .settings-modal-body-scrollable {
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
-            padding-right: 8px; 
+            padding-top: 24px;
+            padding-right: 32px;
+            padding-bottom: 24px;
+            padding-left: 32px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
-        .settings-modal-sheet-scrollable::-webkit-scrollbar { width: 6px; }
-        .settings-modal-sheet-scrollable::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+        .settings-modal-body-scrollable::-webkit-scrollbar { width: 6px; }
+        .settings-modal-body-scrollable::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 3px; }
 
-        .application-modal-backdrop.is-visible-active .settings-modal-sheet { transform: translateY(0) scale(1); }
+        .settings-modal-footer-fixed {
+            padding-top: 24px;
+            padding-right: 32px;
+            padding-bottom: 32px;
+            padding-left: 32px;
+            flex-shrink: 0;
+            background-color: rgba(30, 30, 30, 0.95);
+            border-top-width: 1px;
+            border-top-style: solid;
+            border-top-color: rgba(255, 255, 255, 0.1);
+        }
 
-        .settings-modal-heading { font-family: var(--font-bold); font-weight: normal; font-size: 24px; color: #FFFFFF; margin-bottom: 12px; letter-spacing: -0.02em; text-align: center; }
-        .settings-modal-description { font-family: var(--font-regular); font-weight: normal; font-size: 15px; color: rgba(255, 255, 255, 0.65); margin-bottom: 28px; line-height: 1.5; text-align: center; }
-
+        /* Form Inputs & Controls */
         .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; flex-shrink: 0;}
         .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
         .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
+        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
         .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
+        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
+        .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
+        
+        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
+        .settings-action-button-secondary:active { color: #FFFFFF; transform: scale(0.96); opacity: 0.85;}
+
         /* Agenda Modal Editor Specifics */
-        .modal-section-divider {
-            height: 1px;
-            background-color: rgba(255,255,255,0.1);
-            margin-top: 16px;
-            margin-bottom: 24px;
-            flex-shrink: 0;
-        }
+        .modal-section-divider { height: 1px; background-color: rgba(255,255,255,0.1); margin-top: 16px; margin-bottom: 24px; flex-shrink: 0; }
+        .modal-section-title { font-family: var(--font-semibold-soft); font-size: 16px; color: #FFFFFF; text-align: left; margin-bottom: 12px; margin-top: 8px; flex-shrink:0;}
 
-        .modal-section-title {
-            font-family: var(--font-bold);
-            font-size: 20px;
-            color: #FFFFFF;
-            text-align: left;
-            margin-bottom: 16px;
-            letter-spacing: -0.01em;
-            flex-shrink: 0;
-        }
+        .agenda-routine-block { background-color: rgba(0,0,0,0.25); border-radius: 20px; padding: 16px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        .agenda-routine-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .agenda-routine-title-info { display: flex; flex-direction: column; align-items: flex-start; }
+        .agenda-routine-title-text { font-family: var(--font-semibold-soft); font-size: 17px; color: #FFFFFF; }
+        .agenda-routine-time-text { font-family: var(--font-regular); font-size: 13px; color: var(--card-inactive-subtitle-color); }
 
-        .agenda-routine-block {
-            background-color: rgba(0,0,0,0.25);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            flex-shrink: 0;
-        }
-
-        .agenda-routine-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .agenda-routine-title-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .agenda-routine-title-text {
-            font-family: var(--font-semibold-soft);
-            font-size: 17px;
-            color: #FFFFFF;
-        }
-
-        .agenda-routine-time-text {
-            font-family: var(--font-regular);
-            font-size: 13px;
-            color: var(--card-inactive-subtitle-color);
-        }
-
-        .agenda-edit-action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background-color: rgba(255,255,255,0.1);
-            border: none;
-            color: #FFFFFF;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: opacity var(--animation-duration-fast);
-        }
-        .agenda-edit-action-btn:active { opacity: 0.5; }
+        .agenda-edit-action-btn { width: 32px; height: 32px; border-radius: 8px; background-color: rgba(255,255,255,0.1); border: none; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform var(--animation-duration-fast), opacity var(--animation-duration-fast); }
+        .agenda-edit-action-btn:active { transform: scale(0.90); opacity: 0.8;}
         .agenda-edit-action-btn.delete { background-color: rgba(255, 69, 58, 0.2); color: #FF453A; }
 
-        .agenda-task-edit-item {
-            background-color: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .agenda-task-edit-title {
-            font-family: var(--font-regular);
-            font-size: 15px;
-            color: #FFFFFF;
-        }
-
+        .agenda-task-edit-item { background-color: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .agenda-task-edit-title { font-family: var(--font-regular); font-size: 15px; color: #FFFFFF; }
         .agenda-task-edit-controls { display: flex; gap: 6px; }
 
-        .agenda-add-task-form {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .agenda-add-routine-form {
-            background-color: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            flex-shrink: 0;
-        }
+        .agenda-add-task-form { display: flex; gap: 8px; margin-top: 12px; }
+        .agenda-add-routine-form { background-color: rgba(255,255,255,0.05); border-radius: 20px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
 
         .agenda-time-inputs { display: flex; gap: 12px; }
         .agenda-time-input-wrapper { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
         .agenda-time-label { font-family: var(--font-regular); font-size: 13px; color: rgba(255,255,255,0.6); }
         
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-
-        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; margin-top: 16px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
-        .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
-        
-        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
-        .settings-action-button-secondary:active { color: #FFFFFF; }
 
         .system-toast-notification { font-family: var(--font-bold); font-weight: normal; position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 16px; padding-right: 32px; padding-bottom: 16px; padding-left: 32px; border-radius: 32px; font-size: 16px; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition-property: opacity, transform; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-spring-curve); }
         .system-toast-notification.is-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
@@ -1065,8 +1103,7 @@
     <!-- ==========================================================================
          APPLICATION HEADER
          ========================================================================== -->
-    <header class="application-header" aria-label="Main Application Header">
-        <!-- Live Clock Display elegantly rendered with perfectly proportioned custom font -->
+    <header class="application-header awaits-animation" id="anim-target-1" aria-label="Main Application Header">
         <h1 class="application-title" id="live-clock-display">00:00</h1>
         <div class="header-controls-container">
             <button class="circular-icon-button" id="header-btn-refresh" aria-label="Synchronize Devices" title="Force Refresh">
@@ -1079,9 +1116,9 @@
     </header>
 
     <!-- ==========================================================================
-         WEATHER WIDGET SECTION (EXPANDABLE)
+         WEATHER WIDGET SECTION
          ========================================================================== -->
-    <section aria-label="Weather Dashboard" id="weather-dashboard-section">
+    <section class="awaits-animation" id="anim-target-2" aria-label="Weather Dashboard">
         <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
             <div class="weather-main-row" id="weather-main-row-container">
                 <!-- Populated by WeatherService with skeleton loading initially -->
@@ -1093,13 +1130,12 @@
     </section>
 
     <!-- ==========================================================================
-         DAILY AGENDA SECTION (DYNAMIC VISIBILITY)
+         DAILY AGENDA SECTION
          ========================================================================== -->
-    <section aria-label="Daily Agenda" id="agenda-dashboard-section">
+    <section class="awaits-animation" id="anim-target-3" aria-label="Daily Agenda" id="agenda-dashboard-section">
         <div class="agenda-dashboard-widget">
             <div class="agenda-header-row">
                 <h2 class="agenda-title">Daily Routine</h2>
-                <!-- Time period dynamically injected here -->
                 <span class="agenda-time-period-label" id="agenda-active-time-label">--:-- - --:--</span>
             </div>
             <div class="agenda-list-container" id="agenda-main-list-container">
@@ -1109,32 +1145,36 @@
     </section>
 
     <!-- ==========================================================================
-         DEVICES GRID SECTION & GLOBAL SYNC LINK
+         DEVICES GRID SECTION
          ========================================================================== -->
-    <h2 class="section-heading-title">Rooms & Devices</h2>
-    
-    <div class="device-grid-wrapper">
-        <button id="global-link-synchronization-button" class="global-link-synchronization-button" aria-pressed="false" title="Synchronize Devices">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </svg>
-        </button>
-        
-        <main class="device-grid-container" id="main-device-grid" aria-live="polite">
-            <!-- Smart Device Cards are dynamically constructed and injected here by UIRenderer class -->
-        </main>
+    <div class="awaits-animation" id="anim-target-4">
+        <h2 class="section-heading-title">Rooms & Devices</h2>
+        <div class="device-grid-wrapper">
+            <button id="global-link-synchronization-button" class="global-link-synchronization-button" aria-pressed="false" title="Synchronize Devices">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+            </button>
+            <main class="device-grid-container" id="main-device-grid" aria-live="polite">
+                <!-- Cards injected here -->
+            </main>
+        </div>
     </div>
 
     <!-- ==========================================================================
-         SETTINGS MODAL BACKDROP & SHEET (INCLUDES AGENDA EDITOR)
+         SETTINGS MODAL (FLEXBOX OVERFLOW ARCHITECTURE)
          ========================================================================== -->
     <div class="application-modal-backdrop" id="modal-backdrop-settings" aria-hidden="true" role="dialog" aria-modal="true">
         <div class="settings-modal-sheet">
-            <div class="settings-modal-sheet-scrollable">
+            <!-- Fixed Header -->
+            <div class="settings-modal-header-fixed">
                 <h2 class="settings-modal-heading">Hub Configuration</h2>
-                <p class="settings-modal-description" style="margin-bottom:16px;">Core connection settings for Tuya smart devices.</p>
-                
+                <p class="settings-modal-description" style="margin-bottom:0;">Core settings for Tuya smart devices and daily routines.</p>
+            </div>
+
+            <!-- Fluid Scrollable Body -->
+            <div class="settings-modal-body-scrollable">
                 <div class="ios-segmented-control-container" role="radiogroup" aria-label="Layout Selection">
                     <button class="ios-segmented-control-button is-segment-active" id="segment-btn-portrait" role="radio" aria-checked="true">Portrait</button>
                     <button class="ios-segmented-control-button" id="segment-btn-landscape" role="radio" aria-checked="false">Landscape</button>
@@ -1143,10 +1183,8 @@
                 <input type="url" class="settings-text-input-field" id="input-field-worker-url" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false" aria-label="Cloudflare Worker URL">
                 
                 <div class="modal-section-divider"></div>
-                
                 <h2 class="settings-modal-heading" style="margin-bottom:24px;">Routine Management</h2>
                 
-                <!-- Injection point for full Agenda Editing UI -->
                 <div id="settings-agenda-editor-container"></div>
                 
                 <div class="modal-section-title">Create New Routine</div>
@@ -1164,11 +1202,12 @@
                     </div>
                     <button class="settings-action-button-secondary" style="background: rgba(255,255,255,0.1); border-radius: 12px; margin-top: 4px; padding:12px;" onclick="AgendaSystem.handleCreateNewRoutine()">+ Create Routine</button>
                 </div>
+            </div>
 
-                <div class="modal-section-divider"></div>
-
-                <button class="settings-action-button-primary" id="modal-btn-save">Save & Close</button>
-                <button class="settings-action-button-secondary" id="modal-btn-cancel">Cancel</button>
+            <!-- Fixed Footer -->
+            <div class="settings-modal-footer-fixed">
+                <button class="settings-action-button-primary" id="modal-btn-save" style="margin-top:0; margin-bottom:12px;">Save & Close</button>
+                <button class="settings-action-button-secondary" id="modal-btn-cancel" style="padding:12px;">Cancel</button>
             </div>
         </div>
     </div>
@@ -1186,9 +1225,6 @@
     <script>
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
-         * Encompasses state management, UI rendering, debounced network requests, external API integrations,
-         * advanced HTML5 Canvas color picking with polar coordinate mathematics, responsive forecasting,
-         * real-time clock rendering, synchronized device dispatch, and a comprehensive Routine/Agenda Engine.
          */
 
         "use strict";
@@ -1203,12 +1239,12 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v17',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v17',
-            WEATHER_CACHE: 'enterprise_weather_cache_v17',
-            DEVICES_LINKED: 'enterprise_devices_linked_v17',
-            AGENDA_ROUTINES: 'enterprise_agenda_routines_v17',
-            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v17'
+            WORKER_URL: 'enterprise_tuya_worker_url_v18',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v18',
+            WEATHER_CACHE: 'enterprise_weather_cache_v18',
+            DEVICES_LINKED: 'enterprise_devices_linked_v18',
+            AGENDA_ROUTINES: 'enterprise_agenda_routines_v18',
+            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v18'
         };
 
         const SVG_ASSETS = {
@@ -1222,6 +1258,27 @@
             TRASH_CAN: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
             PLUS_ICON: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
         };
+
+        /* ==========================================================================
+           ANIMATION ORCHESTRATION
+           ========================================================================== */
+        
+        function triggerEntryAnimations() {
+            const targets = [
+                document.getElementById('anim-target-1'),
+                document.getElementById('anim-target-2'),
+                document.getElementById('anim-target-3'),
+                document.getElementById('anim-target-4')
+            ];
+            
+            targets.forEach((el, index) => {
+                if (el) {
+                    setTimeout(() => {
+                        el.classList.add('animate-entry');
+                    }, index * 120); // 120ms elegant stagger
+                }
+            });
+        }
 
         /* ==========================================================================
            UTILITY CLASSES
@@ -1246,9 +1303,6 @@
         }
         const GlobalToast = new ToastManager();
 
-        /**
-         * Orchestrates the real-time digital clock and triggers chronological state validations.
-         */
         class RealTimeClockManager {
             constructor(elementId) {
                 this.clockElement = document.getElementById(elementId);
@@ -1256,7 +1310,6 @@
             }
             start() {
                 this.updateClock();
-                // Tick every 1000ms ensures perfect synchronization
                 this.intervalId = setInterval(() => this.updateClock(), 1000);
             }
             updateClock() {
@@ -1266,7 +1319,6 @@
                 const formattedMinutes = String(now.getMinutes()).padStart(2, '0');
                 this.clockElement.innerText = `${formattedHours}:${formattedMinutes}`;
                 
-                // Every minute (when seconds hit 00), validate the active Agenda Routine
                 if (now.getSeconds() === 0 && window.ApplicationUI) {
                     window.ApplicationUI.evaluateAndRenderActiveRoutine();
                 }
@@ -1295,11 +1347,9 @@
                     try {
                         this.routines = JSON.parse(storedData);
                     } catch (e) {
-                        console.error("AgendaManager: Corrupt data in storage. Resetting.");
                         this.routines = [];
                     }
                 } else {
-                    // Seed sophisticated default data illustrating the architecture
                     this.routines = [
                         {
                             id: this.generateUUID(),
@@ -1311,17 +1361,6 @@
                                 { id: this.generateUUID(), title: "Make Coffee", completed: false, order: 0 },
                                 { id: this.generateUUID(), title: "Check Emails", completed: false, order: 1 }
                             ]
-                        },
-                        {
-                            id: this.generateUUID(),
-                            title: "Evening Routine",
-                            startTime: "18:00",
-                            endTime: "22:00",
-                            order: 1,
-                            tasks: [
-                                { id: this.generateUUID(), title: "Dim the lights", completed: false, order: 0 },
-                                { id: this.generateUUID(), title: "Read a book", completed: false, order: 1 }
-                            ]
                         }
                     ];
                     this.saveToStorage();
@@ -1329,7 +1368,6 @@
             }
 
             saveToStorage() {
-                // Mathematically enforce serialization of order attributes before saving
                 this.routines.sort((a,b) => a.order - b.order).forEach((routine, rIndex) => {
                     routine.order = rIndex;
                     routine.tasks.sort((a,b) => a.order - b.order).forEach((task, tIndex) => {
@@ -1349,46 +1387,29 @@
                     });
                     this.saveToStorage();
                     localStorage.setItem(STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
-                    console.log(`AgendaManager: System performed daily automated reset for ${currentLocalDateString}.`);
                 }
             }
 
-            /**
-             * Mathematically evaluates time boundaries to find the currently active routine.
-             * Supports midnight-crossing brackets (e.g. 22:00 to 02:00).
-             */
             getActiveRoutine() {
                 const now = new Date();
-                const currentHours = now.getHours();
-                const currentMinutes = now.getMinutes();
-                const currentAbsoluteMinutes = (currentHours * 60) + currentMinutes;
+                const currentAbsoluteMinutes = (now.getHours() * 60) + now.getMinutes();
 
                 for (let i = 0; i < this.routines.length; i++) {
                     const routine = this.routines[i];
-                    
                     const [startH, startM] = routine.startTime.split(':').map(Number);
                     const startAbsoluteMinutes = (startH * 60) + startM;
-                    
                     const [endH, endM] = routine.endTime.split(':').map(Number);
                     const endAbsoluteMinutes = (endH * 60) + endM;
 
-                    // Standard chronological bracket
                     if (startAbsoluteMinutes <= endAbsoluteMinutes) {
-                        if (currentAbsoluteMinutes >= startAbsoluteMinutes && currentAbsoluteMinutes <= endAbsoluteMinutes) {
-                            return routine;
-                        }
-                    } 
-                    // Midnight-crossing chronological bracket
-                    else {
-                        if (currentAbsoluteMinutes >= startAbsoluteMinutes || currentAbsoluteMinutes <= endAbsoluteMinutes) {
-                            return routine;
-                        }
+                        if (currentAbsoluteMinutes >= startAbsoluteMinutes && currentAbsoluteMinutes <= endAbsoluteMinutes) return routine;
+                    } else {
+                        if (currentAbsoluteMinutes >= startAbsoluteMinutes || currentAbsoluteMinutes <= endAbsoluteMinutes) return routine;
                     }
                 }
-                return null; // No routine active
+                return null; 
             }
 
-            // Routine CRUD Operations
             addRoutine(title, startTime, endTime) {
                 this.routines.push({
                     id: this.generateUUID(),
@@ -1406,16 +1427,10 @@
                 this.saveToStorage();
             }
 
-            // Task CRUD Operations
             addTaskToRoutine(routineId, taskTitle) {
                 const routine = this.routines.find(r => r.id === routineId);
                 if (routine && taskTitle.trim() !== '') {
-                    routine.tasks.push({
-                        id: this.generateUUID(),
-                        title: taskTitle.trim(),
-                        completed: false,
-                        order: routine.tasks.length
-                    });
+                    routine.tasks.push({ id: this.generateUUID(), title: taskTitle.trim(), completed: false, order: routine.tasks.length });
                     this.saveToStorage();
                 }
             }
@@ -1463,7 +1478,6 @@
                 }
             }
         }
-        
         const AgendaSystem = new AgendaManager();
 
         /* ==========================================================================
@@ -1532,8 +1546,8 @@
                 `;
 
                 if (this.hourlyContainerElement && data.hourly && data.hourly.length > 0) {
-                    this.hourlyContainerElement.innerHTML = data.hourly.map(hourBlock => `
-                        <div class="hourly-item-block">
+                    this.hourlyContainerElement.innerHTML = data.hourly.map((hourBlock, index) => `
+                        <div class="hourly-item-block" style="animation-delay: ${index * 50}ms;">
                             <span class="hourly-item-time">${hourBlock.time}</span>
                             <div class="hourly-item-icon">${hourBlock.icon}</div>
                             <span class="hourly-item-temp">${hourBlock.temp}°</span>
@@ -1556,9 +1570,7 @@
 
                 try {
                     const rawData = await NetworkService.get(this.apiUrl);
-                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
-                        throw new Error("Invalid data structure from Open-Meteo API.");
-                    }
+                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) throw new Error("API Failure");
 
                     const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
                     const compiledWeatherData = {
@@ -1574,12 +1586,9 @@
 
                     let startIndex = 0;
                     const nowTime = new Date().getTime();
-                    
                     for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
-                        if (hourTime >= nowTime - 1800000) { 
-                            startIndex = i;
-                            break;
+                        if (new Date(rawData.hourly.time[i]).getTime() >= nowTime - 1800000) { 
+                            startIndex = i; break;
                         }
                     }
 
@@ -1587,7 +1596,6 @@
                         const dateObj = new Date(rawData.hourly.time[i]);
                         const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
                         const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
-                        
                         compiledWeatherData.hourly.push({
                             time: i === startIndex ? "Now" : hoursStr,
                             temp: Math.round(rawData.hourly.temperature_2m[i]),
@@ -1599,9 +1607,7 @@
                     sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
-                    let errorMessage = "Data Unavailable";
-                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
-                    if (!cachedPayload) this.renderErrorState(errorMessage);
+                    if (!cachedPayload) this.renderErrorState("Data Unavailable");
                 }
             }
         }
@@ -1612,7 +1618,7 @@
 
         class NetworkManager {
             constructor() {
-                this.defaultTimeoutMs = 15000; 
+                this.defaultTimeoutMs = 12000; 
             }
             async get(url) {
                 const abortController = new AbortController();
@@ -1658,37 +1664,19 @@
                 this.canvas = canvasElement;
                 this.indicator = indicatorElement;
                 this.isDragging = false;
-                
                 this.fixedCanvasDimension = 200;
-                this.fixedCenterPoint = this.fixedCanvasDimension / 2; // 100
-                
+                this.fixedCenterPoint = this.fixedCanvasDimension / 2; 
                 this.bindEvents();
             }
 
             bindEvents() {
-                const handleStart = (e) => {
-                    this.isDragging = true;
-                    this.processInteraction(e);
-                    if(e.cancelable) e.preventDefault(); 
-                };
-
-                const handleMove = (e) => {
-                    if (!this.isDragging) return;
-                    this.processInteraction(e);
-                    if(e.cancelable) e.preventDefault();
-                };
-
-                const handleEnd = (e) => {
-                    if(this.isDragging) {
-                        this.isDragging = false;
-                        this.dispatchFinalColorCommand();
-                    }
-                };
+                const handleStart = (e) => { this.isDragging = true; this.processInteraction(e); if(e.cancelable) e.preventDefault(); };
+                const handleMove = (e) => { if (!this.isDragging) return; this.processInteraction(e); if(e.cancelable) e.preventDefault(); };
+                const handleEnd = (e) => { if(this.isDragging) { this.isDragging = false; this.dispatchFinalColorCommand(); }};
 
                 this.canvas.addEventListener('mousedown', handleStart, {passive: false});
                 this.canvas.addEventListener('mousemove', handleMove, {passive: false});
                 window.addEventListener('mouseup', handleEnd);
-
                 this.canvas.addEventListener('touchstart', handleStart, {passive: false});
                 this.canvas.addEventListener('touchmove', handleMove, {passive: false});
                 window.addEventListener('touchend', handleEnd);
@@ -1696,7 +1684,6 @@
 
             processInteraction(event) {
                 const rect = this.canvas.getBoundingClientRect();
-                
                 let clientX = event.clientX;
                 let clientY = event.clientY;
                 if (event.touches && event.touches.length > 0) {
@@ -1714,11 +1701,8 @@
                 const rawDistance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
                 
                 let clampedDistance = Math.min(rawDistance, this.fixedCenterPoint);
-                
                 const SNAP_RADIUS = 18;
-                if (clampedDistance <= SNAP_RADIUS) {
-                    clampedDistance = 0;
-                }
+                if (clampedDistance <= SNAP_RADIUS) clampedDistance = 0;
                 
                 const saturationRatio = clampedDistance / this.fixedCenterPoint;
 
@@ -1743,7 +1727,6 @@
                         if (deviceData.id !== this.deviceId) {
                             DeviceManager.devicesState[deviceData.id].hue = Math.round(hueDegrees);
                             DeviceManager.devicesState[deviceData.id].saturation = Math.round(saturationRatio * 1000);
-                            
                             if (DeviceManager.colorWheelControllers[deviceData.id]) {
                                 DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                             }
@@ -1754,9 +1737,7 @@
 
             dispatchFinalColorCommand() {
                 const targetIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
-                targetIds.forEach(id => {
-                    DeviceManager.executeColorCommand(id);
-                });
+                targetIds.forEach(id => DeviceManager.executeColorCommand(id));
             }
             
             updateIndicatorFromState() {
@@ -1796,91 +1777,51 @@
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
-                    this.devicesState[device.id] = {
-                        on: false,
-                        brightness: 100, 
-                        hue: 0,
-                        saturation: 0
-                    };
+                    this.devicesState[device.id] = { on: false, brightness: 100, hue: 0, saturation: 0 };
                 }
                 this.debounceTimers = {};
             }
 
-            buildEndpointUrl(path) {
-                return this.workerApiUrl.replace(/\/$/, '') + path;
-            }
-
-            setApiUrl(newUrl) {
-                this.workerApiUrl = newUrl.trim();
-                localStorage.setItem(STORAGE_KEYS.WORKER_URL, this.workerApiUrl);
-            }
-
-            isConfigured() {
-                return this.workerApiUrl !== null && this.workerApiUrl !== '';
-            }
+            buildEndpointUrl(path) { return this.workerApiUrl.replace(/\/$/, '') + path; }
+            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); localStorage.setItem(STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
+            isConfigured() { return this.workerApiUrl !== null && this.workerApiUrl !== ''; }
 
             async synchronizeAllDevices() {
                 if (!this.isConfigured()) return;
-
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
                     ApplicationUI.setDeviceConnectingState(device.id, true);
                     try {
-                        const url = this.buildEndpointUrl(`/status?device=${device.id}`);
-                        const jsonPayload = await NetworkService.get(url);
-                        
-                        if (jsonPayload.success && jsonPayload.result) {
-                            this.parseAndApplyTuyaStatusPayload(device.id, jsonPayload.result);
-                        }
+                        const jsonPayload = await NetworkService.get(this.buildEndpointUrl(`/status?device=${device.id}`));
+                        if (jsonPayload.success && jsonPayload.result) this.parseAndApplyTuyaStatusPayload(device.id, jsonPayload.result);
                     } catch (error) {
-                        console.warn(`TuyaSmartDeviceManager: Synchronization failed for device [${device.name}].`, error);
                     } finally {
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
-                        
-                        if(this.colorWheelControllers[device.id]) {
-                            this.colorWheelControllers[device.id].updateIndicatorFromState();
-                        }
+                        if(this.colorWheelControllers[device.id]) this.colorWheelControllers[device.id].updateIndicatorFromState();
                     }
                 }
             }
 
             parseAndApplyTuyaStatusPayload(deviceId, statusArray) {
                 const powerInstruction = statusArray.find(instruction => instruction.code === 'switch_led');
-                if (powerInstruction !== undefined) {
-                    this.devicesState[deviceId].on = powerInstruction.value;
-                }
+                if (powerInstruction !== undefined) this.devicesState[deviceId].on = powerInstruction.value;
                 
                 const colorInstruction = statusArray.find(instruction => instruction.code === 'colour_data_v2' || instruction.code === 'colour_data');
                 if (colorInstruction !== undefined) {
                     try {
-                        const parsedValueObject = typeof colorInstruction.value === 'string' 
-                            ? JSON.parse(colorInstruction.value) 
-                            : colorInstruction.value;
-                            
+                        const parsedValueObject = typeof colorInstruction.value === 'string' ? JSON.parse(colorInstruction.value) : colorInstruction.value;
                         if (parsedValueObject) {
-                            if (parsedValueObject.v !== undefined) {
-                                let uiBrightness = Math.round(parsedValueObject.v / 10);
-                                this.devicesState[deviceId].brightness = Math.max(1, Math.min(100, uiBrightness));
-                            }
-                            if (parsedValueObject.h !== undefined) {
-                                this.devicesState[deviceId].hue = parsedValueObject.h;
-                            }
-                            if (parsedValueObject.s !== undefined) {
-                                this.devicesState[deviceId].saturation = parsedValueObject.s;
-                            }
+                            if (parsedValueObject.v !== undefined) this.devicesState[deviceId].brightness = Math.max(1, Math.min(100, Math.round(parsedValueObject.v / 10)));
+                            if (parsedValueObject.h !== undefined) this.devicesState[deviceId].hue = parsedValueObject.h;
+                            if (parsedValueObject.s !== undefined) this.devicesState[deviceId].saturation = parsedValueObject.s;
                         }
-                    } catch (parseError) {
-                        console.error("TuyaSmartDeviceManager: Failed to parse colour_data JSON.", parseError);
-                    }
+                    } catch (parseError) {}
                 }
             }
 
             async toggleDevicePower(deviceId) {
-                if (!this.isConfigured()) {
-                    ApplicationUI.openSettingsModal();
-                    return;
-                }
+                if (!this.isConfigured()) return ApplicationUI.openSettingsModal();
 
                 const targetState = !this.devicesState[deviceId].on;
                 const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
@@ -1893,40 +1834,22 @@
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    
-                    await Promise.all(targetDeviceIds.map(id => {
-                        const body = {
-                            device: id,
-                            commands: [{ code: 'switch_led', value: targetState }]
-                        };
-                        return NetworkService.post(url, body);
-                    }));
-
+                    await Promise.all(targetDeviceIds.map(id => NetworkService.post(url, { device: id, commands: [{ code: 'switch_led', value: targetState }] })));
                 } catch (error) {
-                    if (error.name === 'AbortError') {
-                        GlobalToast.show("Device Unresponsive (Timeout)");
-                    } else {
-                        GlobalToast.show("Network Error. Check Connection.");
-                    }
+                    GlobalToast.show("Network Error. Reverting.");
                     targetDeviceIds.forEach(id => {
                         this.devicesState[id].on = !targetState;
                         ApplicationUI.updateDeviceCardRender(id);
                     });
                 } finally {
-                    targetDeviceIds.forEach(id => {
-                        ApplicationUI.setDeviceConnectingState(id, false);
-                    });
+                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
                 }
             }
 
             handleBrightnessChangeIntent(deviceId, newBrightnessPercentage) {
                 if (!this.isConfigured()) return;
-
                 if (this.debounceTimers[deviceId]) clearTimeout(this.debounceTimers[deviceId]);
-
-                this.debounceTimers[deviceId] = setTimeout(() => {
-                    this.executeBrightnessCommand(deviceId, newBrightnessPercentage);
-                }, 400);
+                this.debounceTimers[deviceId] = setTimeout(() => this.executeBrightnessCommand(deviceId, newBrightnessPercentage), 400);
             }
 
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
@@ -1934,42 +1857,21 @@
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
                 
                 let dispatchNeeded = false;
-
                 targetDeviceIds.forEach(id => {
-                    if (this.devicesState[id].on === true) {
-                        dispatchNeeded = true;
-                        ApplicationUI.setDeviceConnectingState(id, true);
-                    }
+                    if (this.devicesState[id].on === true) { dispatchNeeded = true; ApplicationUI.setDeviceConnectingState(id, true); }
                 });
-                
                 if(!dispatchNeeded) return;
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    
                     await Promise.all(targetDeviceIds.map(id => {
                         if (this.devicesState[id].on === false) return Promise.resolve();
-                        
-                        const body = {
-                            device: id,
-                            commands: [
-                                { code: 'work_mode', value: 'colour' },
-                                { code: 'colour_data', value: JSON.stringify({ 
-                                    h: this.devicesState[id].hue || 0, 
-                                    s: this.devicesState[id].saturation || 0, 
-                                    v: tuyaFormatBrightness 
-                                }) }
-                            ]
-                        };
-                        return NetworkService.post(url, body);
+                        return NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue || 0, s: this.devicesState[id].saturation || 0, v: tuyaFormatBrightness }) } ] });
                     }));
                 } catch (error) {
-                    if (error.name === 'AbortError') GlobalToast.show("Device Unresponsive (Timeout)");
-                    else GlobalToast.show("Network Error. Check Connection.");
+                    GlobalToast.show("Network Error.");
                 } finally {
-                    targetDeviceIds.forEach(id => {
-                        ApplicationUI.setDeviceConnectingState(id, false);
-                    });
+                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
                 }
             }
             
@@ -1988,32 +1890,16 @@
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    
                     await Promise.all(targetDeviceIds.map(id => {
-                        const body = {
-                            device: id,
-                            commands: [
-                                { code: 'work_mode', value: 'colour' },
-                                { code: 'colour_data', value: JSON.stringify({ 
-                                    h: this.devicesState[id].hue, 
-                                    s: this.devicesState[id].saturation, 
-                                    v: this.devicesState[id].brightness * 10 
-                                }) }
-                            ]
-                        };
-                        return NetworkService.post(url, body);
+                        return NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue, s: this.devicesState[id].saturation, v: this.devicesState[id].brightness * 10 }) } ] });
                     }));
-
                 } catch (error) {
                     GlobalToast.show("Failed to apply color configuration.");
                 } finally {
-                    targetDeviceIds.forEach(id => {
-                        ApplicationUI.setDeviceConnectingState(id, false);
-                    });
+                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
                 }
             }
         }
-
         const DeviceManager = new TuyaSmartDeviceManager();
 
         /* ==========================================================================
@@ -2029,9 +1915,6 @@
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
                 this.inputWorkerUrl = document.getElementById('input-field-worker-url');
                 
-                // Track currently active routine to prevent unnecessary repaints
-                this.currentActiveRoutineId = null;
-                
                 this.handleSettingsSave = this.handleSettingsSave.bind(this);
                 this.handleSettingsCancel = this.handleSettingsCancel.bind(this);
             }
@@ -2041,17 +1924,12 @@
                 this.applyGlobalLinkStateToButton();
                 this.constructDeviceGrid();
                 this.attachStaticEventListeners();
-                
-                // Initial render of agenda
                 this.evaluateAndRenderActiveRoutine();
             }
 
             applyLayoutModeToBody() {
-                if (this.layoutMode === 'landscape') {
-                    document.body.classList.add('layout-mode-landscape');
-                } else {
-                    document.body.classList.remove('layout-mode-landscape');
-                }
+                if (this.layoutMode === 'landscape') document.body.classList.add('layout-mode-landscape');
+                else document.body.classList.remove('layout-mode-landscape');
 
                 const btnPortrait = document.getElementById('segment-btn-portrait');
                 const btnLandscape = document.getElementById('segment-btn-landscape');
@@ -2096,55 +1974,32 @@
                 localStorage.setItem(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
                 this.applyGlobalLinkStateToButton();
                 
-                if (this.isDevicesLinked) {
-                    GlobalToast.show("Devices Synced");
-                } else {
-                    GlobalToast.show("Devices Unlinked");
-                }
+                if (this.isDevicesLinked) GlobalToast.show("Devices Synced");
+                else GlobalToast.show("Devices Unlinked");
             }
 
             attachStaticEventListeners() {
                 document.getElementById('header-btn-refresh').addEventListener('click', () => {
-                    if (!DeviceManager.isConfigured()) {
-                        this.openSettingsModal();
-                        return;
-                    }
-                    GlobalToast.show("Synchronizing telemetry...");
+                    if (!DeviceManager.isConfigured()) return this.openSettingsModal();
+                    GlobalToast.show("Synchronizing...");
                     DeviceManager.synchronizeAllDevices();
                 });
 
-                document.getElementById('header-btn-settings').addEventListener('click', () => {
-                    this.openSettingsModal();
-                });
-
-                document.getElementById('segment-btn-portrait').addEventListener('click', () => {
-                    this.setLayoutMode('portrait');
-                });
-                
-                document.getElementById('segment-btn-landscape').addEventListener('click', () => {
-                    this.setLayoutMode('landscape');
-                });
-
+                document.getElementById('header-btn-settings').addEventListener('click', () => this.openSettingsModal());
+                document.getElementById('segment-btn-portrait').addEventListener('click', () => this.setLayoutMode('portrait'));
+                document.getElementById('segment-btn-landscape').addEventListener('click', () => this.setLayoutMode('landscape'));
                 document.getElementById('modal-btn-save').addEventListener('click', this.handleSettingsSave);
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
-                
-                document.getElementById('global-link-synchronization-button').addEventListener('click', () => {
-                    this.toggleGlobalLinkState();
-                });
+                document.getElementById('global-link-synchronization-button').addEventListener('click', () => this.toggleGlobalLinkState());
             }
             
             toggleWeatherExpansion() {
                 const widget = document.getElementById('weather-dashboard-widget');
-                if(widget) {
-                    widget.classList.toggle('is-expanded');
-                }
+                if(widget) widget.classList.toggle('is-expanded');
             }
 
             // ================== AGENDA UI METHODS ==================
 
-            /**
-             * Evaluates time thresholds and renders the main agenda dashboard if a routine is active.
-             */
             evaluateAndRenderActiveRoutine() {
                 const activeRoutine = AgendaSystem.getActiveRoutine();
                 const sectionContainer = document.getElementById('agenda-dashboard-section');
@@ -2153,25 +2008,13 @@
 
                 if (!sectionContainer || !timeLabel || !listContainer) return;
 
-                // Absolute visibility control based on temporal validation
                 if (!activeRoutine) {
                     sectionContainer.style.display = 'none';
-                    this.currentActiveRoutineId = null;
                     return;
                 }
 
-                // Make visible
                 sectionContainer.style.display = 'block';
-                
-                // Set Header Information
-                // Instead of "Daily Routine", we could use activeRoutine.title, 
-                // but the prompt specified: "text saying: Daily routine, then i small small numbers showing what time period"
-                // So the title remains static CSS/HTML, and we inject the dynamic time period.
                 timeLabel.innerText = `${activeRoutine.startTime} - ${activeRoutine.endTime}`;
-
-                // To prevent DOM thrashing, only re-render list if the routine changed or we force it
-                // We'll force it every time for safety during interactions, but the clock won't trigger re-renders 
-                // if the same routine is still active.
                 
                 const sortedTasks = [...activeRoutine.tasks].sort((a, b) => a.order - b.order);
 
@@ -2181,9 +2024,7 @@
                     listContainer.innerHTML = sortedTasks.map(task => `
                         <div class="agenda-item-row ${task.completed ? 'is-task-completed' : ''}" onclick="ApplicationUI.handleDashboardTaskToggle('${activeRoutine.id}', '${task.id}')">
                             <div class="agenda-checkbox-container">
-                                <svg class="agenda-checkbox-svg" viewBox="0 0 24 24">
-                                    <path d="M5 13l4 4L19 7"></path>
-                                </svg>
+                                <svg class="agenda-checkbox-svg" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
                             </div>
                             <div class="agenda-item-content">
                                 <span class="agenda-item-title">${task.title}</span>
@@ -2191,21 +2032,13 @@
                         </div>
                     `).join('');
                 }
-
-                this.currentActiveRoutineId = activeRoutine.id;
             }
 
-            /**
-             * Handles interaction from the main dashboard, updating state and requesting a repaint.
-             */
             handleDashboardTaskToggle(routineId, taskId) {
                 AgendaSystem.toggleTaskCompletion(routineId, taskId);
                 this.evaluateAndRenderActiveRoutine();
             }
 
-            /**
-             * Renders the complex nested Routine & Task editor inside the Settings modal.
-             */
             renderAgendaEditorSettings() {
                 const container = document.getElementById('settings-agenda-editor-container');
                 if (!container) return;
@@ -2217,7 +2050,6 @@
                     return;
                 }
 
-                // SVGs for the nested task controls
                 const upIcon = SVG_ASSETS.UP_CHEVRON;
                 const downIcon = SVG_ASSETS.DOWN_CHEVRON;
                 const trashIcon = SVG_ASSETS.TRASH_CAN;
@@ -2253,11 +2085,7 @@
                                 </div>
                                 <button class="agenda-edit-action-btn delete" onclick="AgendaSystem.deleteRoutine('${routine.id}'); ApplicationUI.renderAgendaEditorSettings();" title="Delete Routine">${trashIcon}</button>
                             </div>
-                            
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                ${tasksHtml}
-                            </div>
-                            
+                            <div style="display:flex; flex-direction:column; gap:8px;">${tasksHtml}</div>
                             <div class="agenda-add-task-form">
                                 <input type="text" class="settings-text-input-field" style="margin-bottom:0; padding:12px; font-size:14px; border-radius:12px;" id="add-task-input-${routine.id}" placeholder="New task..." autocomplete="off">
                                 <button class="settings-action-button-primary" style="margin:0; width:auto; padding:12px 16px; border-radius:12px;" onclick="ApplicationUI.handleAddNewTaskToRoutine('${routine.id}')">${plusIcon}</button>
@@ -2273,8 +2101,8 @@
                 const inputElement = document.getElementById(`add-task-input-${routineId}`);
                 if (inputElement && inputElement.value.trim() !== '') {
                     AgendaSystem.addTaskToRoutine(routineId, inputElement.value);
-                    this.renderAgendaEditorSettings(); // Re-render editor UI
-                    this.evaluateAndRenderActiveRoutine(); // Update main dashboard if it's the active routine
+                    this.renderAgendaEditorSettings(); 
+                    this.evaluateAndRenderActiveRoutine(); 
                 }
             }
 
@@ -2349,7 +2177,6 @@
                     const canvasEl = document.getElementById(`canvas-${deviceData.id}`);
                     const indicatorEl = document.getElementById(`color-thumb-${deviceData.id}`);
                     DeviceManager.colorWheelControllers[deviceData.id] = new ColorWheelManager(deviceData.id, canvasEl, indicatorEl);
-                    
                     DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                 }
             }
@@ -2365,13 +2192,9 @@
                         if (event.target === toggleButton || toggleButton.contains(event.target) || event.target === sliderInput || expansionArea.contains(event.target)) {
                             return;
                         }
-                        
-                        if (DeviceManager.devicesState[deviceId].on === false) {
-                            return;
-                        }
+                        if (DeviceManager.devicesState[deviceId].on === false) return;
                         
                         cardWrapper.classList.toggle('is-expanded');
-                        
                         if(cardWrapper.classList.contains('is-expanded') && DeviceManager.colorWheelControllers[deviceId]) {
                             window.requestAnimationFrame(() => {
                                 setTimeout(() => {
@@ -2478,7 +2301,6 @@
                 this.setLayoutMode(localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
                 if (this.inputWorkerUrl) this.inputWorkerUrl.value = DeviceManager.workerApiUrl;
                 
-                // Hydrate the dynamic agenda editor UI inside the modal
                 this.renderAgendaEditorSettings();
                 
                 if (this.settingsModalBackdrop) {
@@ -2513,7 +2335,6 @@
                 GlobalToast.show("Configuration saved. Connecting...");
                 DeviceManager.synchronizeAllDevices();
                 
-                // Re-evaluate agenda in case settings created a new active routine
                 this.evaluateAndRenderActiveRoutine();
             }
         }
@@ -2528,11 +2349,8 @@
             
             if(titleEl && startEl && endEl && titleEl.value.trim() !== '') {
                 AgendaSystem.addRoutine(titleEl.value, startEl.value, endEl.value);
-                // Clear inputs
                 titleEl.value = '';
-                // Rerender editor
                 ApplicationUI.renderAgendaEditorSettings();
-                // Rerender main dashboard just in case the new routine is currently active
                 ApplicationUI.evaluateAndRenderActiveRoutine();
                 GlobalToast.show("Routine Created");
             } else {
@@ -2546,19 +2364,14 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             ApplicationUI.initialize();
-
-            // Initialize Live Digital Clock
+            triggerEntryAnimations();
             LiveClock.start();
 
-            // Instantiate and trigger background weather service independently
             const WeatherAPI = new WeatherService();
             WeatherAPI.fetchAndRender();
 
-            // Evaluate configuration readiness
             if (!DeviceManager.isConfigured()) {
-                setTimeout(() => {
-                    ApplicationUI.openSettingsModal();
-                }, 600);
+                setTimeout(() => ApplicationUI.openSettingsModal(), 1200);
             } else {
                 DeviceManager.synchronizeAllDevices();
             }
