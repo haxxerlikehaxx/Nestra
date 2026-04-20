@@ -13,17 +13,47 @@
 
     <style>
         /* ==========================================================================
-           CUSTOM TYPOGRAPHY INTEGRATION
+           CUSTOM TYPOGRAPHY INTEGRATION (ENTERPRISE GRADE)
+           Mapping exact local files to distinct font families to prevent faux-bolding
            ========================================================================== */
-        /* 
-           USER INSTRUCTION: 
-           Place the "SFProMedium.ttf" file in the exact same directory as this HTML file.
-           The browser will automatically load and apply it to the entire application. 
-        */
+
         @font-face {
-            font-family: 'SF Pro Medium';
+            font-family: 'SF Pro Light Custom';
+            src: url('./SFProLight.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'SF Pro Regular Custom';
+            src: url('./SFProRegular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'SF Pro Medium Custom';
             src: url('./SFProMedium.ttf') format('truetype');
-            font-weight: 500;
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'SF Pro Semibold Soft Custom';
+            /* URL encoded spaces for maximum browser compatibility */
+            src: url('./SF%20Pro%20-%20Semibold%20Soft.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'SF Pro Bold Custom';
+            src: url('./SF-Pro-Display-Bold.otf') format('opentype');
+            font-weight: normal;
             font-style: normal;
             font-display: swap;
         }
@@ -69,8 +99,12 @@
             --link-active-foreground-color: #FFFFFF;
             --link-active-box-shadow: 0px 4px 16px rgba(10, 132, 255, 0.4);
 
-            /* Typography Configuration - Custom Font injected globally */
-            --system-font-family: 'SF Pro Medium', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            /* Typography Pointers */
+            --font-light: 'SF Pro Light Custom', -apple-system, sans-serif;
+            --font-regular: 'SF Pro Regular Custom', -apple-system, sans-serif;
+            --font-medium: 'SF Pro Medium Custom', -apple-system, sans-serif;
+            --font-semibold-soft: 'SF Pro Semibold Soft Custom', -apple-system, sans-serif;
+            --font-bold: 'SF Pro Bold Custom', -apple-system, sans-serif;
             
             /* Physics & Animation Curves */
             --animation-spring-curve: cubic-bezier(0.32, 0.72, 0, 1.0);
@@ -89,12 +123,10 @@
             /* Card Height Mathematics (Critical for smooth expansion animation) */
             --card-base-height: 200px;
             --grid-gap-portrait: 24px;
-            /* Expanded height precisely matches 2 rows + gap (200 + 200 + 24) to prevent layout jitter */
-            --card-expanded-height-portrait: 424px; 
+            --card-expanded-height-portrait: 424px; /* 200 + 200 + 24 */
             
             --grid-gap-landscape: 32px;
-            /* Expanded height landscape (200 + 200 + 32) */
-            --card-expanded-height-landscape: 432px;
+            --card-expanded-height-landscape: 432px; /* 200 + 200 + 32 */
         }
 
         /* ==========================================================================
@@ -114,7 +146,8 @@
         }
 
         html {
-            font-family: var(--system-font-family);
+            /* Set a baseline to inherit from, but explicit components will use specific variables */
+            font-family: var(--font-regular);
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
         }
@@ -154,11 +187,11 @@
             user-select: text !important;
             -webkit-user-select: text !important;
             -webkit-touch-callout: default !important;
-            font-family: inherit;
+            font-family: var(--font-regular);
         }
 
         /* ==========================================================================
-           HEADER COMPONENT (WITH REAL-TIME CLOCK)
+           HEADER COMPONENT
            ========================================================================== */
         .application-header {
             display: flex;
@@ -170,13 +203,14 @@
             padding-right: 8px;
         }
 
-        /* Redesigned specifically for the real-time clock to look majestic with SFProMedium */
         .application-title {
+            font-family: var(--font-medium);
+            font-weight: normal; /* Let the font file dictate weight */
             font-size: 38px;
-            font-weight: 500; /* Maps beautifully to the SF Pro Medium custom font */
             letter-spacing: -0.02em;
             line-height: 1.2;
             color: #FFFFFF;
+            font-variant-numeric: tabular-nums;
         }
 
         .header-controls-container {
@@ -272,13 +306,44 @@
         }
 
         .weather-information-left { display: flex; flex-direction: column; gap: 6px; }
-        .weather-city-label { font-size: 15px; font-weight: 600; color: var(--card-inactive-subtitle-color); text-transform: uppercase; letter-spacing: 0.06em; }
-        .weather-temperature-display { font-size: 56px; font-weight: 200; letter-spacing: -0.05em; line-height: 1.0; margin-top: 4px; margin-bottom: 4px; color: #FFFFFF; }
-        .weather-condition-description { font-size: 16px; font-weight: 500; color: var(--card-inactive-subtitle-color); }
+        
+        .weather-city-label { 
+            font-family: var(--font-bold);
+            font-weight: normal;
+            font-size: 15px; 
+            color: var(--card-inactive-subtitle-color); 
+            text-transform: uppercase; 
+            letter-spacing: 0.06em; 
+        }
+        
+        .weather-temperature-display { 
+            font-family: var(--font-light);
+            font-weight: normal;
+            font-size: 56px; 
+            letter-spacing: -0.05em; 
+            line-height: 1.0; 
+            margin-top: 4px; 
+            margin-bottom: 4px; 
+            color: #FFFFFF; 
+        }
+        
+        .weather-condition-description { 
+            font-family: var(--font-regular);
+            font-weight: normal;
+            font-size: 16px; 
+            color: var(--card-inactive-subtitle-color); 
+        }
+        
         .weather-graphics-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
         .weather-vector-icon { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
         .weather-vector-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); }
-        .weather-high-low-range { font-size: 15px; font-weight: 600; color: var(--card-inactive-subtitle-color); }
+        
+        .weather-high-low-range { 
+            font-family: var(--font-medium);
+            font-weight: normal;
+            font-size: 15px; 
+            color: var(--card-inactive-subtitle-color); 
+        }
         
         /* Expandable Hourly Section with Hardware Compositing Layers */
         .weather-hourly-container {
@@ -329,10 +394,22 @@
             flex-shrink: 0;
         }
 
-        .hourly-item-time { font-size: 14px; font-weight: 600; color: var(--card-inactive-subtitle-color); }
+        .hourly-item-time { 
+            font-family: var(--font-regular);
+            font-weight: normal;
+            font-size: 14px; 
+            color: var(--card-inactive-subtitle-color); 
+        }
+        
         .hourly-item-icon { width: 32px; height: 32px; }
         .hourly-item-icon svg { width: 100%; height: 100%; }
-        .hourly-item-temp { font-size: 17px; font-weight: 600; color: #FFFFFF; }
+        
+        .hourly-item-temp { 
+            font-family: var(--font-medium);
+            font-weight: normal;
+            font-size: 17px; 
+            color: #FFFFFF; 
+        }
         
         /* Skeleton Animation */
         .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
@@ -350,8 +427,9 @@
         }
 
         .section-heading-title {
+            font-family: var(--font-bold);
+            font-weight: normal;
             font-size: 22px;
-            font-weight: 600;
             margin-bottom: 20px;
             padding-left: 8px;
             letter-spacing: -0.02em;
@@ -541,8 +619,27 @@
             margin-bottom: 20px;
         }
 
-        .device-display-name { font-size: 17px; font-weight: 600; letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .device-current-status-label { font-size: 15px; font-weight: 500; color: var(--card-inactive-subtitle-color); margin-top: 4px; transition-property: color; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve); }
+        .device-display-name { 
+            font-family: var(--font-semibold-soft);
+            font-weight: normal;
+            font-size: 17px; 
+            letter-spacing: -0.015em; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        
+        .device-current-status-label { 
+            font-family: var(--font-medium);
+            font-weight: normal;
+            font-size: 15px; 
+            color: var(--card-inactive-subtitle-color); 
+            margin-top: 4px; 
+            transition-property: color; 
+            transition-duration: var(--animation-duration-medium); 
+            transition-timing-function: var(--animation-ease-out-curve); 
+        }
+        
         .smart-device-card.state-is-on .device-current-status-label { color: var(--card-active-subtitle-color); }
 
         /* Bottom Area: Slider Control */
@@ -689,22 +786,60 @@
         }
         .application-modal-backdrop.is-visible-active .settings-modal-sheet { transform: translateY(0) scale(1); }
 
-        .settings-modal-heading { font-size: 24px; font-weight: 700; color: #FFFFFF; margin-bottom: 12px; letter-spacing: -0.02em; }
-        .settings-modal-description { font-size: 15px; color: rgba(255, 255, 255, 0.65); margin-bottom: 28px; line-height: 1.5; }
+        .settings-modal-heading { 
+            font-family: var(--font-bold);
+            font-weight: normal;
+            font-size: 24px; 
+            color: #FFFFFF; 
+            margin-bottom: 12px; 
+            letter-spacing: -0.02em; 
+        }
+        
+        .settings-modal-description { 
+            font-family: var(--font-regular);
+            font-weight: normal;
+            font-size: 15px; 
+            color: rgba(255, 255, 255, 0.65); 
+            margin-bottom: 28px; 
+            line-height: 1.5; 
+        }
 
         .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; }
-        .ios-segmented-control-button { flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; font-weight: 600; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
+        
+        .ios-segmented-control-button { 
+            font-family: var(--font-medium);
+            font-weight: normal;
+            flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); 
+        }
+        
         .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-text-input-field { width: 100%; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
+        .settings-text-input-field { 
+            font-family: var(--font-regular);
+            font-weight: normal;
+            width: 100%; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); 
+        }
         .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
-        .settings-action-button-primary { background-color: #FFFFFF; color: #000000; width: 100%; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
+        .settings-action-button-primary { 
+            font-family: var(--font-bold);
+            font-weight: normal;
+            background-color: #FFFFFF; color: #000000; width: 100%; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); 
+        }
         .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
-        .settings-action-button-secondary { background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; padding-top: 16px; padding-bottom: 16px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; transition-property: color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
+        
+        .settings-action-button-secondary { 
+            font-family: var(--font-medium);
+            font-weight: normal;
+            background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); 
+        }
         .settings-action-button-secondary:active { color: #FFFFFF; }
 
-        .system-toast-notification { position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 16px; padding-right: 32px; padding-bottom: 16px; padding-left: 32px; border-radius: 32px; font-size: 16px; font-weight: 600; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition-property: opacity, transform; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-spring-curve); }
+        .system-toast-notification { 
+            font-family: var(--font-bold);
+            font-weight: normal;
+            position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 16px; padding-right: 32px; padding-bottom: 16px; padding-left: 32px; border-radius: 32px; font-size: 16px; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition-property: opacity, transform; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-spring-curve); 
+        }
         .system-toast-notification.is-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     </style>
 </head>
@@ -809,10 +944,10 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v13',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v13',
-            WEATHER_CACHE: 'enterprise_weather_cache_v13',
-            DEVICES_LINKED: 'enterprise_devices_linked_v13'
+            WORKER_URL: 'enterprise_tuya_worker_url_v14',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v14',
+            WEATHER_CACHE: 'enterprise_weather_cache_v14',
+            DEVICES_LINKED: 'enterprise_devices_linked_v14'
         };
 
         const SVG_ASSETS = {
