@@ -7,7 +7,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     <meta name="description" content="Ultimate Premium Apple HomeKit Style Smart Home Controller for iPad Air 2">
-    <title>Smart Home Control Center</title>
+    <link rel="icon" href="/home/favicon.png">
+    <link rel="apple-touch-icon" href="/home/apple-touch-icon.png">
+    <title>Nestra</title>
 
     <style>
         /* ==========================================================================
@@ -45,6 +47,11 @@
             --slider-inactive-track-color: rgba(0, 0, 0, 0.25);
             --slider-inactive-fill-color: rgba(255, 255, 255, 0.20);
             --slider-inactive-fill-shadow: none;
+
+            /* Link Device Active State */
+            --link-active-background-color: #0A84FF; /* Apple System Blue */
+            --link-active-foreground-color: #FFFFFF;
+            --link-active-box-shadow: 0px 4px 16px rgba(10, 132, 255, 0.4);
 
             /* Typography */
             --system-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -148,11 +155,13 @@
         }
 
         .application-title {
-            font-size: 36px;
+            font-size: 40px;
             font-weight: 700;
-            letter-spacing: -0.035em;
+            letter-spacing: -0.04em;
             line-height: 1.2;
             color: #FFFFFF;
+            /* Monospaced numbers for smooth clock ticking */
+            font-variant-numeric: tabular-nums;
         }
 
         .header-controls-container {
@@ -316,8 +325,15 @@
         @keyframes shimmer { 100% { transform: translateX(100%); } }
 
         /* ==========================================================================
-           DEVICE GRID LAYOUT
+           DEVICE GRID LAYOUT & LINK COMPONENT
            ========================================================================== */
+        
+        /* Wrapper to facilitate absolute positioning of the Sync/Link button */
+        .device-grid-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
         .section-heading-title {
             font-size: 22px;
             font-weight: 600;
@@ -325,6 +341,53 @@
             padding-left: 8px;
             letter-spacing: -0.02em;
             color: #FFFFFF;
+        }
+
+        /* The Global Sync / Link Button */
+        .global-link-synchronization-button {
+            position: absolute;
+            /* Perfectly centered mathematically between the two columns */
+            left: 50%;
+            top: 24px; /* Aligned gracefully with the top padding of the device cards */
+            transform: translateX(-50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            background-color: var(--glass-background-base);
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+            border-style: solid;
+            border-color: var(--glass-border-color);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            cursor: pointer;
+            
+            transition-property: background-color, color, border-color, box-shadow, transform;
+            transition-duration: var(--animation-duration-medium);
+            transition-timing-function: var(--animation-spring-curve);
+        }
+
+        .global-link-synchronization-button:active {
+            transform: translateX(-50%) scale(0.85);
+        }
+
+        .global-link-synchronization-button.is-devices-linked {
+            background-color: var(--link-active-background-color);
+            color: var(--link-active-foreground-color);
+            border-color: var(--link-active-background-color);
+            box-shadow: var(--link-active-box-shadow);
+        }
+
+        .global-link-synchronization-button svg {
+            width: 18px;
+            height: 18px;
         }
 
         .device-grid-container {
@@ -367,7 +430,7 @@
             flex-direction: column;
             justify-content: flex-start;
             
-            /* Explicit Initial Height enabling pure CSS interpolation */
+            /* Explicit Initial Height enabling pure CSS mathematical interpolation */
             height: var(--card-base-height); 
             
             box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.05);
@@ -545,7 +608,7 @@
             transition-timing-function: var(--animation-spring-curve);
         }
 
-        /* Use visible overflow ONLY when fully expanded so shadow doesn't clip */
+        /* Fix: Use visible overflow ONLY when fully expanded so shadow doesn't clip */
         .smart-device-card.is-expanded .color-picker-expansion-area {
             opacity: 1;
             max-height: 280px; 
@@ -635,13 +698,14 @@
          APPLICATION HEADER
          ========================================================================== -->
     <header class="application-header" aria-label="Main Application Header">
-        <h1 class="application-title">My Home</h1>
+        <!-- Live Clock Display replacing static text -->
+        <h1 class="application-title" id="live-clock-display">00:00</h1>
         <div class="header-controls-container">
             <button class="circular-icon-button" id="header-btn-refresh" aria-label="Synchronize Devices" title="Force Refresh">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"></path><path d="M21.34 15.57a10 10 0 1 1-.92-10.26l5.08 5.08"></path></svg>
             </button>
             <button class="circular-icon-button" id="header-btn-settings" aria-label="Open Settings" title="Configure Hub">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </button>
         </div>
     </header>
@@ -661,12 +725,23 @@
     </section>
 
     <!-- ==========================================================================
-         DEVICES GRID SECTION
+         DEVICES GRID SECTION & GLOBAL SYNC LINK
          ========================================================================== -->
     <h2 class="section-heading-title">Rooms & Devices</h2>
-    <main class="device-grid-container" id="main-device-grid" aria-live="polite">
-        <!-- Smart Device Cards are dynamically constructed and injected here by UIRenderer class -->
-    </main>
+    
+    <div class="device-grid-wrapper">
+        <!-- The Global Link / Synchronization Button positioned perfectly between cards -->
+        <button id="global-link-synchronization-button" class="global-link-synchronization-button" aria-pressed="false" title="Synchronize Devices">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+        </button>
+        
+        <main class="device-grid-container" id="main-device-grid" aria-live="polite">
+            <!-- Smart Device Cards are dynamically constructed and injected here by UIRenderer class -->
+        </main>
+    </div>
 
     <!-- ==========================================================================
          SETTINGS MODAL BACKDROP & SHEET
@@ -702,7 +777,8 @@
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
          * Encompasses state management, UI rendering, debounced network requests, external API integrations,
-         * advanced HTML5 Canvas color picking with polar coordinate mathematics, and responsive forecasting.
+         * advanced HTML5 Canvas color picking with polar coordinate mathematics, responsive forecasting,
+         * real-time clock rendering, and synchronized device dispatch.
          */
 
         "use strict";
@@ -717,9 +793,10 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v11',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v11',
-            WEATHER_CACHE: 'enterprise_weather_cache_v11'
+            WORKER_URL: 'enterprise_tuya_worker_url_v12',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v12',
+            WEATHER_CACHE: 'enterprise_weather_cache_v12',
+            DEVICES_LINKED: 'enterprise_devices_linked_v12'
         };
 
         const SVG_ASSETS = {
@@ -753,21 +830,38 @@
         }
         const GlobalToast = new ToastManager();
 
+        /**
+         * Orchestrates the real-time digital clock in the application header.
+         */
+        class RealTimeClockManager {
+            constructor(elementId) {
+                this.clockElement = document.getElementById(elementId);
+                this.intervalId = null;
+            }
+            start() {
+                this.updateClock();
+                // Tick every 1000ms ensures perfect synchronization
+                this.intervalId = setInterval(() => this.updateClock(), 1000);
+            }
+            updateClock() {
+                if(!this.clockElement) return;
+                const now = new Date();
+                const formattedHours = String(now.getHours()).padStart(2, '0');
+                const formattedMinutes = String(now.getMinutes()).padStart(2, '0');
+                this.clockElement.innerText = `${formattedHours}:${formattedMinutes}`;
+            }
+        }
+        const LiveClock = new RealTimeClockManager('live-clock-display');
+
         /* ==========================================================================
            EXTERNAL SERVICE INTEGRATIONS
            ========================================================================== */
 
-        /**
-         * Manages retrieval, parsing, and caching of meteorological data via Open-Meteo API.
-         * Integrates fully fledged hourly forecasting with hardware accelerated UI mapping.
-         */
         class WeatherService {
             constructor() {
                 this.latitudeCoordinateForApi = 59.38; // Spånga
                 this.longitudeCoordinateForApi = 17.90; // Spånga
-                // Fetching current, daily, AND hourly telemetry
                 this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
-                
                 this.mainRowElement = document.getElementById('weather-main-row-container');
                 this.hourlyContainerElement = document.getElementById('weather-hourly-container');
             }
@@ -781,9 +875,7 @@
                         <span class="weather-condition-description">Fetching Weather...</span>
                     </div>
                     <div class="weather-graphics-right">
-                        <div class="weather-vector-icon">
-                            <div class="weather-spinner"></div>
-                        </div>
+                        <div class="weather-vector-icon"><div class="weather-spinner"></div></div>
                         <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
                     </div>
                 `;
@@ -814,8 +906,6 @@
 
             renderSuccessState(data) {
                 if (!this.mainRowElement) return;
-                
-                // Render main dashboard
                 this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
@@ -828,7 +918,6 @@
                     </div>
                 `;
 
-                // Render Hourly Forecast if container exists
                 if (this.hourlyContainerElement && data.hourly && data.hourly.length > 0) {
                     this.hourlyContainerElement.innerHTML = data.hourly.map(hourBlock => `
                         <div class="hourly-item-block">
@@ -854,12 +943,10 @@
 
                 try {
                     const rawData = await NetworkService.get(this.apiUrl);
-                    
                     if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
                         throw new Error("Invalid data structure from Open-Meteo API.");
                     }
 
-                    // Process Current
                     const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
                     const compiledWeatherData = {
                         current: {
@@ -872,23 +959,17 @@
                         hourly: []
                     };
 
-                    // Process Hourly (Extract next 24 hours based on current time)
-                    const currentHourIso = new Date().toISOString().substring(0, 14) + "00"; // roughly match "YYYY-MM-DDTHH:00"
-                    
-                    // Find index of current hour in OpenMeteo's time array
                     let startIndex = 0;
                     const nowTime = new Date().getTime();
                     
-                    // Simple search for closest hour
                     for (let i = 0; i < rawData.hourly.time.length; i++) {
                         const hourTime = new Date(rawData.hourly.time[i]).getTime();
-                        if (hourTime >= nowTime - 1800000) { // within last half hour
+                        if (hourTime >= nowTime - 1800000) { 
                             startIndex = i;
                             break;
                         }
                     }
 
-                    // Map 24 hours of data
                     for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
                         const dateObj = new Date(rawData.hourly.time[i]);
                         const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
@@ -906,12 +987,8 @@
 
                 } catch (error) {
                     let errorMessage = "Data Unavailable";
-                    if (error.name === 'AbortError') {
-                        errorMessage = "Weather API Timeout";
-                    }
-                    if (!cachedPayload) {
-                        this.renderErrorState(errorMessage);
-                    }
+                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
+                    if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
         }
@@ -922,7 +999,7 @@
 
         class NetworkManager {
             constructor() {
-                this.defaultTimeoutMs = 15000; // Expanded to 15 seconds for robust resilience
+                this.defaultTimeoutMs = 15000; 
             }
             async get(url) {
                 const abortController = new AbortController();
@@ -959,35 +1036,27 @@
         const NetworkService = new NetworkManager();
         
         /* ==========================================================================
-           COLOR WHEEL LOGIC (HTML5 CANVAS)
+           COLOR WHEEL LOGIC (HTML5 CANVAS WITH MATHEMATICAL SNAP)
            ========================================================================== */
            
         /**
-         * Handles rendering and interaction logic for the HSL Color Wheel on HTML5 Canvas.
-         * Mathematically rebuilt to perfectly track the user's touch point with zero offset,
-         * and snap magnetically to pure white in the dead center.
+         * Handles rendering and complex touch/mouse interaction logic for the HSL Color Wheel.
+         * Mathematically decoupled from CSS transitions to guarantee pixel-perfect accuracy.
          */
         class ColorWheelManager {
-            /**
-             * Attaches a color wheel to a specific canvas element.
-             * @param {string} deviceId - Tuya device identifier.
-             * @param {HTMLCanvasElement} canvasElement - The target canvas.
-             * @param {HTMLElement} indicatorElement - The circular thumb overlay.
-             */
             constructor(deviceId, canvasElement, indicatorElement) {
                 this.deviceId = deviceId;
                 this.canvas = canvasElement;
                 this.indicator = indicatorElement;
-                
-                // Track interaction state
                 this.isDragging = false;
+                
+                // Hardcoded geometrical bounds for absolute calculation safety regardless of CSS animation state
+                this.fixedCanvasDimension = 200;
+                this.fixedCenterPoint = this.fixedCanvasDimension / 2; // 100
                 
                 this.bindEvents();
             }
 
-            /**
-             * Binds complex multi-touch and mouse tracking events.
-             */
             bindEvents() {
                 const handleStart = (e) => {
                     this.isDragging = true;
@@ -1017,11 +1086,6 @@
                 window.addEventListener('touchend', handleEnd);
             }
 
-            /**
-             * Converts physical touch coordinates into polar Hue/Saturation metrics.
-             * Ensures perfect 1:1 tracking mapping finger directly to the UI thumb.
-             * @param {Event} event - Mouse or Touch event.
-             */
             processInteraction(event) {
                 const rect = this.canvas.getBoundingClientRect();
                 
@@ -1032,21 +1096,19 @@
                     clientY = event.touches[0].clientY;
                 }
 
-                const centerX = rect.width / 2;
+                // Utilize strict dimensions for calculations to avoid transitional reflow bugs
+                const centerX = rect.width / 2; 
                 const centerY = rect.height / 2;
-                const radius = centerX;
-
+                
+                // We use dynamic rect left/top for offset, but trust the circle is perfectly round
                 const xOffset = clientX - rect.left - centerX;
                 const yOffset = clientY - rect.top - centerY;
 
                 // Absolute true radians for pixel-perfect tracking (0 is at 3 o'clock)
                 const rawAngleRadians = Math.atan2(yOffset, xOffset);
-                
-                // Mathematical distance from center calculation
                 const rawDistance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
                 
-                // Clamp saturation to physical boundaries of the circle
-                let clampedDistance = Math.min(rawDistance, radius);
+                let clampedDistance = Math.min(rawDistance, this.fixedCenterPoint);
                 
                 // Magnetic Snapping Logic: If within 18 pixels of center, snap to absolute dead center (White)
                 const SNAP_RADIUS = 18;
@@ -1054,11 +1116,12 @@
                     clampedDistance = 0;
                 }
                 
-                const saturationRatio = clampedDistance / radius;
+                const saturationRatio = clampedDistance / this.fixedCenterPoint;
 
                 // Visual thumb placement strictly follows raw interaction angle, resulting in perfect sync
-                const visualThumbX = centerX + Math.cos(rawAngleRadians) * clampedDistance;
-                const visualThumbY = centerY + Math.sin(rawAngleRadians) * clampedDistance;
+                // We map this relative to the fixed 200px coordinate space.
+                const visualThumbX = this.fixedCenterPoint + Math.cos(rawAngleRadians) * clampedDistance;
+                const visualThumbY = this.fixedCenterPoint + Math.sin(rawAngleRadians) * clampedDistance;
                 
                 this.indicator.style.left = `${visualThumbX}px`;
                 this.indicator.style.top = `${visualThumbY}px`;
@@ -1069,57 +1132,65 @@
                 if (hueDegrees >= 360) hueDegrees -= 360;
                 
                 // Dynamic Lightness computation to ensure the center is pure #FFFFFF white.
-                // When Saturation = 0, Lightness = 100%
-                // When Saturation = 1, Lightness = 50% (Standard vibrant HSL color)
                 const lightnessPct = 100 - (saturationRatio * 50);
                 this.indicator.style.backgroundColor = `hsl(${hueDegrees}, 100%, ${lightnessPct}%)`;
 
-                // Update authoritative state memory locally (Scale: Tuya Hue 0-360, Tuya Saturation 0-1000)
+                // Update authoritative state memory locally for THIS device
                 DeviceManager.devicesState[this.deviceId].hue = Math.round(hueDegrees);
                 DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationRatio * 1000);
+                
+                // GLOBAL LINK FAN-OUT: If linked, mirror this exact state to ALL other devices
+                if (ApplicationUI.isDevicesLinked) {
+                    TUYA_DEVICES.forEach(deviceData => {
+                        if (deviceData.id !== this.deviceId) {
+                            DeviceManager.devicesState[deviceData.id].hue = Math.round(hueDegrees);
+                            DeviceManager.devicesState[deviceData.id].saturation = Math.round(saturationRatio * 1000);
+                            
+                            // Force visual update on the other device's color wheel if it happens to be rendered
+                            if (DeviceManager.colorWheelControllers[deviceData.id]) {
+                                DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
+                            }
+                        }
+                    });
+                }
             }
 
-            /**
-             * Triggers network request after interaction finishes.
-             */
             dispatchFinalColorCommand() {
-                DeviceManager.executeColorCommand(this.deviceId);
+                // If linked, execute for all. If not, execute for just this one.
+                const targetIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
+                targetIds.forEach(id => {
+                    DeviceManager.executeColorCommand(id);
+                });
             }
             
             /**
              * Mathematically reverses Tuya State back into polar coordinates for the UI Indicator.
+             * Completely immune to CSS transition artifacts due to hardcoded boundary geometry.
              */
             updateIndicatorFromState() {
                 const state = DeviceManager.devicesState[this.deviceId];
                 
                 // Strict Failsafe: Initialize to dead center (Pure White) if state data is missing or precisely zero
                 if(state.hue === undefined || state.saturation === undefined || (state.hue === 0 && state.saturation === 0)) {
-                    this.indicator.style.left = `50%`;
-                    this.indicator.style.top = `50%`;
+                    this.indicator.style.left = `100px`; // 50% of 200
+                    this.indicator.style.top = `100px`;
                     this.indicator.style.backgroundColor = `#FFFFFF`;
                     return;
                 }
                 
-                const rect = this.canvas.getBoundingClientRect();
-                // Skip calculation if UI is currently hidden/unrendered
-                if(rect.width === 0) return; 
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                // Reverse engineering polar coordinates to place the thumb
+                // Reverse engineering polar coordinates to place the thumb within the strictly 200x200 box
                 // Angle must be mapped back to standard geometric radians where 0 is at 3 o'clock
                 const angleRadians = (state.hue - 90) * (Math.PI / 180);
                 const distanceRatio = state.saturation / 1000;
-                const absoluteDistance = distanceRatio * centerX;
+                const absoluteDistance = distanceRatio * this.fixedCenterPoint;
                 
-                const visualThumbX = centerX + Math.cos(angleRadians) * absoluteDistance;
-                const visualThumbY = centerY + Math.sin(angleRadians) * absoluteDistance;
+                const visualThumbX = this.fixedCenterPoint + Math.cos(angleRadians) * absoluteDistance;
+                const visualThumbY = this.fixedCenterPoint + Math.sin(angleRadians) * absoluteDistance;
                 
                 this.indicator.style.left = `${visualThumbX}px`;
                 this.indicator.style.top = `${visualThumbY}px`;
                 
-                // Dynamic lightness interpolation for Pure White rendering when pulled from memory
+                // Dynamic lightness interpolation for Pure White rendering
                 const lightnessPct = 100 - (distanceRatio * 50);
                 this.indicator.style.backgroundColor = `hsl(${state.hue}, 100%, ${lightnessPct}%)`;
             }
@@ -1133,13 +1204,10 @@
             constructor() {
                 this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
-                
-                // Map to store instantiated canvas controllers
                 this.colorWheelControllers = {};
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
-                    // Strict initialization. Default Hue 0, Saturation 0 = Pure White.
                     this.devicesState[device.id] = {
                         on: false,
                         brightness: 100, 
@@ -1181,8 +1249,6 @@
                     } finally {
                         ApplicationUI.setDeviceConnectingState(device.id, false);
                         ApplicationUI.updateDeviceCardRender(device.id);
-                        
-                        // Force color wheel UI to match synchronized state memory
                         if(this.colorWheelControllers[device.id]) {
                             this.colorWheelControllers[device.id].updateIndicatorFromState();
                         }
@@ -1221,116 +1287,159 @@
                 }
             }
 
+            /**
+             * Toggles power, branching out to multiple devices if global link is active.
+             */
             async toggleDevicePower(deviceId) {
                 if (!this.isConfigured()) {
                     ApplicationUI.openSettingsModal();
                     return;
                 }
 
-                const previousStateMemory = this.devicesState[deviceId].on;
-                this.devicesState[deviceId].on = !previousStateMemory;
+                // Determine target state based on the specific device interacted with
+                const targetState = !this.devicesState[deviceId].on;
                 
-                ApplicationUI.setDeviceConnectingState(deviceId, true);
-                ApplicationUI.updateDeviceCardRender(deviceId);
+                // Fan-out array based on Global Link state
+                const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
+
+                // Optimistically invert state and apply connecting UI for ALL targets
+                targetDeviceIds.forEach(id => {
+                    this.devicesState[id].on = targetState;
+                    ApplicationUI.setDeviceConnectingState(id, true);
+                    ApplicationUI.updateDeviceCardRender(id);
+                });
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    const requestBodyPayload = {
-                        device: deviceId,
-                        commands: [{ code: 'switch_led', value: this.devicesState[deviceId].on }]
-                    };
-                    await NetworkService.post(url, requestBodyPayload);
+                    
+                    // Execute all requests concurrently
+                    await Promise.all(targetDeviceIds.map(id => {
+                        const body = {
+                            device: id,
+                            commands: [{ code: 'switch_led', value: targetState }]
+                        };
+                        return NetworkService.post(url, body);
+                    }));
+
                 } catch (error) {
                     if (error.name === 'AbortError') {
                         GlobalToast.show("Device Unresponsive (Timeout)");
                     } else {
                         GlobalToast.show("Network Error. Check Connection.");
                     }
-                    this.devicesState[deviceId].on = previousStateMemory;
-                    ApplicationUI.updateDeviceCardRender(deviceId);
+                    // Revert state on network failure for all targets
+                    targetDeviceIds.forEach(id => {
+                        this.devicesState[id].on = !targetState;
+                        ApplicationUI.updateDeviceCardRender(id);
+                    });
                 } finally {
-                    ApplicationUI.setDeviceConnectingState(deviceId, false);
+                    // Always remove connecting state
+                    targetDeviceIds.forEach(id => {
+                        ApplicationUI.setDeviceConnectingState(id, false);
+                    });
                 }
             }
 
+            /**
+             * Queues brightness command.
+             */
             handleBrightnessChangeIntent(deviceId, newBrightnessPercentage) {
                 if (!this.isConfigured()) return;
 
-                if (this.debounceTimers[deviceId]) {
-                    clearTimeout(this.debounceTimers[deviceId]);
-                }
+                if (this.debounceTimers[deviceId]) clearTimeout(this.debounceTimers[deviceId]);
 
                 this.debounceTimers[deviceId] = setTimeout(() => {
                     this.executeBrightnessCommand(deviceId, newBrightnessPercentage);
                 }, 400);
             }
 
+            /**
+             * Executes brightness modification, fanning out if globally linked.
+             */
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
-                if (this.devicesState[deviceId].on === false) return;
-
-                ApplicationUI.setDeviceConnectingState(deviceId, true);
-                
+                const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
+                
+                let dispatchNeeded = false;
+
+                targetDeviceIds.forEach(id => {
+                    if (this.devicesState[id].on === true) {
+                        dispatchNeeded = true;
+                        ApplicationUI.setDeviceConnectingState(id, true);
+                    }
+                });
+                
+                if(!dispatchNeeded) return;
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    const requestBodyPayload = {
-                        device: deviceId,
-                        commands: [
-                            { code: 'work_mode', value: 'colour' },
-                            { code: 'colour_data', value: JSON.stringify({ 
-                                h: this.devicesState[deviceId].hue || 0, 
-                                s: this.devicesState[deviceId].saturation || 0, 
-                                v: tuyaFormatBrightness 
-                            }) }
-                        ]
-                    };
-                    await NetworkService.post(url, requestBodyPayload);
+                    
+                    await Promise.all(targetDeviceIds.map(id => {
+                        if (this.devicesState[id].on === false) return Promise.resolve();
+                        
+                        const body = {
+                            device: id,
+                            commands: [
+                                { code: 'work_mode', value: 'colour' },
+                                { code: 'colour_data', value: JSON.stringify({ 
+                                    h: this.devicesState[id].hue || 0, 
+                                    s: this.devicesState[id].saturation || 0, 
+                                    v: tuyaFormatBrightness 
+                                }) }
+                            ]
+                        };
+                        return NetworkService.post(url, body);
+                    }));
                 } catch (error) {
-                    if (error.name === 'AbortError') {
-                        GlobalToast.show("Device Unresponsive (Timeout)");
-                    } else {
-                        GlobalToast.show("Network Error. Check Connection.");
-                    }
+                    if (error.name === 'AbortError') GlobalToast.show("Device Unresponsive (Timeout)");
+                    else GlobalToast.show("Network Error. Check Connection.");
                 } finally {
-                    ApplicationUI.setDeviceConnectingState(deviceId, false);
+                    targetDeviceIds.forEach(id => {
+                        ApplicationUI.setDeviceConnectingState(id, false);
+                    });
                 }
             }
             
             /**
-             * Transmits isolated color state modifications to Tuya via Cloudflare Worker.
-             * Utilizes state properties manipulated directly by the ColorWheelManager.
-             * @param {string} deviceId - Tuya device identifier.
+             * Transmits isolated color state modifications, fanning out if globally linked.
              */
             async executeColorCommand(deviceId) {
                 if (!this.isConfigured()) return;
                 
-                // Optimistic turn ON if color modified while off
-                if (this.devicesState[deviceId].on === false) {
-                    this.devicesState[deviceId].on = true;
-                    ApplicationUI.updateDeviceCardRender(deviceId);
-                }
-
-                ApplicationUI.setDeviceConnectingState(deviceId, true);
+                const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
+                
+                targetDeviceIds.forEach(id => {
+                    if (this.devicesState[id].on === false) {
+                        this.devicesState[id].on = true;
+                        ApplicationUI.updateDeviceCardRender(id);
+                    }
+                    ApplicationUI.setDeviceConnectingState(id, true);
+                });
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    const requestBodyPayload = {
-                        device: deviceId,
-                        commands: [
-                            { code: 'work_mode', value: 'colour' },
-                            { code: 'colour_data', value: JSON.stringify({ 
-                                h: this.devicesState[deviceId].hue, 
-                                s: this.devicesState[deviceId].saturation, 
-                                v: this.devicesState[deviceId].brightness * 10 
-                            }) }
-                        ]
-                    };
-                    await NetworkService.post(url, requestBodyPayload);
+                    
+                    await Promise.all(targetDeviceIds.map(id => {
+                        const body = {
+                            device: id,
+                            commands: [
+                                { code: 'work_mode', value: 'colour' },
+                                { code: 'colour_data', value: JSON.stringify({ 
+                                    h: this.devicesState[id].hue, 
+                                    s: this.devicesState[id].saturation, 
+                                    v: this.devicesState[id].brightness * 10 
+                                }) }
+                            ]
+                        };
+                        return NetworkService.post(url, body);
+                    }));
+
                 } catch (error) {
                     GlobalToast.show("Failed to apply color configuration.");
                 } finally {
-                    ApplicationUI.setDeviceConnectingState(deviceId, false);
+                    targetDeviceIds.forEach(id => {
+                        ApplicationUI.setDeviceConnectingState(id, false);
+                    });
                 }
             }
         }
@@ -1338,15 +1447,19 @@
         const DeviceManager = new TuyaSmartDeviceManager();
 
         /* ==========================================================================
-           USER INTERFACE RENDERER
+           USER INTERFACE RENDERER & LOGIC
            ========================================================================== */
 
         /**
-         * Orchestrates all DOM manipulation, Event Listening, and View rendering.
+         * Orchestrates DOM manipulation, Global Link logic, and View rendering.
          */
         class UserInterfaceController {
             constructor() {
                 this.layoutMode = localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
+                
+                // Retrieve Global Link state from memory
+                this.isDevicesLinked = localStorage.getItem(STORAGE_KEYS.DEVICES_LINKED) === 'true';
+                
                 this.deviceGridContainer = document.getElementById('main-device-grid');
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
                 this.inputWorkerUrl = document.getElementById('input-field-worker-url');
@@ -1357,6 +1470,7 @@
 
             initialize() {
                 this.applyLayoutModeToBody();
+                this.applyGlobalLinkStateToButton();
                 this.constructDeviceGrid();
                 this.attachStaticEventListeners();
             }
@@ -1392,6 +1506,37 @@
                     this.applyLayoutModeToBody();
                 }
             }
+            
+            /**
+             * Visually updates the Global Link / Sync button based on state.
+             */
+            applyGlobalLinkStateToButton() {
+                const btn = document.getElementById('global-link-synchronization-button');
+                if (!btn) return;
+                
+                if (this.isDevicesLinked) {
+                    btn.classList.add('is-devices-linked');
+                    btn.setAttribute('aria-pressed', 'true');
+                } else {
+                    btn.classList.remove('is-devices-linked');
+                    btn.setAttribute('aria-pressed', 'false');
+                }
+            }
+            
+            /**
+             * Toggles the Global Link state in memory and applies visuals.
+             */
+            toggleGlobalLinkState() {
+                this.isDevicesLinked = !this.isDevicesLinked;
+                localStorage.setItem(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
+                this.applyGlobalLinkStateToButton();
+                
+                if (this.isDevicesLinked) {
+                    GlobalToast.show("Devices Synced");
+                } else {
+                    GlobalToast.show("Devices Unlinked");
+                }
+            }
 
             attachStaticEventListeners() {
                 document.getElementById('header-btn-refresh').addEventListener('click', () => {
@@ -1417,6 +1562,11 @@
 
                 document.getElementById('modal-btn-save').addEventListener('click', this.handleSettingsSave);
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
+                
+                // Link Toggle Event
+                document.getElementById('global-link-synchronization-button').addEventListener('click', () => {
+                    this.toggleGlobalLinkState();
+                });
             }
             
             toggleWeatherExpansion() {
@@ -1522,7 +1672,6 @@
                             return;
                         }
                         
-                        // Toggle CSS class that drives explicitly defined mathematical height variables
                         cardWrapper.classList.toggle('is-expanded');
                         
                         // Redraw indicator mathematics to compensate for grid expansion offset changes
@@ -1561,30 +1710,42 @@
                 }
             }
 
+            /**
+             * Repaints DOM variables during high-fps touch interactions.
+             * Propagates visual updates to all devices if Global Link is active.
+             */
             handleHighFrequencySliderDrag(deviceId, rawValue) {
                 const integerValue = parseInt(rawValue, 10);
                 
-                // Fast-path ON state invocation immediately upon interaction
-                if (DeviceManager.devicesState[deviceId].on === false) {
-                    DeviceManager.devicesState[deviceId].on = true;
-                    this.updateDeviceCardRender(deviceId);
-                }
+                const targetDeviceIds = this.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
 
-                DeviceManager.devicesState[deviceId].brightness = integerValue;
-                
-                const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
-                const statusLabel = document.getElementById(`status-label-${deviceId}`);
-                const nativeSlider = document.getElementById(`native-slider-input-${deviceId}`);
-                
-                if (fillLayer) fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
+                targetDeviceIds.forEach(id => {
+                    // Fast-path ON state invocation immediately upon interaction
+                    if (DeviceManager.devicesState[id].on === false) {
+                        DeviceManager.devicesState[id].on = true;
+                        this.updateDeviceCardRender(id);
+                    }
 
-                if (DeviceManager.devicesState[deviceId].on && statusLabel && nativeSlider) {
-                    statusLabel.innerText = `${integerValue}%`;
-                    nativeSlider.setAttribute('aria-valuenow', integerValue);
-                    nativeSlider.setAttribute('aria-valuetext', `${integerValue} percent`);
-                }
+                    DeviceManager.devicesState[id].brightness = integerValue;
+                    
+                    const fillLayer = document.getElementById(`slider-fill-layer-${id}`);
+                    const statusLabel = document.getElementById(`status-label-${id}`);
+                    const nativeSlider = document.getElementById(`native-slider-input-${id}`);
+                    
+                    if (fillLayer) fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
+
+                    if (DeviceManager.devicesState[id].on && statusLabel && nativeSlider) {
+                        statusLabel.innerText = `${integerValue}%`;
+                        nativeSlider.value = integerValue; // Force physical sync of other slider
+                        nativeSlider.setAttribute('aria-valuenow', integerValue);
+                        nativeSlider.setAttribute('aria-valuetext', `${integerValue} percent`);
+                    }
+                });
             }
 
+            /**
+             * Applies authoritative state data from memory onto the DOM node structurally.
+             */
             updateDeviceCardRender(deviceId) {
                 const stateObject = DeviceManager.devicesState[deviceId];
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
@@ -1607,8 +1768,7 @@
                     nativeSlider.disabled = true;
                     
                     // ARCHITECTURAL ENFORCEMENT:
-                    // If the device is turned off (locally or via remote sync), we must ensure 
-                    // the expanded color wheel interface is securely collapsed.
+                    // If the device is turned off we must ensure the expanded color wheel is collapsed.
                     if (cardWrapper.classList.contains('is-expanded')) {
                         cardWrapper.classList.remove('is-expanded');
                     }
@@ -1623,7 +1783,6 @@
             setDeviceConnectingState(deviceId, isConnecting) {
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 if (cardWrapper) {
-                    // Directly manipulate classes to trigger subtle CSS animations
                     if (isConnecting) cardWrapper.classList.add('is-connecting');
                     else cardWrapper.classList.remove('is-connecting');
                 }
@@ -1675,11 +1834,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             ApplicationUI.initialize();
 
+            // Initialize Live Digital Clock
+            LiveClock.start();
+
+            // Instantiate and trigger background weather service independently
             const WeatherAPI = new WeatherService();
             WeatherAPI.fetchAndRender();
 
+            // Evaluate configuration readiness
             if (!DeviceManager.isConfigured()) {
-                setTimeout(() => ApplicationUI.openSettingsModal(), 600);
+                setTimeout(() => {
+                    ApplicationUI.openSettingsModal();
+                }, 600);
             } else {
                 DeviceManager.synchronizeAllDevices();
             }
