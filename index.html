@@ -6,10 +6,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <meta name="description" content="Ultimate Premium Apple HomeKit Style Smart Home Controller for iPad Air 2">
-    <link rel="icon" href="/home/favicon.png">
-    <link rel="apple-touch-icon" href="/home/apple-touch-icon.png">
+    <meta name="description" content="Nestra: Ultimate Premium Apple HomeKit Style Smart Home Controller for iPad Air 2">
+    
+    <!-- Application Identity & iOS Home Screen Iconography -->
     <title>Nestra</title>
+    <link rel="icon" href="/home/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/home/apple-touch-icon.png">
 
     <style>
         /* ==========================================================================
@@ -203,14 +205,20 @@
             padding-right: 8px;
         }
 
+        /* CRITICAL TYPOGRAPHY FIX: Proportional Numbers for perfectly kerned Clock Digits */
         .application-title {
             font-family: var(--font-medium);
-            font-weight: normal; /* Let the font file dictate weight */
+            font-weight: normal; /* Let the custom font file dictate the physical weight */
             font-size: 38px;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.04em; /* Tight, native Apple kerning */
             line-height: 1.2;
             color: #FFFFFF;
-            font-variant-numeric: tabular-nums;
+            
+            /* Replaced tabular-nums with proportional-nums to fix the massive gap around the digit '1' */
+            font-variant-numeric: proportional-nums;
+            
+            /* Low-level OpenType feature explicit enforcement for WebKit rendering accuracy */
+            font-feature-settings: "pnum" 1, "tnum" 0, "kern" 1;
         }
 
         .header-controls-container {
@@ -325,6 +333,8 @@
             margin-top: 4px; 
             margin-bottom: 4px; 
             color: #FFFFFF; 
+            font-variant-numeric: proportional-nums;
+            font-feature-settings: "pnum" 1, "tnum" 0;
         }
         
         .weather-condition-description { 
@@ -944,10 +954,10 @@
         ];
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v14',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v14',
-            WEATHER_CACHE: 'enterprise_weather_cache_v14',
-            DEVICES_LINKED: 'enterprise_devices_linked_v14'
+            WORKER_URL: 'enterprise_tuya_worker_url_v15',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v15',
+            WEATHER_CACHE: 'enterprise_weather_cache_v15',
+            DEVICES_LINKED: 'enterprise_devices_linked_v15'
         };
 
         const SVG_ASSETS = {
@@ -1940,6 +1950,7 @@
             setDeviceConnectingState(deviceId, isConnecting) {
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 if (cardWrapper) {
+                    // Directly manipulate classes to trigger subtle CSS animations
                     if (isConnecting) cardWrapper.classList.add('is-connecting');
                     else cardWrapper.classList.remove('is-connecting');
                 }
