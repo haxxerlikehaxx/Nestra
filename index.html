@@ -1510,9 +1510,9 @@
 
         class WeatherService {
             constructor() {
-                this.latitudeCoordinateForApi = 59.38; // Spånga
-                this.longitudeCoordinateForApi = 17.90; // Spånga
-                this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+                this.latitudeCoordinateForApi = "59.380000"; // Spånga
+                this.longitudeCoordinateForApi = "17.900000"; // Spånga
+                this.apiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitudeCoordinateForApi}/lat/${this.latitudeCoordinateForApi}/data.json`;
                 this.mainRowElement = document.getElementById('weather-main-row-container');
                 this.hourlyContainerElement = document.getElementById('weather-hourly-container');
             }
@@ -1543,16 +1543,100 @@
                 `;
             }
 
-            parseWmoWeatherCode(code) {
-                if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
-                if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
+            parseSmhiWeatherCode(code) {
+                if (code === 1 || code === 2) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
+                if (code === 3 || code === 4) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code >= 5 && code <= 7) return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if ([8, 9, 10, 18, 19, 20].includes(code)) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
+                if ([11, 21].includes(code)) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
+                if ([12, 13, 14, 22, 23, 24].includes(code)) return { text: "Sleet", icon: SVG_ASSETS.WEATHER_RAIN };
+                if ([15, 16, 17, 25, 26, 27].includes(code)) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
                 return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+            }
+
+            async fetchAndRender() {
+                const cachedPayload = sessionStorage.getItem(STORAGE_KEYS.WEATHER_CACHE);
+                if (cachedPayload) {
+                    try {
+                        this.renderSuccessState(JSON.parse(cachedPayload));
+                    } catch (e) {
+                        this.renderLoadingState(); 
+                    }
+                } else {
+                    this.renderLoadingState();
+                }
+
+                try {
+                    const rawData = await NetworkService.get(this.apiUrl);
+                    if (!rawData || !rawData.timeSeries || rawData.timeSeries.length === 0) {
+                        throw new Error("Invalid data structure from SMHI API.");
+                    }
+
+                    const getParam = (params, name) => {
+                        const p = params.find(param => param.name === name);
+                        return p && p.values && p.values.length > 0 ? p.values[0] : 0;
+                    };
+
+                    const currentData = rawData.timeSeries[0];
+                    const currentTemp = getParam(currentData.parameters, 't');
+                    const currentCode = getParam(currentData.parameters, 'Wsymb2');
+                    const currentCondition = this.parseSmhiWeatherCode(currentCode);
+
+                    const todayStr = new Date().toLocaleDateString();
+                    let todayHigh = -100;
+                    let todayLow = 100;
+
+                    const compiledWeatherData = {
+                        current: {
+                            temp: Math.round(currentTemp),
+                            text: currentCondition.text,
+                            icon: currentCondition.icon,
+                            high: 0,
+                            low: 0
+                        },
+                        hourly: []
+                    };
+
+                    let count = 0;
+                    for (let i = 0; i < rawData.timeSeries.length; i++) {
+                        const ts = rawData.timeSeries[i];
+                        const dateObj = new Date(ts.validTime);
+                        const tsDateStr = dateObj.toLocaleDateString();
+                        const t = getParam(ts.parameters, 't');
+                        
+                        if (tsDateStr === todayStr) {
+                            if (t > todayHigh) todayHigh = t;
+                            if (t < todayLow) todayLow = t;
+                        }
+
+                        if (count < 24) {
+                            const hCode = getParam(ts.parameters, 'Wsymb2');
+                            const hCondition = this.parseSmhiWeatherCode(hCode);
+                            const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
+                            
+                            compiledWeatherData.hourly.push({
+                                time: count === 0 ? "Now" : hoursStr,
+                                temp: Math.round(t),
+                                icon: hCondition.icon
+                            });
+                            count++;
+                        }
+                    }
+
+                    if (todayHigh === -100) todayHigh = currentTemp;
+                    if (todayLow === 100) todayLow = currentTemp;
+
+                    compiledWeatherData.current.high = Math.round(todayHigh);
+                    compiledWeatherData.current.low = Math.round(todayLow);
+
+                    this.renderSuccessState(compiledWeatherData);
+                    sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
+
+                } catch (error) {
+                    let errorMessage = "Data Unavailable";
+                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
+                    if (!cachedPayload) this.renderErrorState(errorMessage);
+                }
             }
 
             renderSuccessState(data) {
@@ -1577,69 +1661,6 @@
                             <span class="hourly-item-temp">${hourBlock.temp}°</span>
                         </div>
                     `).join('');
-                }
-            }
-
-            async fetchAndRender() {
-                const cachedPayload = sessionStorage.getItem(STORAGE_KEYS.WEATHER_CACHE);
-                if (cachedPayload) {
-                    try {
-                        this.renderSuccessState(JSON.parse(cachedPayload));
-                    } catch (e) {
-                        this.renderLoadingState(); 
-                    }
-                } else {
-                    this.renderLoadingState();
-                }
-
-                try {
-                    const rawData = await NetworkService.get(this.apiUrl);
-                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
-                        throw new Error("Invalid data structure from Open-Meteo API.");
-                    }
-
-                    const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
-                    const compiledWeatherData = {
-                        current: {
-                            temp: Math.round(rawData.current.temperature_2m),
-                            text: currentCondition.text,
-                            icon: currentCondition.icon,
-                            high: Math.round(rawData.daily.temperature_2m_max[0]),
-                            low: Math.round(rawData.daily.temperature_2m_min[0])
-                        },
-                        hourly: []
-                    };
-
-                    let startIndex = 0;
-                    const nowTime = new Date().getTime();
-                    
-                    for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
-                        if (hourTime >= nowTime - 1800000) { 
-                            startIndex = i;
-                            break;
-                        }
-                    }
-
-                    for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
-                        const dateObj = new Date(rawData.hourly.time[i]);
-                        const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
-                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
-                        
-                        compiledWeatherData.hourly.push({
-                            time: i === startIndex ? "Now" : hoursStr,
-                            temp: Math.round(rawData.hourly.temperature_2m[i]),
-                            icon: hCondition.icon
-                        });
-                    }
-
-                    this.renderSuccessState(compiledWeatherData);
-                    sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
-
-                } catch (error) {
-                    let errorMessage = "Data Unavailable";
-                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
-                    if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
         }
