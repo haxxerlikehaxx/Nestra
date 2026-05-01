@@ -1227,6 +1227,28 @@
         "use strict";
 
         /* ==========================================================================
+           SAFE STORAGE WRAPPER (Prevents QuotaExceededError in older iOS Safari)
+           ========================================================================== */
+        const SafeStorage = {
+            getLocal: function(key) {
+                try { return localStorage.getItem(key); } 
+                catch (e) { return null; }
+            },
+            setLocal: function(key, value) {
+                try { localStorage.setItem(key, value); } 
+                catch (e) { console.warn('LocalStorage unavailable.'); }
+            },
+            getSession: function(key) {
+                try { return sessionStorage.getItem(key); } 
+                catch (e) { return null; }
+            },
+            setSession: function(key, value) {
+                try { sessionStorage.setItem(key, value); } 
+                catch (e) { console.warn('SessionStorage unavailable.'); }
+            }
+        };
+
+        /* ==========================================================================
            CONSTANTS & STATIC DATA
            ========================================================================== */
         
@@ -1317,8 +1339,8 @@
             updateClock() {
                 if(!this.clockElement) return;
                 const now = new Date();
-                const formattedHours = String(now.getHours()).padStart(2, '0');
-                const formattedMinutes = String(now.getMinutes()).padStart(2, '0');
+                const formattedHours = ('0' + now.getHours()).slice(-2);
+                const formattedMinutes = ('0' + now.getMinutes()).slice(-2);
                 this.clockElement.innerText = `${formattedHours}:${formattedMinutes}`;
                 
                 // Every minute, evaluate the active Agenda Routine
@@ -1345,7 +1367,7 @@
             }
 
             loadFromStorage() {
-                const storedData = localStorage.getItem(STORAGE_KEYS.AGENDA_ROUTINES);
+                const storedData = SafeStorage.getLocal(STORAGE_KEYS.AGENDA_ROUTINES);
                 if (storedData) {
                     try {
                         this.routines = JSON.parse(storedData);
@@ -1377,19 +1399,19 @@
                         task.order = tIndex;
                     });
                 });
-                localStorage.setItem(STORAGE_KEYS.AGENDA_ROUTINES, JSON.stringify(this.routines));
+                SafeStorage.setLocal(STORAGE_KEYS.AGENDA_ROUTINES, JSON.stringify(this.routines));
             }
 
             enforceDailyReset() {
                 const currentLocalDateString = new Date().toDateString();
-                const lastRecordedResetDate = localStorage.getItem(STORAGE_KEYS.AGENDA_LAST_RESET);
+                const lastRecordedResetDate = SafeStorage.getLocal(STORAGE_KEYS.AGENDA_LAST_RESET);
 
                 if (lastRecordedResetDate !== currentLocalDateString) {
                     this.routines.forEach(routine => {
                         routine.tasks.forEach(task => task.completed = false);
                     });
                     this.saveToStorage();
-                    localStorage.setItem(STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
+                    SafeStorage.setLocal(STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
                 }
             }
 
@@ -1547,15 +1569,15 @@
                 if (code === 1 || code === 2) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
                 if (code === 3 || code === 4) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
                 if (code >= 5 && code <= 7) return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if ([8, 9, 10, 18, 19, 20].includes(code)) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if ([11, 21].includes(code)) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
-                if ([12, 13, 14, 22, 23, 24].includes(code)) return { text: "Sleet", icon: SVG_ASSETS.WEATHER_RAIN };
-                if ([15, 16, 17, 25, 26, 27].includes(code)) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
+                if ([8, 9, 10, 18, 19, 20].indexOf(code) !== -1) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
+                if ([11, 21].indexOf(code) !== -1) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
+                if ([12, 13, 14, 22, 23, 24].indexOf(code) !== -1) return { text: "Sleet", icon: SVG_ASSETS.WEATHER_RAIN };
+                if ([15, 16, 17, 25, 26, 27].indexOf(code) !== -1) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
                 return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
             }
 
             async fetchAndRender() {
-                const cachedPayload = sessionStorage.getItem(STORAGE_KEYS.WEATHER_CACHE);
+                const cachedPayload = SafeStorage.getSession(STORAGE_KEYS.WEATHER_CACHE);
                 if (cachedPayload) {
                     try {
                         this.renderSuccessState(JSON.parse(cachedPayload));
@@ -1582,7 +1604,7 @@
                     const currentCode = getParam(currentData.parameters, 'Wsymb2');
                     const currentCondition = this.parseSmhiWeatherCode(currentCode);
 
-                    const todayStr = new Date().toLocaleDateString();
+                    const now = new Date();
                     let todayHigh = -100;
                     let todayLow = 100;
 
@@ -1601,10 +1623,12 @@
                     for (let i = 0; i < rawData.timeSeries.length; i++) {
                         const ts = rawData.timeSeries[i];
                         const dateObj = new Date(ts.validTime);
-                        const tsDateStr = dateObj.toLocaleDateString();
                         const t = getParam(ts.parameters, 't');
                         
-                        if (tsDateStr === todayStr) {
+                        // Universal Day matching (avoids WebKit toLocaleDateString bugs)
+                        if (dateObj.getFullYear() === now.getFullYear() && 
+                            dateObj.getMonth() === now.getMonth() && 
+                            dateObj.getDate() === now.getDate()) {
                             if (t > todayHigh) todayHigh = t;
                             if (t < todayLow) todayLow = t;
                         }
@@ -1612,7 +1636,7 @@
                         if (count < 24) {
                             const hCode = getParam(ts.parameters, 'Wsymb2');
                             const hCondition = this.parseSmhiWeatherCode(hCode);
-                            const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
+                            const hoursStr = ('0' + dateObj.getHours()).slice(-2) + ":00";
                             
                             compiledWeatherData.hourly.push({
                                 time: count === 0 ? "Now" : hoursStr,
@@ -1630,11 +1654,11 @@
                     compiledWeatherData.current.low = Math.round(todayLow);
 
                     this.renderSuccessState(compiledWeatherData);
-                    sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
+                    SafeStorage.setSession(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
                     let errorMessage = "Data Unavailable";
-                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
+                    if (error && error.name === 'AbortError') errorMessage = "Weather API Timeout";
                     if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
@@ -1673,11 +1697,22 @@
             constructor() {
                 this.defaultTimeoutMs = 15000; 
             }
+
             async get(url) {
-                const abortController = new AbortController();
-                const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
+                let abortController = null;
+                let signal = undefined;
+                if (typeof window.AbortController !== 'undefined') {
+                    abortController = new window.AbortController();
+                    signal = abortController.signal;
+                }
+                
+                const timeoutId = setTimeout(() => {
+                    if (abortController) abortController.abort();
+                }, this.defaultTimeoutMs);
+                
                 try {
-                    const response = await fetch(url, { signal: abortController.signal });
+                    const fetchOptions = signal ? { signal } : {};
+                    const response = await fetch(url, fetchOptions);
                     clearTimeout(timeoutId);
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return await response.json();
@@ -1686,16 +1721,28 @@
                     throw error;
                 }
             }
+
             async post(url, body) {
-                const abortController = new AbortController();
-                const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
+                let abortController = null;
+                let signal = undefined;
+                if (typeof window.AbortController !== 'undefined') {
+                    abortController = new window.AbortController();
+                    signal = abortController.signal;
+                }
+
+                const timeoutId = setTimeout(() => {
+                    if (abortController) abortController.abort();
+                }, this.defaultTimeoutMs);
+                
                 try {
-                    const response = await fetch(url, {
+                    const fetchOptions = {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body),
-                        signal: abortController.signal
-                    });
+                        body: JSON.stringify(body)
+                    };
+                    if (signal) fetchOptions.signal = signal;
+
+                    const response = await fetch(url, fetchOptions);
                     clearTimeout(timeoutId);
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return await response.json();
@@ -1852,7 +1899,7 @@
 
         class TuyaSmartDeviceManager {
             constructor() {
-                this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
+                this.workerApiUrl = SafeStorage.getLocal(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
                 this.colorWheelControllers = {};
                 
@@ -1864,7 +1911,7 @@
             }
 
             buildEndpointUrl(path) { return this.workerApiUrl.replace(/\/$/, '') + path; }
-            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); localStorage.setItem(STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
+            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); SafeStorage.setLocal(STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
             isConfigured() { return this.workerApiUrl !== null && this.workerApiUrl !== ''; }
 
             async synchronizeAllDevices() {
@@ -1989,8 +2036,8 @@
 
         class UserInterfaceController {
             constructor() {
-                this.layoutMode = localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
-                this.isDevicesLinked = localStorage.getItem(STORAGE_KEYS.DEVICES_LINKED) === 'true';
+                this.layoutMode = SafeStorage.getLocal(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
+                this.isDevicesLinked = SafeStorage.getLocal(STORAGE_KEYS.DEVICES_LINKED) === 'true';
                 
                 this.deviceGridContainer = document.getElementById('main-device-grid');
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
@@ -2052,7 +2099,7 @@
             
             toggleGlobalLinkState() {
                 this.isDevicesLinked = !this.isDevicesLinked;
-                localStorage.setItem(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
+                SafeStorage.setLocal(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
                 this.applyGlobalLinkStateToButton();
                 
                 if (this.isDevicesLinked) GlobalToast.show("Devices Synced");
@@ -2412,7 +2459,7 @@
             }
 
             openSettingsModal() {
-                this.setLayoutMode(localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
+                this.setLayoutMode(SafeStorage.getLocal(STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
                 if (this.inputWorkerUrl) this.inputWorkerUrl.value = DeviceManager.workerApiUrl;
                 
                 this.renderAgendaEditorSettings();
@@ -2424,7 +2471,7 @@
             }
 
             handleSettingsCancel() {
-                const memoryLayout = localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
+                const memoryLayout = SafeStorage.getLocal(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
                 this.setLayoutMode(memoryLayout);
                 if (this.settingsModalBackdrop) {
                     this.settingsModalBackdrop.classList.remove('is-visible-active');
@@ -2438,7 +2485,7 @@
                 if (inputString === '') return GlobalToast.show("Error: Web URL cannot be empty.");
                 
                 DeviceManager.setApiUrl(inputString);
-                localStorage.setItem(STORAGE_KEYS.LAYOUT_MODE, this.layoutMode);
+                SafeStorage.setLocal(STORAGE_KEYS.LAYOUT_MODE, this.layoutMode);
                 this.applyLayoutModeToBody();
 
                 if (this.settingsModalBackdrop) {
