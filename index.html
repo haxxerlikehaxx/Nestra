@@ -1527,11 +1527,12 @@
         const AgendaSystem = new AgendaManager();
 
         /* ==========================================================================
-           EXTERNAL SERVICE INTEGRATIONS (WEATHER)
+           EXTERNAL SERVICE INTEGRATIONS (WEATHER - SMHI SAFARI FIXED)
            ========================================================================== */
 
         class WeatherService {
             constructor() {
+                // SMHI requires exactly maximum 6 decimal places.
                 this.latitudeCoordinateForApi = "59.380000"; // Spånga
                 this.longitudeCoordinateForApi = "17.900000"; // Spånga
                 this.apiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitudeCoordinateForApi}/lat/${this.latitudeCoordinateForApi}/data.json`;
@@ -1548,7 +1549,7 @@
                         <span class="weather-condition-description">Fetching Weather...</span>
                     </div>
                     <div class="weather-graphics-right">
-                        <div class="weather-vector-icon"><div class="weather-spinner"></div></div>
+                        <div class="weather-vector-icon"><div class="skeleton" style="width: 64px; height: 64px; border-radius: 50%;"></div></div>
                         <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
                     </div>
                 `;
@@ -1559,8 +1560,8 @@
                 this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
-                        <h2 class="weather-temperature-display">--</h2>
-                        <span class="weather-condition-description" style="color: #FF453A;">${errorMessage}</span>
+                        <h2 class="weather-temperature-display" style="font-size: 32px; margin-top: 12px;">Error</h2>
+                        <span class="weather-condition-description" style="color: #FF453A; font-size: 13px; line-height: 1.2; max-width: 200px; display: block;">${errorMessage}</span>
                     </div>
                 `;
             }
@@ -1570,7 +1571,7 @@
                 if (code === 3 || code === 4) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
                 if (code >= 5 && code <= 7) return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
                 if ([8, 9, 10, 18, 19, 20].indexOf(code) !== -1) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if ([11, 21].indexOf(code) !== -1) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
+                if ([11, 21].indexOf(code) !== -1) return { text: "Thunder", icon: SVG_ASSETS.WEATHER_RAIN };
                 if ([12, 13, 14, 22, 23, 24].indexOf(code) !== -1) return { text: "Sleet", icon: SVG_ASSETS.WEATHER_RAIN };
                 if ([15, 16, 17, 25, 26, 27].indexOf(code) !== -1) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
                 return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
@@ -1589,9 +1590,26 @@
                 }
 
                 try {
-                    const rawData = await NetworkService.get(this.apiUrl);
+                    // Bypass the global NetworkManager specifically for the iPad Safari fix.
+                    // Removed AbortController as it causes random DOMExceptions on old iPads.
+                    const response = await fetch(this.apiUrl, {
+                        method: 'GET',
+                        mode: 'cors',         // Required for cross-origin
+                        credentials: 'omit',  // Prevents iOS tracking prevention from blocking the request
+                        cache: 'no-store',    // Prevents iOS Safari from heavily caching API endpoints
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const rawData = await response.json();
+
                     if (!rawData || !rawData.timeSeries || rawData.timeSeries.length === 0) {
-                        throw new Error("Invalid data structure from SMHI API.");
+                        throw new Error("Invalid format from SMHI.");
                     }
 
                     const getParam = (params, name) => {
@@ -1622,10 +1640,14 @@
                     let count = 0;
                     for (let i = 0; i < rawData.timeSeries.length; i++) {
                         const ts = rawData.timeSeries[i];
-                        const dateObj = new Date(ts.validTime);
+                        
+                        // Fallback Date parser for Safari stability
+                        const dateStr = ts.validTime; // "2024-05-01T12:00:00Z"
+                        const dateObj = new Date(dateStr);
+                        
                         const t = getParam(ts.parameters, 't');
                         
-                        // Universal Day matching (avoids WebKit toLocaleDateString bugs)
+                        // Isolate day matching strictly to prevent WebKit timezone shifts
                         if (dateObj.getFullYear() === now.getFullYear() && 
                             dateObj.getMonth() === now.getMonth() && 
                             dateObj.getDate() === now.getDate()) {
@@ -1657,8 +1679,10 @@
                     SafeStorage.setSession(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
-                    let errorMessage = "Data Unavailable";
-                    if (error && error.name === 'AbortError') errorMessage = "Weather API Timeout";
+                    // Injecting the exact error message into the UI so you can see if it's a network block or parse error
+                    let errorMessage = error.message || "Unknown Network Error";
+                    if (errorMessage.includes('Failed to fetch')) errorMessage = "Network/CORS blocked by iPad";
+                    
                     if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
