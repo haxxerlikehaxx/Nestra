@@ -1527,15 +1527,14 @@
         const AgendaSystem = new AgendaManager();
 
         /* ==========================================================================
-           EXTERNAL SERVICE INTEGRATIONS (WEATHER - SMHI SAFARI FIXED)
+           EXTERNAL SERVICE INTEGRATIONS (WEATHER - BULLETPROOF IPAD VERSION)
            ========================================================================== */
 
         class WeatherService {
             constructor() {
-                // SMHI requires exactly maximum 6 decimal places.
-                this.latitudeCoordinateForApi = "59.380000"; // Spånga
-                this.longitudeCoordinateForApi = "17.900000"; // Spånga
-                this.apiUrl = `https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/${this.longitudeCoordinateForApi}/lat/${this.latitudeCoordinateForApi}/data.json`;
+                // Open-Meteo: No API keys, no strict CORS, highly permissive. 
+                // Set to Spånga coordinates with Stockholm timezone.
+                this.apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=59.38&longitude=17.90&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FStockholm';
                 this.mainRowElement = document.getElementById('weather-main-row-container');
                 this.hourlyContainerElement = document.getElementById('weather-hourly-container');
             }
@@ -1546,7 +1545,7 @@
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
                         <h2 class="weather-temperature-display"><div class="skeleton" style="width: 80px; height: 50px;"></div></h2>
-                        <span class="weather-condition-description">Fetching Weather...</span>
+                        <span class="weather-condition-description">Loading...</span>
                     </div>
                     <div class="weather-graphics-right">
                         <div class="weather-vector-icon"><div class="skeleton" style="width: 64px; height: 64px; border-radius: 50%;"></div></div>
@@ -1560,20 +1559,22 @@
                 this.mainRowElement.innerHTML = `
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
-                        <h2 class="weather-temperature-display" style="font-size: 32px; margin-top: 12px;">Error</h2>
-                        <span class="weather-condition-description" style="color: #FF453A; font-size: 13px; line-height: 1.2; max-width: 200px; display: block;">${errorMessage}</span>
+                        <h2 class="weather-temperature-display">--</h2>
+                        <span class="weather-condition-description" style="color: #FF453A;">${errorMessage}</span>
                     </div>
                 `;
             }
 
-            parseSmhiWeatherCode(code) {
-                if (code === 1 || code === 2) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
-                if (code === 3 || code === 4) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code >= 5 && code <= 7) return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if ([8, 9, 10, 18, 19, 20].indexOf(code) !== -1) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if ([11, 21].indexOf(code) !== -1) return { text: "Thunder", icon: SVG_ASSETS.WEATHER_RAIN };
-                if ([12, 13, 14, 22, 23, 24].indexOf(code) !== -1) return { text: "Sleet", icon: SVG_ASSETS.WEATHER_RAIN };
-                if ([15, 16, 17, 25, 26, 27].indexOf(code) !== -1) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
+            parseWmoWeatherCode(code) {
+                if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
+                if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code >= 45 && code <= 48) return { text: "Fog", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 71 && code <= 77) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 80 && code <= 82) return { text: "Showers", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
                 return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
             }
 
@@ -1590,99 +1591,59 @@
                 }
 
                 try {
-                    // Bypass the global NetworkManager specifically for the iPad Safari fix.
-                    // Removed AbortController as it causes random DOMExceptions on old iPads.
-                    const response = await fetch(this.apiUrl, {
-                        method: 'GET',
-                        mode: 'cors',         // Required for cross-origin
-                        credentials: 'omit',  // Prevents iOS tracking prevention from blocking the request
-                        cache: 'no-store',    // Prevents iOS Safari from heavily caching API endpoints
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-
+                    // Raw, simple fetch. No AbortControllers, no headers to trigger CORS pre-flights.
+                    const response = await fetch(this.apiUrl);
+                    
+                    if (!response.ok) throw new Error("HTTP Error");
+                    
                     const rawData = await response.json();
 
-                    if (!rawData || !rawData.timeSeries || rawData.timeSeries.length === 0) {
-                        throw new Error("Invalid format from SMHI.");
-                    }
-
-                    const getParam = (params, name) => {
-                        const p = params.find(param => param.name === name);
-                        return p && p.values && p.values.length > 0 ? p.values[0] : 0;
-                    };
-
-                    const currentData = rawData.timeSeries[0];
-                    const currentTemp = getParam(currentData.parameters, 't');
-                    const currentCode = getParam(currentData.parameters, 'Wsymb2');
-                    const currentCondition = this.parseSmhiWeatherCode(currentCode);
-
-                    const now = new Date();
-                    let todayHigh = -100;
-                    let todayLow = 100;
-
+                    // Parse Current Weather
+                    const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
+                    
                     const compiledWeatherData = {
                         current: {
-                            temp: Math.round(currentTemp),
+                            temp: Math.round(rawData.current.temperature_2m),
                             text: currentCondition.text,
                             icon: currentCondition.icon,
-                            high: 0,
-                            low: 0
+                            high: Math.round(rawData.daily.temperature_2m_max[0]),
+                            low: Math.round(rawData.daily.temperature_2m_min[0])
                         },
                         hourly: []
                     };
 
-                    let count = 0;
-                    for (let i = 0; i < rawData.timeSeries.length; i++) {
-                        const ts = rawData.timeSeries[i];
-                        
-                        // Fallback Date parser for Safari stability
-                        const dateStr = ts.validTime; // "2024-05-01T12:00:00Z"
-                        const dateObj = new Date(dateStr);
-                        
-                        const t = getParam(ts.parameters, 't');
-                        
-                        // Isolate day matching strictly to prevent WebKit timezone shifts
-                        if (dateObj.getFullYear() === now.getFullYear() && 
-                            dateObj.getMonth() === now.getMonth() && 
-                            dateObj.getDate() === now.getDate()) {
-                            if (t > todayHigh) todayHigh = t;
-                            if (t < todayLow) todayLow = t;
-                        }
+                    // Bulletproof iPad Time parsing (Bypasses the 'new Date()' bug in old Safari)
+                    // Open-Meteo returns time as "YYYY-MM-DDTHH:00"
+                    const currentHourString = ('0' + new Date().getHours()).slice(-2) + ":00";
+                    let startIndex = 0;
 
-                        if (count < 24) {
-                            const hCode = getParam(ts.parameters, 'Wsymb2');
-                            const hCondition = this.parseSmhiWeatherCode(hCode);
-                            const hoursStr = ('0' + dateObj.getHours()).slice(-2) + ":00";
-                            
-                            compiledWeatherData.hourly.push({
-                                time: count === 0 ? "Now" : hoursStr,
-                                temp: Math.round(t),
-                                icon: hCondition.icon
-                            });
-                            count++;
+                    // Find the current hour in the array using simple string matching
+                    for (let i = 0; i < rawData.hourly.time.length; i++) {
+                        if (rawData.hourly.time[i].endsWith("T" + currentHourString)) {
+                            startIndex = i;
+                            break;
                         }
                     }
 
-                    if (todayHigh === -100) todayHigh = currentTemp;
-                    if (todayLow === 100) todayLow = currentTemp;
+                    // Grab the next 24 hours starting from the found index
+                    for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
+                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
+                        // Extract just the "HH:MM" part safely using split
+                        const timeStringRaw = rawData.hourly.time[i]; 
+                        const hourOnly = timeStringRaw.split('T')[1]; 
 
-                    compiledWeatherData.current.high = Math.round(todayHigh);
-                    compiledWeatherData.current.low = Math.round(todayLow);
+                        compiledWeatherData.hourly.push({
+                            time: i === startIndex ? "Now" : hourOnly,
+                            temp: Math.round(rawData.hourly.temperature_2m[i]),
+                            icon: hCondition.icon
+                        });
+                    }
 
                     this.renderSuccessState(compiledWeatherData);
                     SafeStorage.setSession(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
-                    // Injecting the exact error message into the UI so you can see if it's a network block or parse error
-                    let errorMessage = error.message || "Unknown Network Error";
-                    if (errorMessage.includes('Failed to fetch')) errorMessage = "Network/CORS blocked by iPad";
-                    
+                    let errorMessage = "Check Network";
                     if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
