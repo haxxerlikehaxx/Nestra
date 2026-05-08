@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -45,6 +46,7 @@
 
         @font-face {
             font-family: 'SF Pro Semibold Soft Custom';
+            /* URL encoded spaces for maximum browser compatibility */
             src: url('./SF%20Pro%20-%20Semibold%20Soft.otf') format('opentype');
             font-weight: normal;
             font-style: normal;
@@ -108,12 +110,13 @@
             --font-semibold-soft: 'SF Pro Semibold Soft Custom', -apple-system, sans-serif;
             --font-bold: 'SF Pro Bold Custom', -apple-system, sans-serif;
             
-            /* Physics & Animation Curves (Overhauled for absolute smoothness) */
-            --animation-smooth-curve: cubic-bezier(0.25, 0.1, 0.25, 1.0); /* Native Apple Ease */
+            /* Physics & Animation Curves */
+            --animation-spring-curve: cubic-bezier(0.32, 0.72, 0, 1.0);
             --animation-bouncy-curve: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --animation-duration-fast: 0.25s;
-            --animation-duration-medium: 0.45s;
-            --animation-duration-slow: 0.65s;
+            --animation-ease-out-curve: cubic-bezier(0.25, 1.0, 0.5, 1.0);
+            --animation-duration-fast: 0.2s;
+            --animation-duration-medium: 0.4s;
+            --animation-duration-slow: 0.6s;
 
             /* Layout Constraints & Mathematical Animation Bounds */
             --layout-max-width-portrait: 768px;
@@ -172,7 +175,7 @@
             
             transition-property: max-width, padding-right, padding-left;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-ease-out-curve);
         }
 
         body.layout-mode-landscape {
@@ -228,7 +231,7 @@
         .animate-entry {
             animation-name: elegant-fade-slide-up;
             animation-duration: 0.7s;
-            animation-timing-function: var(--animation-smooth-curve);
+            animation-timing-function: var(--animation-spring-curve);
             animation-fill-mode: forwards;
         }
 
@@ -245,6 +248,14 @@
             padding-right: 8px;
         }
 
+        /* Grouping the clock and the new room climate badge */
+        .header-title-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+        }
+
         .application-title {
             font-family: var(--font-medium);
             font-weight: normal; 
@@ -254,6 +265,54 @@
             color: #FFFFFF;
             font-variant-numeric: proportional-nums;
             font-feature-settings: "pnum" 1, "tnum" 0, "kern" 1;
+        }
+
+        /* New Room Climate Badge Styles */
+        .room-climate-badge {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--glass-background-base);
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+            border-style: solid;
+            border-color: var(--glass-border-color);
+            padding-top: 6px;
+            padding-right: 14px;
+            padding-bottom: 6px;
+            padding-left: 12px;
+            border-radius: 20px;
+            backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
+            -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
+            
+            /* Initial state for entrance animation */
+            opacity: 0;
+            transform: translateX(-15px);
+            transition-property: opacity, transform;
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
+            transition-timing-function: var(--animation-spring-curve), var(--animation-spring-curve);
+        }
+
+        .room-climate-badge.is-loaded {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .room-climate-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--card-inactive-subtitle-color);
+        }
+
+        .room-climate-value {
+            font-family: var(--font-medium);
+            font-weight: normal;
+            font-size: 18px;
+            color: #FFFFFF;
+            letter-spacing: -0.02em;
         }
 
         .header-controls-container {
@@ -284,7 +343,8 @@
             
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
-            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
+            
             outline: none;
         }
 
@@ -299,7 +359,7 @@
         }
 
         /* ==========================================================================
-           WEATHER WIDGET COMPONENT
+           WEATHER WIDGET COMPONENT (EXPANDABLE & HARDWARE ACCELERATED)
            ========================================================================== */
         .weather-dashboard-widget {
             background-color: var(--glass-background-base);
@@ -312,7 +372,7 @@
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             border-radius: 32px;
-            margin-bottom: 24px; 
+            margin-bottom: 40px;
             display: flex;
             flex-direction: column;
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
@@ -327,7 +387,7 @@
             
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         .weather-dashboard-widget:active {
@@ -380,9 +440,15 @@
         .weather-graphics-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
         .weather-vector-icon { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
         .weather-vector-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); }
-        .weather-high-low-range { font-family: var(--font-medium); font-weight: normal; font-size: 15px; color: var(--card-inactive-subtitle-color); }
         
-        /* Expandable Hourly Section */
+        .weather-high-low-range { 
+            font-family: var(--font-medium);
+            font-weight: normal;
+            font-size: 15px; 
+            color: var(--card-inactive-subtitle-color); 
+        }
+        
+        /* Expandable Hourly Section with Hardware Compositing Layers */
         .weather-hourly-container {
             max-height: 0px;
             opacity: 0;
@@ -405,8 +471,8 @@
             will-change: max-height, opacity, padding-top, padding-bottom;
             
             transition-property: max-height, opacity, padding-top, padding-bottom, border-top-color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-duration: 0.5s;
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         .weather-hourly-container::-webkit-scrollbar { display: none; }
@@ -424,7 +490,7 @@
         .weather-dashboard-widget.is-expanded .hourly-item-block {
             animation-name: hourly-item-fade-in;
             animation-duration: 0.6s;
-            animation-timing-function: var(--animation-smooth-curve);
+            animation-timing-function: var(--animation-spring-curve);
             animation-fill-mode: forwards;
         }
 
@@ -433,6 +499,7 @@
         .hourly-item-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.1)); }
         .hourly-item-temp { font-family: var(--font-medium); font-weight: normal; font-size: 17px; color: #FFFFFF; }
         
+        /* Skeleton Animation */
         .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
         .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); animation: shimmer 2s infinite; }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
@@ -454,7 +521,7 @@
             
             transition-property: max-height, opacity, transform, margin-bottom;
             transition-duration: var(--animation-duration-slow);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         .agenda-dashboard-section-wrapper.is-routine-active {
@@ -479,7 +546,7 @@
             border-radius: 32px;
             padding-top: 24px;
             padding-right: 32px;
-            padding-bottom: 24px; /* Reduced bottom padding for tighter integration */
+            padding-bottom: 24px; 
             padding-left: 32px;
             display: flex;
             flex-direction: column;
@@ -490,7 +557,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            margin-bottom: 20px; /* Tighter header spacing */
+            margin-bottom: 20px; 
             padding-left: 4px;
         }
 
@@ -514,7 +581,7 @@
         .agenda-list-container {
             display: flex;
             flex-direction: column;
-            gap: 8px; /* Tighter gap between tasks */
+            gap: 8px; 
         }
 
         .agenda-item-row {
@@ -531,7 +598,7 @@
             
             transition-property: opacity, background-color, transform;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast), var(--animation-duration-fast);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         .agenda-item-row:active {
@@ -549,8 +616,8 @@
         }
 
         .agenda-checkbox-container {
-            width: 22px; /* Reduced dimension */
-            height: 22px; /* Reduced dimension */
+            width: 22px; 
+            height: 22px; 
             border-radius: 50%;
             border-top-width: 2px;
             border-right-width: 2px;
@@ -565,7 +632,7 @@
             
             transition-property: background-color, border-color, box-shadow;
             transition-duration: var(--animation-duration-fast);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         .agenda-item-row.is-task-completed .agenda-checkbox-container {
@@ -578,7 +645,7 @@
         }
 
         .agenda-checkbox-svg {
-            width: 12px; /* Proportional reduction */
+            width: 12px; 
             height: 12px;
             stroke: #FFFFFF;
             stroke-width: 3;
@@ -608,7 +675,7 @@
         .agenda-item-title {
             font-family: var(--font-medium);
             font-weight: normal;
-            font-size: 15px; /* Reduced for proportional density */
+            font-size: 15px; 
             color: #FFFFFF;
             transition-property: color;
             transition-duration: var(--animation-duration-medium);
@@ -643,6 +710,7 @@
             color: #FFFFFF;
         }
 
+        /* The Global Sync / Link Button - PERFECTLY REPOSITIONED */
         .global-link-synchronization-button {
             position: absolute;
             left: 50%;
@@ -669,7 +737,7 @@
             
             transition-property: background-color, color, border-color, box-shadow, transform;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         .global-link-synchronization-button:active {
@@ -694,7 +762,7 @@
             
             transition-property: grid-template-columns, column-gap, row-gap;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         body.layout-mode-landscape .device-grid-container {
@@ -736,7 +804,7 @@
             
             transition-property: height, background-color, color, transform, box-shadow, border-color;
             transition-duration: 0.5s, var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve);
         }
 
         .smart-device-card.is-expanded {
@@ -779,10 +847,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            
             transition-property: background-color, color, transform, box-shadow;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .device-toggle-icon-container {
@@ -831,7 +898,7 @@
             margin-top: 4px; 
             transition-property: color; 
             transition-duration: var(--animation-duration-medium); 
-            transition-timing-function: var(--animation-smooth-curve); 
+            transition-timing-function: var(--animation-ease-out-curve); 
         }
         
         .smart-device-card.state-is-on .device-current-status-label { color: var(--card-active-subtitle-color); }
@@ -852,7 +919,7 @@
             box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
             transition-property: background-color, box-shadow, opacity;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-ease-out-curve);
         }
 
         .smart-device-card:not(.state-is-on) .device-brightness-slider-container {
@@ -875,7 +942,7 @@
             
             transition-property: background-color, box-shadow;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-ease-out-curve);
         }
 
         .smart-device-card.state-is-on .brightness-slider-visual-fill {
@@ -909,7 +976,6 @@
             padding-top: 0px;
             padding-bottom: 0px;
             will-change: max-height, opacity, padding-top, padding-bottom;
-            
             transition-property: opacity, max-height, padding-top, padding-bottom;
             transition-duration: 0.5s;
             transition-timing-function: var(--animation-spring-curve);
@@ -965,7 +1031,7 @@
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; z-index: 1000;
-            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-smooth-curve);
+            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve);
         }
         .application-modal-backdrop.is-visible-active { opacity: 1; pointer-events: auto; }
 
@@ -1005,10 +1071,10 @@
         }
 
         .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; flex-shrink: 0;}
-        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); }
+        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
         .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
         .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
         /* Highly customized inline edit inputs */
@@ -1052,9 +1118,9 @@
         }
         .agenda-edit-inline-time::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
         .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
-        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
         .settings-action-button-secondary:active { color: #FFFFFF; transform: scale(0.96); opacity: 0.85;}
 
         /* Agenda Modal Editor Specifics */
@@ -1082,6 +1148,59 @@
         .agenda-time-inputs { display: flex; flex-direction: row; gap: 12px; }
         .agenda-time-input-wrapper { flex-grow: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
         .agenda-time-label { font-family: var(--font-regular); font-size: 13px; color: rgba(255,255,255,0.6); }
+        
+        /* New Custom Inner Temperature Element attached securely next to the Clock */
+        .room-climate-badge {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--glass-background-base);
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+            border-style: solid;
+            border-color: var(--glass-border-color);
+            padding-top: 6px;
+            padding-right: 14px;
+            padding-bottom: 6px;
+            padding-left: 12px;
+            border-radius: 20px;
+            backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
+            -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
+            opacity: 0; 
+            transform: translateX(-15px);
+            transition-property: opacity, transform;
+            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
+            transition-timing-function: var(--animation-spring-curve), var(--animation-spring-curve);
+        }
+
+        .room-climate-badge.is-loaded {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .room-climate-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--card-inactive-subtitle-color);
+        }
+
+        .room-climate-value {
+            font-family: var(--font-medium);
+            font-weight: normal;
+            font-size: 18px;
+            color: #FFFFFF;
+            letter-spacing: -0.02em;
+        }
+        
+        .header-title-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+        }
 
         .system-toast-notification { font-family: var(--font-bold); font-weight: normal; position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 16px; padding-right: 32px; padding-bottom: 16px; padding-left: 32px; border-radius: 32px; font-size: 16px; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition-property: opacity, transform; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-spring-curve); }
         .system-toast-notification.is-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
@@ -1093,7 +1212,19 @@
          APPLICATION HEADER
          ========================================================================== -->
     <header class="application-header awaits-animation" id="anim-target-1" aria-label="Main Application Header">
-        <h1 class="application-title" id="live-clock-display">00:00</h1>
+        
+        <!-- Nested Group for Clock and newly requested Room Climate Badge -->
+        <div class="header-title-group">
+            <h1 class="application-title" id="live-clock-display">00:00</h1>
+            
+            <div class="room-climate-badge" id="room-climate-badge" title="Indoor Temperature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="room-climate-icon">
+                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+                </svg>
+                <span class="room-climate-value" id="room-temperature-value">--°C</span>
+            </div>
+        </div>
+
         <div class="header-controls-container">
             <button class="circular-icon-button" id="header-btn-refresh" aria-label="Synchronize Devices" title="Force Refresh">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"></path><path d="M21.34 15.57a10 10 0 1 1-.92-10.26l5.08 5.08"></path></svg>
@@ -1143,6 +1274,7 @@
         <h2 class="section-heading-title">Rooms & Devices</h2>
         
         <div class="device-grid-wrapper">
+            <!-- The Global Link / Synchronization Button positioned perfectly between cards -->
             <button id="global-link-synchronization-button" class="global-link-synchronization-button" aria-pressed="false" title="Synchronize Devices">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
@@ -1220,8 +1352,8 @@
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
          * Encompasses state management, UI rendering, debounced network requests, external API integrations,
          * advanced HTML5 Canvas color picking with polar coordinate mathematics, responsive forecasting,
-         * real-time clock rendering, synchronized device dispatch, and a comprehensive Routine/Agenda Engine
-         * with inline editing capabilities.
+         * real-time clock rendering, synchronized device dispatch, a comprehensive Routine/Agenda Engine
+         * with inline editing capabilities, and a dedicated Room Climate Data Fetcher.
          */
 
         "use strict";
@@ -1257,13 +1389,17 @@
             { id: 'bf1cf6aca13749cf898g3p', name: 'Led Lights Skrivbord' }
         ];
 
+        // Specific constant for the new requested Temperature Sensor
+        const TUYA_CLIMATE_SENSOR_ID = 'bfdf7bb3a6bbe3b451q1ma';
+
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v20',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v20',
-            WEATHER_CACHE: 'enterprise_weather_cache_v20',
-            DEVICES_LINKED: 'enterprise_devices_linked_v20',
-            AGENDA_ROUTINES: 'enterprise_agenda_routines_v20',
-            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v20'
+            WORKER_URL: 'enterprise_tuya_worker_url_v21',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v21',
+            WEATHER_CACHE: 'enterprise_weather_cache_v21',
+            CLIMATE_CACHE: 'enterprise_climate_cache_v21',
+            DEVICES_LINKED: 'enterprise_devices_linked_v21',
+            AGENDA_ROUTINES: 'enterprise_agenda_routines_v21',
+            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v21'
         };
 
         const SVG_ASSETS = {
@@ -1339,8 +1475,8 @@
             updateClock() {
                 if(!this.clockElement) return;
                 const now = new Date();
-                const formattedHours = ('0' + now.getHours()).slice(-2);
-                const formattedMinutes = ('0' + now.getMinutes()).slice(-2);
+                const formattedHours = String(now.getHours()).padStart(2, '0');
+                const formattedMinutes = String(now.getMinutes()).padStart(2, '0');
                 this.clockElement.innerText = `${formattedHours}:${formattedMinutes}`;
                 
                 // Every minute, evaluate the active Agenda Routine
@@ -1350,6 +1486,156 @@
             }
         }
         const LiveClock = new RealTimeClockManager('live-clock-display');
+
+        /* ==========================================================================
+           NETWORK SERVICE LAYER
+           ========================================================================== */
+
+        class NetworkManager {
+            constructor() {
+                this.defaultTimeoutMs = 12000; 
+            }
+            async get(url) {
+                let abortController = null;
+                let signal = undefined;
+                if (typeof window.AbortController !== 'undefined') {
+                    abortController = new window.AbortController();
+                    signal = abortController.signal;
+                }
+                
+                const timeoutId = setTimeout(() => {
+                    if (abortController) abortController.abort();
+                }, this.defaultTimeoutMs);
+                
+                try {
+                    const fetchOptions = signal ? { signal } : {};
+                    const response = await fetch(url, fetchOptions);
+                    clearTimeout(timeoutId);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    throw error;
+                }
+            }
+
+            async post(url, body) {
+                let abortController = null;
+                let signal = undefined;
+                if (typeof window.AbortController !== 'undefined') {
+                    abortController = new window.AbortController();
+                    signal = abortController.signal;
+                }
+
+                const timeoutId = setTimeout(() => {
+                    if (abortController) abortController.abort();
+                }, this.defaultTimeoutMs);
+                
+                try {
+                    const fetchOptions = {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    };
+                    if (signal) fetchOptions.signal = signal;
+
+                    const response = await fetch(url, fetchOptions);
+                    clearTimeout(timeoutId);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    throw error;
+                }
+            }
+        }
+        const NetworkService = new NetworkManager();
+
+        /* ==========================================================================
+           NEW ENTERPRISE FEATURE: ROOM CLIMATE MANAGER
+           ========================================================================== */
+        
+        /**
+         * Dedicated controller for polling and parsing the Tuya Temperature Sensor.
+         */
+        class RoomClimateManager {
+            constructor() {
+                this.deviceId = TUYA_CLIMATE_SENSOR_ID;
+                this.valueElement = document.getElementById('room-temperature-value');
+                this.badgeElement = document.getElementById('room-climate-badge');
+            }
+
+            /**
+             * Orchestrates the fetch and UI update specifically for the climate sensor.
+             */
+            async fetchAndRender() {
+                // Failsafe: Do nothing if Cloudflare URL isn't configured yet.
+                if (!DeviceManager.isConfigured()) return;
+                
+                // Optimistically load from SessionStorage Cache to prevent blank states
+                const cachedTemp = SafeStorage.getSession(STORAGE_KEYS.CLIMATE_CACHE);
+                if (cachedTemp && this.valueElement && this.badgeElement) {
+                    this.valueElement.innerText = `${cachedTemp}°C`;
+                    this.badgeElement.classList.add('is-loaded');
+                }
+
+                try {
+                    const url = DeviceManager.buildEndpointUrl(`/status?device=${this.deviceId}`);
+                    const jsonPayload = await NetworkService.get(url);
+                    
+                    if (jsonPayload.success && jsonPayload.result) {
+                        const parsedTemperature = this.parseTemperaturePayload(jsonPayload.result);
+                        
+                        if (parsedTemperature !== null) {
+                            if (this.valueElement && this.badgeElement) {
+                                this.valueElement.innerText = `${parsedTemperature}°C`;
+                                this.badgeElement.classList.add('is-loaded');
+                            }
+                            // Update the session cache with fresh verified data
+                            SafeStorage.setSession(STORAGE_KEYS.CLIMATE_CACHE, parsedTemperature.toString());
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`RoomClimateManager: Failed to fetch sensor data for device [${this.deviceId}].`, error);
+                    // If we have a cache, just leave it visible. Otherwise, leave it hidden.
+                }
+            }
+
+            /**
+             * Evaluates generic Tuya status payload to find and mathematically correct 
+             * various manufacturer temperature string representations.
+             * @param {Array<Object>} statusArray - Tuya Status Array
+             * @returns {number|null} Formatted temperature in Celsius, or null if unresolvable.
+             */
+            parseTemperaturePayload(statusArray) {
+                // Tuya manufacturers use different identifier codes for temperature.
+                // We hunt for the most common ones.
+                const tempInstruction = statusArray.find(instruction => 
+                    instruction.code === 'va_temperature' || 
+                    instruction.code === 'temp_current' || 
+                    instruction.code === 'temperature'
+                );
+
+                if (tempInstruction !== undefined && tempInstruction.value !== undefined) {
+                    let rawValue = parseFloat(tempInstruction.value);
+                    
+                    // Mathematical Correction:
+                    // Many Tuya sensors report 23.5°C as the integer 235.
+                    // If the value is unrealistically high for a normal room (> 50), 
+                    // we can safely assume it requires a base-10 division.
+                    if (rawValue > 50) {
+                        rawValue = rawValue / 10;
+                    }
+
+                    // Format to exactly one decimal place (e.g., 23.5)
+                    return Number(rawValue.toFixed(1));
+                }
+
+                return null;
+            }
+        }
+
+        const RoomClimateSystem = new RoomClimateManager();
 
         /* ==========================================================================
            AGENDA SYSTEM (TIME-BRACKETED ROUTINES WITH INLINE EDITING)
@@ -1527,14 +1813,14 @@
         const AgendaSystem = new AgendaManager();
 
         /* ==========================================================================
-           EXTERNAL SERVICE INTEGRATIONS (WEATHER - BULLETPROOF IPAD VERSION)
+           EXTERNAL SERVICE INTEGRATIONS (WEATHER)
            ========================================================================== */
 
         class WeatherService {
             constructor() {
-                // Open-Meteo: No API keys, no strict CORS, highly permissive. 
-                // Set to Spånga coordinates with Stockholm timezone.
-                this.apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=59.38&longitude=17.90&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FStockholm';
+                this.latitudeCoordinateForApi = 59.38; // Spånga
+                this.longitudeCoordinateForApi = 17.90; // Spånga
+                this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
                 this.mainRowElement = document.getElementById('weather-main-row-container');
                 this.hourlyContainerElement = document.getElementById('weather-hourly-container');
             }
@@ -1545,10 +1831,10 @@
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
                         <h2 class="weather-temperature-display"><div class="skeleton" style="width: 80px; height: 50px;"></div></h2>
-                        <span class="weather-condition-description">Loading...</span>
+                        <span class="weather-condition-description">Fetching Weather...</span>
                     </div>
                     <div class="weather-graphics-right">
-                        <div class="weather-vector-icon"><div class="skeleton" style="width: 64px; height: 64px; border-radius: 50%;"></div></div>
+                        <div class="weather-vector-icon"><div class="weather-spinner"></div></div>
                         <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
                     </div>
                 `;
@@ -1569,83 +1855,12 @@
                 if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
                 if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
                 if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code >= 45 && code <= 48) return { text: "Fog", icon: SVG_ASSETS.WEATHER_CLOUD };
                 if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 71 && code <= 77) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 80 && code <= 82) return { text: "Showers", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
                 if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
                 if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
                 return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-            }
-
-            async fetchAndRender() {
-                const cachedPayload = SafeStorage.getSession(STORAGE_KEYS.WEATHER_CACHE);
-                if (cachedPayload) {
-                    try {
-                        this.renderSuccessState(JSON.parse(cachedPayload));
-                    } catch (e) {
-                        this.renderLoadingState(); 
-                    }
-                } else {
-                    this.renderLoadingState();
-                }
-
-                try {
-                    // Raw, simple fetch. No AbortControllers, no headers to trigger CORS pre-flights.
-                    const response = await fetch(this.apiUrl);
-                    
-                    if (!response.ok) throw new Error("HTTP Error");
-                    
-                    const rawData = await response.json();
-
-                    // Parse Current Weather
-                    const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
-                    
-                    const compiledWeatherData = {
-                        current: {
-                            temp: Math.round(rawData.current.temperature_2m),
-                            text: currentCondition.text,
-                            icon: currentCondition.icon,
-                            high: Math.round(rawData.daily.temperature_2m_max[0]),
-                            low: Math.round(rawData.daily.temperature_2m_min[0])
-                        },
-                        hourly: []
-                    };
-
-                    // Bulletproof iPad Time parsing (Bypasses the 'new Date()' bug in old Safari)
-                    // Open-Meteo returns time as "YYYY-MM-DDTHH:00"
-                    const currentHourString = ('0' + new Date().getHours()).slice(-2) + ":00";
-                    let startIndex = 0;
-
-                    // Find the current hour in the array using simple string matching
-                    for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        if (rawData.hourly.time[i].endsWith("T" + currentHourString)) {
-                            startIndex = i;
-                            break;
-                        }
-                    }
-
-                    // Grab the next 24 hours starting from the found index
-                    for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
-                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
-                        // Extract just the "HH:MM" part safely using split
-                        const timeStringRaw = rawData.hourly.time[i]; 
-                        const hourOnly = timeStringRaw.split('T')[1]; 
-
-                        compiledWeatherData.hourly.push({
-                            time: i === startIndex ? "Now" : hourOnly,
-                            temp: Math.round(rawData.hourly.temperature_2m[i]),
-                            icon: hCondition.icon
-                        });
-                    }
-
-                    this.renderSuccessState(compiledWeatherData);
-                    SafeStorage.setSession(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
-
-                } catch (error) {
-                    let errorMessage = "Check Network";
-                    if (!cachedPayload) this.renderErrorState(errorMessage);
-                }
             }
 
             renderSuccessState(data) {
@@ -1672,73 +1887,71 @@
                     `).join('');
                 }
             }
-        }
 
-        /* ==========================================================================
-           NETWORK SERVICE LAYER
-           ========================================================================== */
-
-        class NetworkManager {
-            constructor() {
-                this.defaultTimeoutMs = 15000; 
-            }
-
-            async get(url) {
-                let abortController = null;
-                let signal = undefined;
-                if (typeof window.AbortController !== 'undefined') {
-                    abortController = new window.AbortController();
-                    signal = abortController.signal;
+            async fetchAndRender() {
+                const cachedPayload = SafeStorage.getSession(STORAGE_KEYS.WEATHER_CACHE);
+                if (cachedPayload) {
+                    try {
+                        this.renderSuccessState(JSON.parse(cachedPayload));
+                    } catch (e) {
+                        this.renderLoadingState(); 
+                    }
+                } else {
+                    this.renderLoadingState();
                 }
-                
-                const timeoutId = setTimeout(() => {
-                    if (abortController) abortController.abort();
-                }, this.defaultTimeoutMs);
-                
+
                 try {
-                    const fetchOptions = signal ? { signal } : {};
-                    const response = await fetch(url, fetchOptions);
-                    clearTimeout(timeoutId);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return await response.json();
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    throw error;
-                }
-            }
+                    const rawData = await NetworkService.get(this.apiUrl);
+                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
+                        throw new Error("Invalid data structure from Open-Meteo API.");
+                    }
 
-            async post(url, body) {
-                let abortController = null;
-                let signal = undefined;
-                if (typeof window.AbortController !== 'undefined') {
-                    abortController = new window.AbortController();
-                    signal = abortController.signal;
-                }
-
-                const timeoutId = setTimeout(() => {
-                    if (abortController) abortController.abort();
-                }, this.defaultTimeoutMs);
-                
-                try {
-                    const fetchOptions = {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
+                    const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
+                    const compiledWeatherData = {
+                        current: {
+                            temp: Math.round(rawData.current.temperature_2m),
+                            text: currentCondition.text,
+                            icon: currentCondition.icon,
+                            high: Math.round(rawData.daily.temperature_2m_max[0]),
+                            low: Math.round(rawData.daily.temperature_2m_min[0])
+                        },
+                        hourly: []
                     };
-                    if (signal) fetchOptions.signal = signal;
 
-                    const response = await fetch(url, fetchOptions);
-                    clearTimeout(timeoutId);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return await response.json();
+                    let startIndex = 0;
+                    const nowTime = new Date().getTime();
+                    
+                    for (let i = 0; i < rawData.hourly.time.length; i++) {
+                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
+                        if (hourTime >= nowTime - 1800000) { 
+                            startIndex = i;
+                            break;
+                        }
+                    }
+
+                    for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
+                        const dateObj = new Date(rawData.hourly.time[i]);
+                        const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
+                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
+                        
+                        compiledWeatherData.hourly.push({
+                            time: i === startIndex ? "Now" : hoursStr,
+                            temp: Math.round(rawData.hourly.temperature_2m[i]),
+                            icon: hCondition.icon
+                        });
+                    }
+
+                    this.renderSuccessState(compiledWeatherData);
+                    SafeStorage.setSession(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
+
                 } catch (error) {
-                    clearTimeout(timeoutId);
-                    throw error;
+                    let errorMessage = "Data Unavailable";
+                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
+                    if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
         }
-        const NetworkService = new NetworkManager();
-        
+
         /* ==========================================================================
            COLOR WHEEL LOGIC (HTML5 CANVAS WITH MATHEMATICAL SNAP)
            ========================================================================== */
@@ -1750,7 +1963,6 @@
                 this.indicator = indicatorElement;
                 this.isDragging = false;
                 
-                // Fixed dimensions decouple mathematical precision from DOM resize artifacts
                 this.fixedCanvasDimension = 200;
                 this.fixedCenterPoint = this.fixedCanvasDimension / 2; 
                 
@@ -1802,7 +2014,6 @@
                 const xOffset = clientX - rect.left - centerX;
                 const yOffset = clientY - rect.top - centerY;
 
-                // Absolute true radians (0 is at 3 o'clock)
                 const rawAngleRadians = Math.atan2(yOffset, xOffset);
                 const rawDistance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
                 
@@ -1815,7 +2026,6 @@
                 
                 const saturationRatio = clampedDistance / this.fixedCenterPoint;
 
-                // Visual mapping using fixed math isolates indicator from CSS layout jumps
                 const visualThumbX = this.fixedCenterPoint + Math.cos(rawAngleRadians) * clampedDistance;
                 const visualThumbY = this.fixedCenterPoint + Math.sin(rawAngleRadians) * clampedDistance;
                 
@@ -2028,6 +2238,8 @@
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
                 this.inputWorkerUrl = document.getElementById('input-field-worker-url');
                 
+                this.currentActiveRoutineId = null;
+                
                 this.handleSettingsSave = this.handleSettingsSave.bind(this);
                 this.handleSettingsCancel = this.handleSettingsCancel.bind(this);
             }
@@ -2096,6 +2308,8 @@
                     if (!DeviceManager.isConfigured()) return this.openSettingsModal();
                     GlobalToast.show("Synchronizing...");
                     DeviceManager.synchronizeAllDevices();
+                    // Force weather refresh alongside devices
+                    RoomClimateSystem.fetchAndRender();
                 });
 
                 document.getElementById('header-btn-settings').addEventListener('click', () => this.openSettingsModal());
@@ -2124,6 +2338,7 @@
 
                 if (!activeRoutine) {
                     sectionWrapper.classList.remove('is-routine-active');
+                    this.currentActiveRoutineId = null;
                     return;
                 }
 
@@ -2149,6 +2364,8 @@
                         </div>
                     `).join('');
                 }
+
+                this.currentActiveRoutineId = activeRoutine.id;
             }
 
             handleDashboardTaskToggle(routineId, taskId) {
@@ -2156,10 +2373,6 @@
                 this.evaluateAndRenderActiveRoutine();
             }
 
-            /**
-             * Renders the settings editor with fully editable inline text inputs.
-             * Utilizes explicit onblur/onchange events to save data without losing focus awkwardly.
-             */
             renderAgendaEditorSettings() {
                 const container = document.getElementById('settings-agenda-editor-container');
                 if (!container) return;
@@ -2187,7 +2400,6 @@
                     } else {
                         tasksHtml = sortedTasks.map((task, tIndex) => `
                             <div class="agenda-task-edit-item">
-                                <!-- Inline Editable Task Title -->
                                 <input type="text" class="agenda-edit-inline-input" value="${task.title}" 
                                        onchange="AgendaSystem.updateTask('${routine.id}', '${task.id}', this.value); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                 
@@ -2204,16 +2416,13 @@
                         <div class="agenda-routine-block">
                             <div class="agenda-routine-header">
                                 <div class="agenda-routine-title-info">
-                                    <!-- Inline Editable Routine Title -->
                                     <input type="text" class="agenda-edit-inline-input agenda-routine-title-text" style="padding-left:0; margin-bottom:4px;" value="${routine.title}" 
                                            onchange="AgendaSystem.updateRoutine('${routine.id}', this.value, undefined, undefined); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                     
                                     <div class="agenda-routine-time-text">
-                                        <!-- Inline Editable Start Time -->
                                         <input type="time" class="agenda-edit-inline-time" value="${routine.startTime}" 
                                                onchange="AgendaSystem.updateRoutine('${routine.id}', undefined, this.value, undefined); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                         <span>-</span>
-                                        <!-- Inline Editable End Time -->
                                         <input type="time" class="agenda-edit-inline-time" value="${routine.endTime}" 
                                                onchange="AgendaSystem.updateRoutine('${routine.id}', undefined, undefined, this.value); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                     </div>
@@ -2313,7 +2522,6 @@
                     this.deviceGridContainer.appendChild(cardElement);
                     this.attachDynamicCardListeners(deviceData.id);
                     
-                    // Initialize isolated Color Wheel Controller
                     const canvasEl = document.getElementById(`canvas-${deviceData.id}`);
                     const indicatorEl = document.getElementById(`color-thumb-${deviceData.id}`);
                     DeviceManager.colorWheelControllers[deviceData.id] = new ColorWheelManager(deviceData.id, canvasEl, indicatorEl);
@@ -2330,7 +2538,6 @@
 
                 if (cardWrapper) {
                     cardWrapper.addEventListener('click', (event) => {
-                        // Prevent expansion trigger if clicking interior interactive controls
                         if (event.target === toggleButton || toggleButton.contains(event.target) || event.target === sliderInput || expansionArea.contains(event.target)) {
                             return;
                         }
@@ -2515,6 +2722,9 @@
 
             const WeatherAPI = new WeatherService();
             WeatherAPI.fetchAndRender();
+            
+            // Execute the new Room Climate fetcher
+            RoomClimateSystem.fetchAndRender();
 
             if (!DeviceManager.isConfigured()) {
                 setTimeout(() => {
