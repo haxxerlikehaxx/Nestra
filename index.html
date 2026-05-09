@@ -22,6 +22,8 @@
         body.critical-js-error-active .awaits-animation {
             opacity: 1 !important;
             transform: translateY(0px) scale(1) !important;
+            transition-property: none !important;
+            animation: none !important;
         }
 
         /* ==========================================================================
@@ -171,6 +173,7 @@
             margin-left: auto;
             margin-right: auto;
             min-height: 100vh;
+            /* Safe area insets for notched iPads */
             padding-top: calc(env(safe-area-inset-top, 40px) + 24px);
             padding-right: var(--layout-padding-horizontal-portrait);
             padding-bottom: var(--layout-padding-vertical-bottom);
@@ -188,13 +191,14 @@
             transition-timing-function: var(--animation-ease-out-curve);
         }
 
+        /* Responsive Landscape Injection */
         body.layout-mode-landscape {
             max-width: var(--layout-max-width-landscape);
             padding-right: var(--layout-padding-horizontal-landscape);
             padding-left: var(--layout-padding-horizontal-landscape);
         }
 
-        /* Explicitly allow inputs to bypass global user-select none */
+        /* Allow typing explicitly in input fields */
         input, textarea, select {
             user-select: text !important;
             -webkit-user-select: text !important;
@@ -260,11 +264,12 @@
             gap: 16px;
         }
 
+        /* CRITICAL TYPOGRAPHY FIX: Proportional Numbers & Opentype features */
         .application-title {
             font-family: var(--font-medium);
             font-weight: normal; 
             font-size: 38px;
-            letter-spacing: -0.04em; 
+            letter-spacing: -0.02em; 
             line-height: 1.2;
             color: #FFFFFF;
             font-variant-numeric: proportional-nums;
@@ -365,7 +370,8 @@
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
             transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
             
-            outline: none;
+            outline-style: none;
+            outline-width: 0px;
         }
 
         .circular-icon-button:active {
@@ -492,7 +498,7 @@
             
             transition-property: max-height, opacity, padding-top, padding-bottom, border-top-color;
             transition-duration: 0.5s;
-            transition-timing-function: var(--animation-spring-curve);
+            transition-timing-function: var(--animation-smooth-curve);
         }
 
         .weather-hourly-container::-webkit-scrollbar { display: none; }
@@ -510,7 +516,7 @@
         .weather-dashboard-widget.is-expanded .hourly-item-block {
             animation-name: hourly-item-fade-in;
             animation-duration: 0.6s;
-            animation-timing-function: var(--animation-spring-curve);
+            animation-timing-function: var(--animation-smooth-curve);
             animation-fill-mode: forwards;
         }
 
@@ -824,7 +830,7 @@
             
             transition-property: height, background-color, color, transform, box-shadow, border-color;
             transition-duration: 0.5s, var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve);
         }
 
         .smart-device-card.is-expanded {
@@ -1051,7 +1057,7 @@
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; z-index: 1000;
-            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-smooth-curve);
+            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve);
         }
         .application-modal-backdrop.is-visible-active { opacity: 1; pointer-events: auto; }
 
@@ -1091,10 +1097,10 @@
         }
 
         .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; flex-shrink: 0;}
-        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); }
+        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
         .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
         .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
         /* Highly customized inline edit inputs */
@@ -1138,9 +1144,9 @@
         }
         .agenda-edit-inline-time::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
         .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
-        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
         .settings-action-button-secondary:active { color: #FFFFFF; transform: scale(0.96); opacity: 0.85;}
 
         /* Agenda Modal Editor Specifics */
@@ -1180,7 +1186,6 @@
          ========================================================================== -->
     <header class="application-header awaits-animation" id="anim-target-1" aria-label="Main Application Header">
         
-        <!-- Nested Group for Clock and Room Climate Badge -->
         <div class="header-title-group">
             <h1 class="application-title" id="live-clock-display">00:00</h1>
             
@@ -1317,7 +1322,7 @@
     <script>
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
-         * Explicitly defines all dependencies globally before utilizing them.
+         * Explicitly defines all dependencies globally before utilizing them to prevent ReferenceErrors.
          */
 
         "use strict";
@@ -1362,13 +1367,13 @@
         const TUYA_CLIMATE_SENSOR_ID = 'bfdf7bb3a6bbe3b451q1ma';
 
         const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v23',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v23',
-            WEATHER_CACHE: 'enterprise_weather_cache_v23',
-            CLIMATE_CACHE: 'enterprise_climate_cache_v23',
-            DEVICES_LINKED: 'enterprise_devices_linked_v23',
-            AGENDA_ROUTINES: 'enterprise_agenda_routines_v23',
-            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v23'
+            WORKER_URL: 'enterprise_tuya_worker_url_v24',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v24',
+            WEATHER_CACHE: 'enterprise_weather_cache_v24',
+            CLIMATE_CACHE: 'enterprise_climate_cache_v24',
+            DEVICES_LINKED: 'enterprise_devices_linked_v24',
+            AGENDA_ROUTINES: 'enterprise_agenda_routines_v24',
+            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v24'
         };
 
         const SVG_ASSETS = {
@@ -1384,7 +1389,7 @@
         };
 
         /* ==========================================================================
-           UTILITY CLASSES (DEFINED FIRST FOR DEPENDENCY INJECTION)
+           UTILITY CLASSES (DEFINED EARLY)
            ========================================================================== */
         
         class ToastManager {
@@ -1395,7 +1400,9 @@
             }
             show(message) {
                 if (!this.toastElement) return;
-                if (this.timeoutReference !== null) clearTimeout(this.timeoutReference);
+                if (this.timeoutReference !== null) {
+                    clearTimeout(this.timeoutReference);
+                }
                 this.toastElement.innerText = message;
                 this.toastElement.classList.add('is-toast-visible');
                 this.timeoutReference = setTimeout(() => {
@@ -1404,7 +1411,8 @@
                 }, this.displayDurationMs);
             }
         }
-        
+        window.GlobalToast = new ToastManager();
+
         class RealTimeClockManager {
             constructor(elementId) {
                 this.clockElement = document.getElementById(elementId);
@@ -1426,6 +1434,7 @@
                 }
             }
         }
+        window.LiveClock = new RealTimeClockManager('live-clock-display');
 
         class NetworkManager {
             constructor() {
@@ -1485,17 +1494,17 @@
                 }
             }
         }
+        window.NetworkService = new NetworkManager();
 
         /* ==========================================================================
-           BUSINESS LOGIC CLASSES (DEPEND ON UTILITIES)
+           BUSINESS LOGIC CLASSES 
            ========================================================================== */
 
         class RoomClimateManager {
-            constructor(networkService) {
+            constructor() {
                 this.deviceId = TUYA_CLIMATE_SENSOR_ID;
                 this.valueElement = document.getElementById('room-temperature-value');
                 this.badgeElement = document.getElementById('room-climate-badge');
-                this.network = networkService;
             }
 
             async fetchAndRender(isBackgroundSync = false) {
@@ -1510,7 +1519,7 @@
 
                 try {
                     const url = window.DeviceManager.buildEndpointUrl(`/status?device=${this.deviceId}`);
-                    const jsonPayload = await this.network.get(url);
+                    const jsonPayload = await window.NetworkService.get(url);
                     
                     if (jsonPayload.success && jsonPayload.result) {
                         const parsedTemperature = this.parseTemperaturePayload(jsonPayload.result);
@@ -1520,7 +1529,7 @@
                         }
                     }
                 } catch (error) {
-                    console.warn(`RoomClimateManager: Failed to fetch sensor data.`, error);
+                    console.warn(`RoomClimateManager: Failed to fetch sensor data for device [${this.deviceId}].`, error);
                 }
             }
 
@@ -1553,6 +1562,7 @@
                 }
             }
         }
+        window.RoomClimateSystem = new RoomClimateManager();
 
         class AgendaManager {
             constructor() {
@@ -1741,15 +1751,15 @@
                 }
             }
         }
+        window.AgendaSystem = new AgendaManager();
 
         class WeatherService {
-            constructor(networkService) {
-                this.latitudeCoordinateForApi = 59.38; 
-                this.longitudeCoordinateForApi = 17.90; 
+            constructor() {
+                this.latitudeCoordinateForApi = 59.38; // Spånga
+                this.longitudeCoordinateForApi = 17.90; // Spånga
                 this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
                 this.mainRowElement = document.getElementById('weather-main-row-container');
                 this.hourlyContainerElement = document.getElementById('weather-hourly-container');
-                this.network = networkService;
             }
             
             renderLoadingState() {
@@ -1758,10 +1768,10 @@
                     <div class="weather-information-left">
                         <span class="weather-city-label">Spånga</span>
                         <h2 class="weather-temperature-display"><div class="skeleton" style="width: 80px; height: 50px;"></div></h2>
-                        <span class="weather-condition-description">Fetching...</span>
+                        <span class="weather-condition-description">Fetching Weather...</span>
                     </div>
                     <div class="weather-graphics-right">
-                        <div class="weather-vector-icon"><div class="skeleton" style="width: 64px; height: 64px; border-radius: 50%;"></div></div>
+                        <div class="weather-vector-icon"><div class="weather-spinner"></div></div>
                         <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
                     </div>
                 `;
@@ -1782,10 +1792,9 @@
                 if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
                 if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
                 if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code >= 45 && code <= 48) return { text: "Fog", icon: SVG_ASSETS.WEATHER_CLOUD };
                 if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 71 && code <= 77) return { text: "Snow", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 80 && code <= 82) return { text: "Showers", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
                 if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
                 if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
                 return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
@@ -1831,9 +1840,9 @@
                 }
 
                 try {
-                    const rawData = await this.network.get(this.apiUrl);
+                    const rawData = await window.NetworkService.get(this.apiUrl);
                     if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
-                        throw new Error("Invalid data structure.");
+                        throw new Error("Invalid data structure from Open-Meteo API.");
                     }
 
                     const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
@@ -1848,23 +1857,24 @@
                         hourly: []
                     };
 
-                    const currentHourString = ('0' + new Date().getHours()).slice(-2) + ":00";
                     let startIndex = 0;
-
+                    const nowTime = new Date().getTime();
+                    
                     for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        if (rawData.hourly.time[i].endsWith("T" + currentHourString)) {
+                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
+                        if (hourTime >= nowTime - 1800000) { 
                             startIndex = i;
                             break;
                         }
                     }
 
                     for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
+                        const dateObj = new Date(rawData.hourly.time[i]);
+                        const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
                         const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
-                        const timeStringRaw = rawData.hourly.time[i]; 
-                        const hourOnly = timeStringRaw.split('T')[1]; 
-
+                        
                         compiledWeatherData.hourly.push({
-                            time: i === startIndex ? "Now" : hourOnly,
+                            time: i === startIndex ? "Now" : hoursStr,
                             temp: Math.round(rawData.hourly.temperature_2m[i]),
                             icon: hCondition.icon
                         });
@@ -1874,12 +1884,13 @@
                     SafeStorage.setSession(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
-                    if (!cachedPayload && !isBackgroundSync) {
-                        this.renderErrorState("Data Unavailable");
-                    }
+                    let errorMessage = "Data Unavailable";
+                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
+                    if (!cachedPayload && !isBackgroundSync) this.renderErrorState(errorMessage);
                 }
             }
         }
+        window.WeatherAPI = new WeatherService();
 
         class ColorWheelManager {
             constructor(deviceId, canvasElement, indicatorElement) {
@@ -1895,9 +1906,24 @@
             }
 
             bindEvents() {
-                const handleStart = (e) => { this.isDragging = true; this.processInteraction(e); if(e.cancelable) e.preventDefault(); };
-                const handleMove = (e) => { if (!this.isDragging) return; this.processInteraction(e); if(e.cancelable) e.preventDefault(); };
-                const handleEnd = (e) => { if(this.isDragging) { this.isDragging = false; this.dispatchFinalColorCommand(); } };
+                const handleStart = (e) => {
+                    this.isDragging = true;
+                    this.processInteraction(e);
+                    if(e.cancelable) e.preventDefault(); 
+                };
+
+                const handleMove = (e) => {
+                    if (!this.isDragging) return;
+                    this.processInteraction(e);
+                    if(e.cancelable) e.preventDefault();
+                };
+
+                const handleEnd = (e) => {
+                    if(this.isDragging) {
+                        this.isDragging = false;
+                        this.dispatchFinalColorCommand();
+                    }
+                };
 
                 this.canvas.addEventListener('mousedown', handleStart, {passive: false});
                 this.canvas.addEventListener('mousemove', handleMove, {passive: false});
@@ -1910,6 +1936,7 @@
 
             processInteraction(event) {
                 const rect = this.canvas.getBoundingClientRect();
+                
                 let clientX = event.clientX;
                 let clientY = event.clientY;
                 if (event.touches && event.touches.length > 0) {
@@ -1964,7 +1991,7 @@
             dispatchFinalColorCommand() {
                 const targetIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
                 targetIds.forEach(id => {
-                    if(window.DeviceManager) window.DeviceManager.executeColorCommand(id);
+                    window.DeviceManager.executeColorCommand(id);
                 });
             }
             
@@ -1995,11 +2022,10 @@
         }
 
         class TuyaSmartDeviceManager {
-            constructor(networkService) {
+            constructor() {
                 this.workerApiUrl = SafeStorage.getLocal(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
                 this.colorWheelControllers = {};
-                this.network = networkService;
                 
                 for (let i = 0; i < TUYA_DEVICES.length; i++) {
                     const device = TUYA_DEVICES[i];
@@ -2018,7 +2044,7 @@
                     const device = TUYA_DEVICES[i];
                     if (!isBackgroundSync && window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(device.id, true);
                     try {
-                        const jsonPayload = await this.network.get(this.buildEndpointUrl(`/status?device=${device.id}`));
+                        const jsonPayload = await window.NetworkService.get(this.buildEndpointUrl(`/status?device=${device.id}`));
                         if (jsonPayload.success && jsonPayload.result) this.parseAndApplyTuyaStatusPayload(device.id, jsonPayload.result);
                     } catch (error) {
                     } finally {
@@ -2065,7 +2091,7 @@
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    await Promise.all(targetDeviceIds.map(id => this.network.post(url, { device: id, commands: [{ code: 'switch_led', value: targetState }] })));
+                    await Promise.all(targetDeviceIds.map(id => window.NetworkService.post(url, { device: id, commands: [{ code: 'switch_led', value: targetState }] })));
                 } catch (error) {
                     if (window.GlobalToast) window.GlobalToast.show("Network Error. Reverting.");
                     targetDeviceIds.forEach(id => {
@@ -2102,7 +2128,7 @@
                     const url = this.buildEndpointUrl('/command');
                     await Promise.all(targetDeviceIds.map(id => {
                         if (this.devicesState[id].on === false) return Promise.resolve();
-                        return this.network.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue || 0, s: this.devicesState[id].saturation || 0, v: tuyaFormatBrightness }) } ] });
+                        return window.NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue || 0, s: this.devicesState[id].saturation || 0, v: tuyaFormatBrightness }) } ] });
                     }));
                 } catch (error) {
                     if (window.GlobalToast) window.GlobalToast.show("Network Error.");
@@ -2129,10 +2155,10 @@
                 try {
                     const url = this.buildEndpointUrl('/command');
                     await Promise.all(targetDeviceIds.map(id => {
-                        return this.network.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue, s: this.devicesState[id].saturation, v: this.devicesState[id].brightness * 10 }) } ] });
+                        return window.NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue, s: this.devicesState[id].saturation, v: this.devicesState[id].brightness * 10 }) } ] });
                     }));
                 } catch (error) {
-                    if (window.GlobalToast) window.GlobalToast.show("Failed to apply color.");
+                    if (window.GlobalToast) window.GlobalToast.show("Failed to apply color configuration.");
                 } finally {
                     targetDeviceIds.forEach(id => {
                         if (window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(id, false);
@@ -2140,6 +2166,7 @@
                 }
             }
         }
+        window.DeviceManager = new TuyaSmartDeviceManager();
 
         /* ==========================================================================
            USER INTERFACE RENDERER & LOGIC
@@ -2224,10 +2251,9 @@
                 SafeStorage.setLocal(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
                 this.applyGlobalLinkStateToButton();
                 
-                if (this.isDevicesLinked) {
-                    if (window.GlobalToast) window.GlobalToast.show("Devices Linked");
-                } else {
-                    if (window.GlobalToast) window.GlobalToast.show("Devices Unlinked");
+                if (window.GlobalToast) {
+                    if (this.isDevicesLinked) window.GlobalToast.show("Devices Synced");
+                    else window.GlobalToast.show("Devices Unlinked");
                 }
             }
 
@@ -2240,6 +2266,7 @@
                     if (window.GlobalToast) window.GlobalToast.show("Synchronizing telemetry...");
                     window.DeviceManager.synchronizeAllDevices();
                     if(window.RoomClimateSystem) window.RoomClimateSystem.fetchAndRender();
+                    if(window.WeatherAPI) window.WeatherAPI.fetchAndRender();
                 });
 
                 document.getElementById('header-btn-settings').addEventListener('click', () => {
@@ -2647,35 +2674,33 @@
            BOOTSTRAPPING & DEPENDENCY INJECTION
            ========================================================================== */
         
-        // Singletons are attached securely to the window object to resolve scoping issues
-        // while allowing inline HTML event handlers to function reliably.
-        window.AgendaSystem = new AgendaManager();
-        window.WeatherAPI = new WeatherService(NetworkService);
-        window.RoomClimateSystem = new RoomClimateManager(NetworkService);
-        window.DeviceManager = new TuyaSmartDeviceManager(NetworkService);
-        window.ApplicationUI = new UserInterfaceController();
+        class SystemBootstrapper {
+            static initialize() {
+                try {
+                    window.ApplicationUI = new UserInterfaceController();
+                    window.ApplicationUI.initialize();
+                    
+                    triggerEntryAnimations();
+                    LiveClock.start();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                window.ApplicationUI.initialize();
-                triggerEntryAnimations();
-                LiveClock.start();
+                    if (window.WeatherAPI) window.WeatherAPI.fetchAndRender();
+                    if (window.RoomClimateSystem) window.RoomClimateSystem.fetchAndRender();
 
-                window.WeatherAPI.fetchAndRender();
-                window.RoomClimateSystem.fetchAndRender();
-
-                if (!window.DeviceManager.isConfigured()) {
-                    setTimeout(() => {
-                        window.ApplicationUI.openSettingsModal();
-                    }, 1200);
-                } else {
-                    window.DeviceManager.synchronizeAllDevices();
+                    if (!window.DeviceManager.isConfigured()) {
+                        setTimeout(() => {
+                            if (window.ApplicationUI) window.ApplicationUI.openSettingsModal();
+                        }, 1200);
+                    } else {
+                        window.DeviceManager.synchronizeAllDevices();
+                    }
+                } catch (error) {
+                    console.error("Bootstrapping Error:", error);
+                    document.body.classList.add('critical-js-error-active');
                 }
-            } catch (error) {
-                console.error("Bootstrapping Error:", error);
-                document.body.classList.add('critical-js-error-active');
             }
-        });
+        }
+
+        document.addEventListener('DOMContentLoaded', SystemBootstrapper.initialize);
 
     </script>
 </body>
