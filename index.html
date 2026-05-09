@@ -15,20 +15,10 @@
 
     <style>
         /* ==========================================================================
-           CRITICAL ERROR RECOVERY (Failsafe for JavaScript Thread Crashes)
-           ========================================================================== */
-        noscript .awaits-animation,
-        body.critical-js-error-active .awaits-animation {
-            opacity: 1 !important;
-            transform: translateY(0px) scale(1) !important;
-            transition-property: none !important;
-            animation: none !important;
-        }
-
-        /* ==========================================================================
            CUSTOM TYPOGRAPHY INTEGRATION (ENTERPRISE GRADE)
            Mapping exact local files to distinct font families to prevent faux-bolding
            ========================================================================== */
+
         @font-face {
             font-family: 'SF Pro Light Custom';
             src: url('./SFProLight.ttf') format('truetype');
@@ -55,7 +45,6 @@
 
         @font-face {
             font-family: 'SF Pro Semibold Soft Custom';
-            /* URL encoded spaces for maximum browser compatibility */
             src: url('./SF%20Pro%20-%20Semibold%20Soft.otf') format('opentype');
             font-weight: normal;
             font-style: normal;
@@ -106,13 +95,11 @@
             --slider-inactive-fill-color: rgba(255, 255, 255, 0.20);
             --slider-inactive-fill-shadow: none;
 
-            /* Link, Success & Alert States */
+            /* Link & Success States */
             --link-active-background-color: #0A84FF; 
             --link-active-foreground-color: #FFFFFF;
             --link-active-box-shadow: 0px 4px 16px rgba(10, 132, 255, 0.4);
             --success-color: #32D74B;
-            --alert-temperature-hot-color: #FF453A; 
-            --alert-temperature-cold-color: #0A84FF; 
 
             /* Typography Pointers */
             --font-light: 'SF Pro Light Custom', -apple-system, sans-serif;
@@ -121,10 +108,9 @@
             --font-semibold-soft: 'SF Pro Semibold Soft Custom', -apple-system, sans-serif;
             --font-bold: 'SF Pro Bold Custom', -apple-system, sans-serif;
             
-            /* Physics & Animation Curves */
-            --animation-smooth-curve: cubic-bezier(0.25, 0.1, 0.25, 1.0); 
+            /* Physics & Animation Curves (Overhauled for absolute smoothness) */
+            --animation-smooth-curve: cubic-bezier(0.25, 0.1, 0.25, 1.0); /* Native Apple Ease */
             --animation-bouncy-curve: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --animation-ease-out-curve: cubic-bezier(0.25, 1.0, 0.5, 1.0);
             --animation-duration-fast: 0.25s;
             --animation-duration-medium: 0.45s;
             --animation-duration-slow: 0.65s;
@@ -172,7 +158,6 @@
             margin-left: auto;
             margin-right: auto;
             min-height: 100vh;
-            /* Safe area insets for notched iPads */
             padding-top: calc(env(safe-area-inset-top, 40px) + 24px);
             padding-right: var(--layout-padding-horizontal-portrait);
             padding-bottom: var(--layout-padding-vertical-bottom);
@@ -187,17 +172,15 @@
             
             transition-property: max-width, padding-right, padding-left;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            transition-timing-function: var(--animation-smooth-curve);
         }
 
-        /* Responsive Landscape Injection */
         body.layout-mode-landscape {
             max-width: var(--layout-max-width-landscape);
             padding-right: var(--layout-padding-horizontal-landscape);
             padding-left: var(--layout-padding-horizontal-landscape);
         }
 
-        /* Allow typing explicitly in input fields */
         input, textarea, select {
             user-select: text !important;
             -webkit-user-select: text !important;
@@ -210,8 +193,14 @@
            ========================================================================== */
         
         @keyframes elegant-fade-slide-up {
-            0% { opacity: 0; transform: translateY(30px); }
-            100% { opacity: 1; transform: translateY(0px); }
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0px);
+            }
         }
 
         @keyframes checkmark-pop-animation {
@@ -256,14 +245,6 @@
             padding-right: 8px;
         }
 
-        .header-title-group {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 16px;
-        }
-
-        /* CRITICAL TYPOGRAPHY FIX: Proportional Numbers & Opentype features */
         .application-title {
             font-family: var(--font-medium);
             font-weight: normal; 
@@ -273,70 +254,6 @@
             color: #FFFFFF;
             font-variant-numeric: proportional-nums;
             font-feature-settings: "pnum" 1, "tnum" 0, "kern" 1;
-        }
-
-        /* Refined, Flush Room Climate Badge */
-        .room-climate-badge {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 4px; 
-            background-color: var(--glass-background-base);
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-style: solid;
-            border-color: var(--glass-border-color);
-            padding-top: 4px; 
-            padding-right: 10px;
-            padding-bottom: 4px;
-            padding-left: 8px;
-            border-radius: 16px; 
-            backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
-            -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
-            
-            opacity: 0;
-            transform: translateX(-15px);
-            transition-property: opacity, transform;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve);
-        }
-
-        .room-climate-badge.is-loaded {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .room-climate-icon {
-            width: 14px; 
-            height: 14px;
-            color: var(--card-inactive-subtitle-color);
-            transition-property: color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        .room-climate-value {
-            font-family: var(--font-medium);
-            font-weight: normal;
-            font-size: 15px; 
-            color: #FFFFFF;
-            letter-spacing: -0.01em;
-            transition-property: color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
-        }
-
-        /* Climate Badge Thermodynamic Alert States */
-        .room-climate-badge.is-temperature-hot .room-climate-value,
-        .room-climate-badge.is-temperature-hot .room-climate-icon {
-            color: var(--alert-temperature-hot-color);
-        }
-
-        .room-climate-badge.is-temperature-cold .room-climate-value,
-        .room-climate-badge.is-temperature-cold .room-climate-icon {
-            color: var(--alert-temperature-cold-color);
         }
 
         .header-controls-container {
@@ -367,8 +284,7 @@
             
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
-            transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
-            
+            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve);
             outline: none;
         }
 
@@ -383,7 +299,7 @@
         }
 
         /* ==========================================================================
-           WEATHER WIDGET COMPONENT (EXPANDABLE & HARDWARE ACCELERATED)
+           WEATHER WIDGET COMPONENT
            ========================================================================== */
         .weather-dashboard-widget {
             background-color: var(--glass-background-base);
@@ -402,7 +318,6 @@
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
             cursor: pointer;
             
-            /* Hardware Acceleration for iPad Air 2 Rendering Performance */
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
@@ -412,7 +327,7 @@
             
             transition-property: transform, background-color;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-spring-curve);
+            transition-timing-function: var(--animation-smooth-curve);
         }
 
         .weather-dashboard-widget:active {
@@ -465,15 +380,9 @@
         .weather-graphics-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
         .weather-vector-icon { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
         .weather-vector-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); }
+        .weather-high-low-range { font-family: var(--font-medium); font-weight: normal; font-size: 15px; color: var(--card-inactive-subtitle-color); }
         
-        .weather-high-low-range { 
-            font-family: var(--font-medium);
-            font-weight: normal;
-            font-size: 15px; 
-            color: var(--card-inactive-subtitle-color); 
-        }
-        
-        /* Expandable Hourly Section with Hardware Compositing Layers */
+        /* Expandable Hourly Section */
         .weather-hourly-container {
             max-height: 0px;
             opacity: 0;
@@ -490,15 +399,14 @@
             border-top-style: solid;
             border-top-color: transparent;
             
-            /* Crucial iOS Native Scrolling and GPU Acceleration bounds */
             -webkit-overflow-scrolling: touch;
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
             will-change: max-height, opacity, padding-top, padding-bottom;
             
             transition-property: max-height, opacity, padding-top, padding-bottom, border-top-color;
-            transition-duration: 0.5s;
-            transition-timing-function: var(--animation-spring-curve);
+            transition-duration: var(--animation-duration-medium);
+            transition-timing-function: var(--animation-smooth-curve);
         }
 
         .weather-hourly-container::-webkit-scrollbar { display: none; }
@@ -516,7 +424,7 @@
         .weather-dashboard-widget.is-expanded .hourly-item-block {
             animation-name: hourly-item-fade-in;
             animation-duration: 0.6s;
-            animation-timing-function: var(--animation-spring-curve);
+            animation-timing-function: var(--animation-smooth-curve);
             animation-fill-mode: forwards;
         }
 
@@ -525,7 +433,6 @@
         .hourly-item-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.1)); }
         .hourly-item-temp { font-family: var(--font-medium); font-weight: normal; font-size: 17px; color: #FFFFFF; }
         
-        /* Skeleton Animation */
         .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
         .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); animation: shimmer 2s infinite; }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
@@ -572,7 +479,7 @@
             border-radius: 32px;
             padding-top: 24px;
             padding-right: 32px;
-            padding-bottom: 24px; 
+            padding-bottom: 24px; /* Reduced bottom padding for tighter integration */
             padding-left: 32px;
             display: flex;
             flex-direction: column;
@@ -583,7 +490,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            margin-bottom: 20px; 
+            margin-bottom: 20px; /* Tighter header spacing */
             padding-left: 4px;
         }
 
@@ -607,7 +514,7 @@
         .agenda-list-container {
             display: flex;
             flex-direction: column;
-            gap: 8px; 
+            gap: 8px; /* Tighter gap between tasks */
         }
 
         .agenda-item-row {
@@ -642,8 +549,8 @@
         }
 
         .agenda-checkbox-container {
-            width: 22px; 
-            height: 22px; 
+            width: 22px; /* Reduced dimension */
+            height: 22px; /* Reduced dimension */
             border-radius: 50%;
             border-top-width: 2px;
             border-right-width: 2px;
@@ -671,7 +578,7 @@
         }
 
         .agenda-checkbox-svg {
-            width: 12px; 
+            width: 12px; /* Proportional reduction */
             height: 12px;
             stroke: #FFFFFF;
             stroke-width: 3;
@@ -701,7 +608,7 @@
         .agenda-item-title {
             font-family: var(--font-medium);
             font-weight: normal;
-            font-size: 15px; 
+            font-size: 15px; /* Reduced for proportional density */
             color: #FFFFFF;
             transition-property: color;
             transition-duration: var(--animation-duration-medium);
@@ -736,7 +643,6 @@
             color: #FFFFFF;
         }
 
-        /* The Global Sync / Link Button - PERFECTLY REPOSITIONED ABOVE CARDS */
         .global-link-synchronization-button {
             position: absolute;
             left: 50%;
@@ -873,9 +779,10 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            
             transition-property: background-color, color, transform, box-shadow;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            transition-timing-function: var(--animation-smooth-curve);
         }
 
         .smart-device-card.state-is-on .device-toggle-icon-container {
@@ -924,7 +831,7 @@
             margin-top: 4px; 
             transition-property: color; 
             transition-duration: var(--animation-duration-medium); 
-            transition-timing-function: var(--animation-ease-out-curve); 
+            transition-timing-function: var(--animation-smooth-curve); 
         }
         
         .smart-device-card.state-is-on .device-current-status-label { color: var(--card-active-subtitle-color); }
@@ -945,7 +852,7 @@
             box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
             transition-property: background-color, box-shadow, opacity;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            transition-timing-function: var(--animation-smooth-curve);
         }
 
         .smart-device-card:not(.state-is-on) .device-brightness-slider-container {
@@ -968,7 +875,7 @@
             
             transition-property: background-color, box-shadow;
             transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-ease-out-curve);
+            transition-timing-function: var(--animation-smooth-curve);
         }
 
         .smart-device-card.state-is-on .brightness-slider-visual-fill {
@@ -1002,6 +909,7 @@
             padding-top: 0px;
             padding-bottom: 0px;
             will-change: max-height, opacity, padding-top, padding-bottom;
+            
             transition-property: opacity, max-height, padding-top, padding-bottom;
             transition-duration: 0.5s;
             transition-timing-function: var(--animation-spring-curve);
@@ -1057,7 +965,7 @@
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; z-index: 1000;
-            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-ease-out-curve);
+            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-smooth-curve);
         }
         .application-modal-backdrop.is-visible-active { opacity: 1; pointer-events: auto; }
 
@@ -1185,20 +1093,7 @@
          APPLICATION HEADER
          ========================================================================== -->
     <header class="application-header awaits-animation" id="anim-target-1" aria-label="Main Application Header">
-        
-        <!-- Nested Group for Clock and Room Climate Badge -->
-        <div class="header-title-group">
-            <!-- Explicit Typographic Render fixes the "1" spacing bug -->
-            <h1 class="application-title" id="live-clock-display">00:00</h1>
-            
-            <div class="room-climate-badge" id="room-climate-badge" title="Indoor Temperature">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="room-climate-icon">
-                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
-                </svg>
-                <span class="room-climate-value" id="room-temperature-value">--°C</span>
-            </div>
-        </div>
-
+        <h1 class="application-title" id="live-clock-display">00:00</h1>
         <div class="header-controls-container">
             <button class="circular-icon-button" id="header-btn-refresh" aria-label="Synchronize Devices" title="Force Refresh">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"></path><path d="M21.34 15.57a10 10 0 1 1-.92-10.26l5.08 5.08"></path></svg>
@@ -1213,7 +1108,7 @@
          WEATHER WIDGET SECTION (EXPANDABLE)
          ========================================================================== -->
     <section class="awaits-animation" id="anim-target-2" aria-label="Weather Dashboard">
-        <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="window.ApplicationUI.toggleWeatherExpansion()">
+        <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
             <div class="weather-main-row" id="weather-main-row-container">
                 <!-- Populated by WeatherService with skeleton loading initially -->
             </div>
@@ -1248,7 +1143,6 @@
         <h2 class="section-heading-title">Rooms & Devices</h2>
         
         <div class="device-grid-wrapper">
-            <!-- The Global Link / Synchronization Button positioned perfectly between cards -->
             <button id="global-link-synchronization-button" class="global-link-synchronization-button" aria-pressed="false" title="Synchronize Devices">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
@@ -1300,7 +1194,7 @@
                             <input type="time" class="settings-text-input-field" style="margin-bottom:0; padding-top:12px; padding-bottom:12px;" id="agenda-new-routine-end" value="09:00">
                         </div>
                     </div>
-                    <button class="settings-action-button-secondary" style="background-color: rgba(255,255,255,0.1); border-radius: 12px; margin-top: 4px; padding-top:12px; padding-bottom:12px;" onclick="window.AgendaSystem.handleCreateNewRoutine()">+ Create Routine</button>
+                    <button class="settings-action-button-secondary" style="background-color: rgba(255,255,255,0.1); border-radius: 12px; margin-top: 4px; padding-top:12px; padding-bottom:12px;" onclick="AgendaSystem.handleCreateNewRoutine()">+ Create Routine</button>
                 </div>
             </div>
 
@@ -1324,61 +1218,33 @@
     <script>
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
-         * Explicitly defines all dependencies globally before utilizing them to prevent ReferenceErrors.
+         * Encompasses state management, UI rendering, debounced network requests, external API integrations,
+         * advanced HTML5 Canvas color picking with polar coordinate mathematics, responsive forecasting,
+         * real-time clock rendering, synchronized device dispatch, and a comprehensive Routine/Agenda Engine
+         * with inline editing capabilities.
          */
 
         "use strict";
-
-        // Fallback execution to display UI if an error is caught immediately
-        window.addEventListener('error', function(errorEvent) {
-            console.error("Critical System Failure. Reverting to failsafe UI.", errorEvent);
-            document.body.classList.add('critical-js-error-active');
-        });
-
-        /* ==========================================================================
-           SAFE STORAGE WRAPPER
-           ========================================================================== */
-        window.SafeStorage = {
-            getLocal: function(key) {
-                try { return localStorage.getItem(key); } 
-                catch (e) { return null; }
-            },
-            setLocal: function(key, value) {
-                try { localStorage.setItem(key, value); } 
-                catch (e) { console.warn('LocalStorage unavailable.'); }
-            },
-            getSession: function(key) {
-                try { return sessionStorage.getItem(key); } 
-                catch (e) { return null; }
-            },
-            setSession: function(key, value) {
-                try { sessionStorage.setItem(key, value); } 
-                catch (e) { console.warn('SessionStorage unavailable.'); }
-            }
-        };
 
         /* ==========================================================================
            CONSTANTS & STATIC DATA
            ========================================================================== */
         
-        window.TUYA_DEVICES = [
+        const TUYA_DEVICES = [
             { id: 'bf8b0e945d8c5f9861fjzy', name: 'Led Lights Tak' },
             { id: 'bf1cf6aca13749cf898g3p', name: 'Led Lights Skrivbord' }
         ];
 
-        window.TUYA_CLIMATE_SENSOR_ID = 'bfdf7bb3a6bbe3b451q1ma';
-
-        window.STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v25',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v25',
-            WEATHER_CACHE: 'enterprise_weather_cache_v25',
-            CLIMATE_CACHE: 'enterprise_climate_cache_v25',
-            DEVICES_LINKED: 'enterprise_devices_linked_v25',
-            AGENDA_ROUTINES: 'enterprise_agenda_routines_v25',
-            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v25'
+        const STORAGE_KEYS = {
+            WORKER_URL: 'enterprise_tuya_worker_url_v20',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v20',
+            WEATHER_CACHE: 'enterprise_weather_cache_v20',
+            DEVICES_LINKED: 'enterprise_devices_linked_v20',
+            AGENDA_ROUTINES: 'enterprise_agenda_routines_v20',
+            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v20'
         };
 
-        window.SVG_ASSETS = {
+        const SVG_ASSETS = {
             WEATHER_SUN: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFB340" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
             WEATHER_CLOUD: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>`,
             WEATHER_RAIN: `<svg viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.4 14.5a6 6 0 1 0-10.8-2.5A5.5 5.5 0 1 0 7.5 22h9a5 5 0 1 0-.1-10Z"/><path d="M12 22v-4"/><path d="M8 22v-4"/><path d="M16 22v-4"/></svg>`,
@@ -1391,7 +1257,31 @@
         };
 
         /* ==========================================================================
-           UTILITY CLASSES (DEFINED EARLY)
+           ANIMATION ORCHESTRATION
+           ========================================================================== */
+        
+        /**
+         * Fires initial load animations systematically.
+         */
+        function triggerEntryAnimations() {
+            const targets = [
+                document.getElementById('anim-target-1'),
+                document.getElementById('anim-target-2'),
+                document.getElementById('anim-target-3'),
+                document.getElementById('anim-target-4')
+            ];
+            
+            targets.forEach((el, index) => {
+                if (el) {
+                    setTimeout(() => {
+                        el.classList.add('animate-entry');
+                    }, index * 120);
+                }
+            });
+        }
+
+        /* ==========================================================================
+           UTILITY CLASSES
            ========================================================================== */
         
         class ToastManager {
@@ -1413,7 +1303,7 @@
                 }, this.displayDurationMs);
             }
         }
-        window.GlobalToast = new ToastManager();
+        const GlobalToast = new ToastManager();
 
         class RealTimeClockManager {
             constructor(elementId) {
@@ -1431,141 +1321,18 @@
                 const formattedMinutes = String(now.getMinutes()).padStart(2, '0');
                 this.clockElement.innerText = `${formattedHours}:${formattedMinutes}`;
                 
+                // Every minute, evaluate the active Agenda Routine
                 if (now.getSeconds() === 0 && window.ApplicationUI) {
-                    window.ApplicationUI.executeGlobalMinuteTick();
+                    window.ApplicationUI.evaluateAndRenderActiveRoutine();
                 }
             }
         }
-        window.LiveClock = new RealTimeClockManager('live-clock-display');
-
-        class NetworkManager {
-            constructor() {
-                this.defaultTimeoutMs = 12000; 
-            }
-            async get(url) {
-                let abortController = null;
-                let signal = undefined;
-                if (typeof window.AbortController !== 'undefined') {
-                    abortController = new window.AbortController();
-                    signal = abortController.signal;
-                }
-                
-                const timeoutId = setTimeout(() => {
-                    if (abortController) abortController.abort();
-                }, this.defaultTimeoutMs);
-                
-                try {
-                    const fetchOptions = signal ? { signal } : {};
-                    const response = await fetch(url, fetchOptions);
-                    clearTimeout(timeoutId);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return await response.json();
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    throw error;
-                }
-            }
-
-            async post(url, body) {
-                let abortController = null;
-                let signal = undefined;
-                if (typeof window.AbortController !== 'undefined') {
-                    abortController = new window.AbortController();
-                    signal = abortController.signal;
-                }
-
-                const timeoutId = setTimeout(() => {
-                    if (abortController) abortController.abort();
-                }, this.defaultTimeoutMs);
-                
-                try {
-                    const fetchOptions = {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
-                    };
-                    if (signal) fetchOptions.signal = signal;
-
-                    const response = await fetch(url, fetchOptions);
-                    clearTimeout(timeoutId);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return await response.json();
-                } catch (error) {
-                    clearTimeout(timeoutId);
-                    throw error;
-                }
-            }
-        }
-        window.NetworkService = new NetworkManager();
+        const LiveClock = new RealTimeClockManager('live-clock-display');
 
         /* ==========================================================================
-           BUSINESS LOGIC CLASSES 
+           AGENDA SYSTEM (TIME-BRACKETED ROUTINES WITH INLINE EDITING)
            ========================================================================== */
-
-        class RoomClimateManager {
-            constructor() {
-                this.deviceId = window.TUYA_CLIMATE_SENSOR_ID;
-                this.valueElement = document.getElementById('room-temperature-value');
-                this.badgeElement = document.getElementById('room-climate-badge');
-            }
-
-            async fetchAndRender(isBackgroundSync = false) {
-                if (!window.DeviceManager || !window.DeviceManager.isConfigured()) return;
-                
-                if (!isBackgroundSync) {
-                    const cachedTemp = window.SafeStorage.getSession(window.STORAGE_KEYS.CLIMATE_CACHE);
-                    if (cachedTemp) {
-                        this.updateClimateUI(parseFloat(cachedTemp));
-                    }
-                }
-
-                try {
-                    const url = window.DeviceManager.buildEndpointUrl(`/status?device=${this.deviceId}`);
-                    const jsonPayload = await window.NetworkService.get(url);
-                    
-                    if (jsonPayload.success && jsonPayload.result) {
-                        const parsedTemperature = this.parseTemperaturePayload(jsonPayload.result);
-                        if (parsedTemperature !== null) {
-                            this.updateClimateUI(parsedTemperature);
-                            window.SafeStorage.setSession(window.STORAGE_KEYS.CLIMATE_CACHE, parsedTemperature.toString());
-                        }
-                    }
-                } catch (error) {
-                    console.warn(`RoomClimateManager: Failed to fetch sensor data for device [${this.deviceId}].`, error);
-                }
-            }
-
-            parseTemperaturePayload(statusArray) {
-                const tempInstruction = statusArray.find(instruction => 
-                    instruction.code === 'va_temperature' || 
-                    instruction.code === 'temp_current' || 
-                    instruction.code === 'temperature'
-                );
-
-                if (tempInstruction !== undefined && tempInstruction.value !== undefined) {
-                    let rawValue = parseFloat(tempInstruction.value);
-                    if (rawValue > 50) rawValue = rawValue / 10;
-                    return Number(rawValue.toFixed(1));
-                }
-                return null;
-            }
-
-            updateClimateUI(temperatureCelsius) {
-                if (!this.valueElement || !this.badgeElement) return;
-                
-                this.valueElement.innerText = `${temperatureCelsius}°C`;
-                this.badgeElement.classList.add('is-loaded');
-                
-                this.badgeElement.classList.remove('is-temperature-hot', 'is-temperature-cold');
-                if (temperatureCelsius > 25.0) {
-                    this.badgeElement.classList.add('is-temperature-hot');
-                } else if (temperatureCelsius < 20.0) {
-                    this.badgeElement.classList.add('is-temperature-cold');
-                }
-            }
-        }
-        window.RoomClimateSystem = new RoomClimateManager();
-
+        
         class AgendaManager {
             constructor() {
                 this.routines = [];
@@ -1578,16 +1345,14 @@
             }
 
             loadFromStorage() {
-                const storedData = window.SafeStorage.getLocal(window.STORAGE_KEYS.AGENDA_ROUTINES);
+                const storedData = localStorage.getItem(STORAGE_KEYS.AGENDA_ROUTINES);
                 if (storedData) {
                     try {
                         this.routines = JSON.parse(storedData);
                     } catch (e) {
-                        console.error("AgendaManager: Corrupt data in storage. Resetting.");
                         this.routines = [];
                     }
                 } else {
-                    // Seed initial example data if empty
                     this.routines = [
                         {
                             id: this.generateUUID(),
@@ -1598,17 +1363,6 @@
                             tasks: [
                                 { id: this.generateUUID(), title: "Make Coffee", completed: false, order: 0 },
                                 { id: this.generateUUID(), title: "Check Emails", completed: false, order: 1 }
-                            ]
-                        },
-                        {
-                            id: this.generateUUID(),
-                            title: "Evening Routine",
-                            startTime: "18:00",
-                            endTime: "22:00",
-                            order: 1,
-                            tasks: [
-                                { id: this.generateUUID(), title: "Dim the lights", completed: false, order: 0 },
-                                { id: this.generateUUID(), title: "Read a book", completed: false, order: 1 }
                             ]
                         }
                     ];
@@ -1623,19 +1377,19 @@
                         task.order = tIndex;
                     });
                 });
-                window.SafeStorage.setLocal(window.STORAGE_KEYS.AGENDA_ROUTINES, JSON.stringify(this.routines));
+                localStorage.setItem(STORAGE_KEYS.AGENDA_ROUTINES, JSON.stringify(this.routines));
             }
 
             enforceDailyReset() {
                 const currentLocalDateString = new Date().toDateString();
-                const lastRecordedResetDate = window.SafeStorage.getLocal(window.STORAGE_KEYS.AGENDA_LAST_RESET);
+                const lastRecordedResetDate = localStorage.getItem(STORAGE_KEYS.AGENDA_LAST_RESET);
 
                 if (lastRecordedResetDate !== currentLocalDateString) {
                     this.routines.forEach(routine => {
                         routine.tasks.forEach(task => task.completed = false);
                     });
                     this.saveToStorage();
-                    window.SafeStorage.setLocal(window.STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
+                    localStorage.setItem(STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
                 }
             }
 
@@ -1747,26 +1501,8 @@
                     this.saveToStorage();
                 }
             }
-            
-            handleCreateNewRoutine() {
-                const titleEl = document.getElementById('agenda-new-routine-title');
-                const startEl = document.getElementById('agenda-new-routine-start');
-                const endEl = document.getElementById('agenda-new-routine-end');
-                
-                if(titleEl && startEl && endEl && titleEl.value.trim() !== '') {
-                    this.addRoutine(titleEl.value, startEl.value, endEl.value);
-                    titleEl.value = '';
-                    if (window.ApplicationUI) {
-                        window.ApplicationUI.renderAgendaEditorSettings();
-                        window.ApplicationUI.evaluateAndRenderActiveRoutine();
-                    }
-                    if (window.GlobalToast) window.GlobalToast.show("Routine Created");
-                } else {
-                    if (window.GlobalToast) window.GlobalToast.show("Please provide a name for the routine.");
-                }
-            }
         }
-        window.AgendaSystem = new AgendaManager();
+        const AgendaSystem = new AgendaManager();
 
         /* ==========================================================================
            EXTERNAL SERVICE INTEGRATIONS (WEATHER)
@@ -1808,15 +1544,15 @@
             }
 
             parseWmoWeatherCode(code) {
-                if (code === 0 || code === 1) return { text: "Clear Sky", icon: window.SVG_ASSETS.WEATHER_SUN };
-                if (code === 2) return { text: "Partly Cloudy", icon: window.SVG_ASSETS.WEATHER_CLOUD };
-                if (code === 3) return { text: "Overcast", icon: window.SVG_ASSETS.WEATHER_CLOUD };
-                if (code >= 51 && code <= 67) return { text: "Rain", icon: window.SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: window.SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: window.SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: window.SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 95) return { text: "Thunderstorm", icon: window.SVG_ASSETS.WEATHER_RAIN };
-                return { text: "Cloudy", icon: window.SVG_ASSETS.WEATHER_CLOUD };
+                if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
+                if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
+                return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
             }
 
             renderSuccessState(data) {
@@ -1844,22 +1580,20 @@
                 }
             }
 
-            async fetchAndRender(isBackgroundSync = false) {
-                const cachedPayload = window.SafeStorage.getSession(window.STORAGE_KEYS.WEATHER_CACHE);
-                if (!isBackgroundSync) {
-                    if (cachedPayload) {
-                        try {
-                            this.renderSuccessState(JSON.parse(cachedPayload));
-                        } catch (e) {
-                            this.renderLoadingState(); 
-                        }
-                    } else {
-                        this.renderLoadingState();
+            async fetchAndRender() {
+                const cachedPayload = sessionStorage.getItem(STORAGE_KEYS.WEATHER_CACHE);
+                if (cachedPayload) {
+                    try {
+                        this.renderSuccessState(JSON.parse(cachedPayload));
+                    } catch (e) {
+                        this.renderLoadingState(); 
                     }
+                } else {
+                    this.renderLoadingState();
                 }
 
                 try {
-                    const rawData = await window.NetworkService.get(this.apiUrl);
+                    const rawData = await NetworkService.get(this.apiUrl);
                     if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
                         throw new Error("Invalid data structure from Open-Meteo API.");
                     }
@@ -1900,17 +1634,58 @@
                     }
 
                     this.renderSuccessState(compiledWeatherData);
-                    window.SafeStorage.setSession(window.STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
+                    sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
                     let errorMessage = "Data Unavailable";
                     if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
-                    if (!cachedPayload && !isBackgroundSync) this.renderErrorState(errorMessage);
+                    if (!cachedPayload) this.renderErrorState(errorMessage);
                 }
             }
         }
-        window.WeatherAPI = new WeatherService();
 
+        /* ==========================================================================
+           NETWORK SERVICE LAYER
+           ========================================================================== */
+
+        class NetworkManager {
+            constructor() {
+                this.defaultTimeoutMs = 15000; 
+            }
+            async get(url) {
+                const abortController = new AbortController();
+                const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
+                try {
+                    const response = await fetch(url, { signal: abortController.signal });
+                    clearTimeout(timeoutId);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    throw error;
+                }
+            }
+            async post(url, body) {
+                const abortController = new AbortController();
+                const timeoutId = setTimeout(() => abortController.abort(), this.defaultTimeoutMs);
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                        signal: abortController.signal
+                    });
+                    clearTimeout(timeoutId);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    throw error;
+                }
+            }
+        }
+        const NetworkService = new NetworkManager();
+        
         /* ==========================================================================
            COLOR WHEEL LOGIC (HTML5 CANVAS WITH MATHEMATICAL SNAP)
            ========================================================================== */
@@ -1922,7 +1697,7 @@
                 this.indicator = indicatorElement;
                 this.isDragging = false;
                 
-                // Fixed geometric constraints for precision tracking unbothered by CSS layout
+                // Fixed dimensions decouple mathematical precision from DOM resize artifacts
                 this.fixedCanvasDimension = 200;
                 this.fixedCenterPoint = this.fixedCanvasDimension / 2; 
                 
@@ -1968,13 +1743,13 @@
                     clientY = event.touches[0].clientY;
                 }
 
-                // Utilize strictly fixed dimensions for calculation
                 const centerX = rect.width / 2; 
                 const centerY = rect.height / 2;
                 
                 const xOffset = clientX - rect.left - centerX;
                 const yOffset = clientY - rect.top - centerY;
 
+                // Absolute true radians (0 is at 3 o'clock)
                 const rawAngleRadians = Math.atan2(yOffset, xOffset);
                 const rawDistance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
                 
@@ -1987,6 +1762,7 @@
                 
                 const saturationRatio = clampedDistance / this.fixedCenterPoint;
 
+                // Visual mapping using fixed math isolates indicator from CSS layout jumps
                 const visualThumbX = this.fixedCenterPoint + Math.cos(rawAngleRadians) * clampedDistance;
                 const visualThumbY = this.fixedCenterPoint + Math.sin(rawAngleRadians) * clampedDistance;
                 
@@ -2000,17 +1776,17 @@
                 const lightnessPct = 100 - (saturationRatio * 50);
                 this.indicator.style.backgroundColor = `hsl(${hueDegrees}, 100%, ${lightnessPct}%)`;
 
-                window.DeviceManager.devicesState[this.deviceId].hue = Math.round(hueDegrees);
-                window.DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationRatio * 1000);
+                DeviceManager.devicesState[this.deviceId].hue = Math.round(hueDegrees);
+                DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationRatio * 1000);
                 
-                if (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) {
-                    window.TUYA_DEVICES.forEach(deviceData => {
+                if (ApplicationUI.isDevicesLinked) {
+                    TUYA_DEVICES.forEach(deviceData => {
                         if (deviceData.id !== this.deviceId) {
-                            window.DeviceManager.devicesState[deviceData.id].hue = Math.round(hueDegrees);
-                            window.DeviceManager.devicesState[deviceData.id].saturation = Math.round(saturationRatio * 1000);
+                            DeviceManager.devicesState[deviceData.id].hue = Math.round(hueDegrees);
+                            DeviceManager.devicesState[deviceData.id].saturation = Math.round(saturationRatio * 1000);
                             
-                            if (window.DeviceManager.colorWheelControllers[deviceData.id]) {
-                                window.DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
+                            if (DeviceManager.colorWheelControllers[deviceData.id]) {
+                                DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                             }
                         }
                     });
@@ -2018,15 +1794,14 @@
             }
 
             dispatchFinalColorCommand() {
-                const targetIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
+                const targetIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
                 targetIds.forEach(id => {
-                    if(window.DeviceManager) window.DeviceManager.executeColorCommand(id);
+                    DeviceManager.executeColorCommand(id);
                 });
             }
             
             updateIndicatorFromState() {
-                if(!window.DeviceManager) return;
-                const state = window.DeviceManager.devicesState[this.deviceId];
+                const state = DeviceManager.devicesState[this.deviceId];
                 
                 if(state.hue === undefined || state.saturation === undefined || (state.hue === 0 && state.saturation === 0)) {
                     this.indicator.style.left = `100px`; 
@@ -2056,34 +1831,34 @@
 
         class TuyaSmartDeviceManager {
             constructor() {
-                this.workerApiUrl = window.SafeStorage.getLocal(window.STORAGE_KEYS.WORKER_URL) || '';
+                this.workerApiUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
                 this.colorWheelControllers = {};
                 
-                for (let i = 0; i < window.TUYA_DEVICES.length; i++) {
-                    const device = window.TUYA_DEVICES[i];
+                for (let i = 0; i < TUYA_DEVICES.length; i++) {
+                    const device = TUYA_DEVICES[i];
                     this.devicesState[device.id] = { on: false, brightness: 100, hue: 0, saturation: 0 };
                 }
                 this.debounceTimers = {};
             }
 
             buildEndpointUrl(path) { return this.workerApiUrl.replace(/\/$/, '') + path; }
-            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); window.SafeStorage.setLocal(window.STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
+            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); localStorage.setItem(STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
             isConfigured() { return this.workerApiUrl !== null && this.workerApiUrl !== ''; }
 
-            async synchronizeAllDevices(isBackgroundSync = false) {
+            async synchronizeAllDevices() {
                 if (!this.isConfigured()) return;
-                for (let i = 0; i < window.TUYA_DEVICES.length; i++) {
-                    const device = window.TUYA_DEVICES[i];
-                    if (!isBackgroundSync && window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(device.id, true);
+                for (let i = 0; i < TUYA_DEVICES.length; i++) {
+                    const device = TUYA_DEVICES[i];
+                    ApplicationUI.setDeviceConnectingState(device.id, true);
                     try {
-                        const jsonPayload = await window.NetworkService.get(this.buildEndpointUrl(`/status?device=${device.id}`));
+                        const jsonPayload = await NetworkService.get(this.buildEndpointUrl(`/status?device=${device.id}`));
                         if (jsonPayload.success && jsonPayload.result) this.parseAndApplyTuyaStatusPayload(device.id, jsonPayload.result);
                     } catch (error) {
                     } finally {
-                        if (!isBackgroundSync && window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(device.id, false);
-                        if (window.ApplicationUI) window.ApplicationUI.updateDeviceCardRender(device.id);
-                        if (this.colorWheelControllers[device.id]) this.colorWheelControllers[device.id].updateIndicatorFromState();
+                        ApplicationUI.setDeviceConnectingState(device.id, false);
+                        ApplicationUI.updateDeviceCardRender(device.id);
+                        if(this.colorWheelControllers[device.id]) this.colorWheelControllers[device.id].updateIndicatorFromState();
                     }
                 }
             }
@@ -2106,35 +1881,28 @@
             }
 
             async toggleDevicePower(deviceId) {
-                if (!this.isConfigured()) {
-                    if (window.ApplicationUI) window.ApplicationUI.openSettingsModal();
-                    return;
-                }
+                if (!this.isConfigured()) return ApplicationUI.openSettingsModal();
 
                 const targetState = !this.devicesState[deviceId].on;
-                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
 
                 targetDeviceIds.forEach(id => {
                     this.devicesState[id].on = targetState;
-                    if (window.ApplicationUI) {
-                        window.ApplicationUI.setDeviceConnectingState(id, true);
-                        window.ApplicationUI.updateDeviceCardRender(id);
-                    }
+                    ApplicationUI.setDeviceConnectingState(id, true);
+                    ApplicationUI.updateDeviceCardRender(id);
                 });
 
                 try {
                     const url = this.buildEndpointUrl('/command');
-                    await Promise.all(targetDeviceIds.map(id => window.NetworkService.post(url, { device: id, commands: [{ code: 'switch_led', value: targetState }] })));
+                    await Promise.all(targetDeviceIds.map(id => NetworkService.post(url, { device: id, commands: [{ code: 'switch_led', value: targetState }] })));
                 } catch (error) {
-                    if (window.GlobalToast) window.GlobalToast.show("Network Error. Reverting.");
+                    GlobalToast.show("Network Error. Reverting.");
                     targetDeviceIds.forEach(id => {
                         this.devicesState[id].on = !targetState;
-                        if (window.ApplicationUI) window.ApplicationUI.updateDeviceCardRender(id);
+                        ApplicationUI.updateDeviceCardRender(id);
                     });
                 } finally {
-                    targetDeviceIds.forEach(id => {
-                        if (window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(id, false);
-                    });
+                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
                 }
             }
 
@@ -2145,15 +1913,12 @@
             }
 
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
-                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
                 
                 let dispatchNeeded = false;
                 targetDeviceIds.forEach(id => {
-                    if (this.devicesState[id].on === true) { 
-                        dispatchNeeded = true; 
-                        if (window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(id, true); 
-                    }
+                    if (this.devicesState[id].on === true) { dispatchNeeded = true; ApplicationUI.setDeviceConnectingState(id, true); }
                 });
                 if(!dispatchNeeded) return;
 
@@ -2161,45 +1926,41 @@
                     const url = this.buildEndpointUrl('/command');
                     await Promise.all(targetDeviceIds.map(id => {
                         if (this.devicesState[id].on === false) return Promise.resolve();
-                        return window.NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue || 0, s: this.devicesState[id].saturation || 0, v: tuyaFormatBrightness }) } ] });
+                        return NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue || 0, s: this.devicesState[id].saturation || 0, v: tuyaFormatBrightness }) } ] });
                     }));
                 } catch (error) {
-                    if (window.GlobalToast) window.GlobalToast.show("Network Error.");
+                    GlobalToast.show("Network Error.");
                 } finally {
-                    targetDeviceIds.forEach(id => {
-                        if (window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(id, false);
-                    });
+                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
                 }
             }
             
             async executeColorCommand(deviceId) {
                 if (!this.isConfigured()) return;
                 
-                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = ApplicationUI.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
                 
                 targetDeviceIds.forEach(id => {
                     if (this.devicesState[id].on === false) {
                         this.devicesState[id].on = true;
-                        if (window.ApplicationUI) window.ApplicationUI.updateDeviceCardRender(id);
+                        ApplicationUI.updateDeviceCardRender(id);
                     }
-                    if (window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(id, true);
+                    ApplicationUI.setDeviceConnectingState(id, true);
                 });
 
                 try {
                     const url = this.buildEndpointUrl('/command');
                     await Promise.all(targetDeviceIds.map(id => {
-                        return window.NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue, s: this.devicesState[id].saturation, v: this.devicesState[id].brightness * 10 }) } ] });
+                        return NetworkService.post(url, { device: id, commands: [ { code: 'work_mode', value: 'colour' }, { code: 'colour_data', value: JSON.stringify({ h: this.devicesState[id].hue, s: this.devicesState[id].saturation, v: this.devicesState[id].brightness * 10 }) } ] });
                     }));
                 } catch (error) {
-                    if (window.GlobalToast) window.GlobalToast.show("Failed to apply color configuration.");
+                    GlobalToast.show("Failed to apply color configuration.");
                 } finally {
-                    targetDeviceIds.forEach(id => {
-                        if (window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(id, false);
-                    });
+                    targetDeviceIds.forEach(id => ApplicationUI.setDeviceConnectingState(id, false));
                 }
             }
         }
-        window.DeviceManager = new TuyaSmartDeviceManager();
+        const DeviceManager = new TuyaSmartDeviceManager();
 
         /* ==========================================================================
            USER INTERFACE RENDERER & LOGIC
@@ -2207,14 +1968,12 @@
 
         class UserInterfaceController {
             constructor() {
-                this.layoutMode = window.SafeStorage.getLocal(window.STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
-                this.isDevicesLinked = window.SafeStorage.getLocal(window.STORAGE_KEYS.DEVICES_LINKED) === 'true';
+                this.layoutMode = localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
+                this.isDevicesLinked = localStorage.getItem(STORAGE_KEYS.DEVICES_LINKED) === 'true';
                 
                 this.deviceGridContainer = document.getElementById('main-device-grid');
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
                 this.inputWorkerUrl = document.getElementById('input-field-worker-url');
-                
-                this.currentActiveRoutineId = null;
                 
                 this.handleSettingsSave = this.handleSettingsSave.bind(this);
                 this.handleSettingsCancel = this.handleSettingsCancel.bind(this);
@@ -2228,21 +1987,9 @@
                 this.evaluateAndRenderActiveRoutine();
             }
 
-            executeGlobalMinuteTick() {
-                this.evaluateAndRenderActiveRoutine();
-                if (window.DeviceManager && window.DeviceManager.isConfigured()) {
-                    window.DeviceManager.synchronizeAllDevices(true); 
-                }
-                if (window.RoomClimateSystem) window.RoomClimateSystem.fetchAndRender(true);
-                if (window.WeatherAPI) window.WeatherAPI.fetchAndRender(true); 
-            }
-
             applyLayoutModeToBody() {
-                if (this.layoutMode === 'landscape') {
-                    document.body.classList.add('layout-mode-landscape');
-                } else {
-                    document.body.classList.remove('layout-mode-landscape');
-                }
+                if (this.layoutMode === 'landscape') document.body.classList.add('layout-mode-landscape');
+                else document.body.classList.remove('layout-mode-landscape');
 
                 const btnPortrait = document.getElementById('segment-btn-portrait');
                 const btnLandscape = document.getElementById('segment-btn-landscape');
@@ -2284,62 +2031,37 @@
             
             toggleGlobalLinkState() {
                 this.isDevicesLinked = !this.isDevicesLinked;
-                window.SafeStorage.setLocal(window.STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
+                localStorage.setItem(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
                 this.applyGlobalLinkStateToButton();
                 
-                if (window.GlobalToast) {
-                    if (this.isDevicesLinked) window.GlobalToast.show("Devices Synced");
-                    else window.GlobalToast.show("Devices Unlinked");
-                }
+                if (this.isDevicesLinked) GlobalToast.show("Devices Synced");
+                else GlobalToast.show("Devices Unlinked");
             }
 
             attachStaticEventListeners() {
                 document.getElementById('header-btn-refresh').addEventListener('click', () => {
-                    if (!window.DeviceManager || !window.DeviceManager.isConfigured()) {
-                        this.openSettingsModal();
-                        return;
-                    }
-                    if (window.GlobalToast) window.GlobalToast.show("Synchronizing telemetry...");
-                    window.DeviceManager.synchronizeAllDevices();
-                    if(window.RoomClimateSystem) window.RoomClimateSystem.fetchAndRender();
-                    if(window.WeatherAPI) window.WeatherAPI.fetchAndRender();
+                    if (!DeviceManager.isConfigured()) return this.openSettingsModal();
+                    GlobalToast.show("Synchronizing...");
+                    DeviceManager.synchronizeAllDevices();
                 });
 
-                document.getElementById('header-btn-settings').addEventListener('click', () => {
-                    this.openSettingsModal();
-                });
-
-                document.getElementById('segment-btn-portrait').addEventListener('click', () => {
-                    this.setLayoutMode('portrait');
-                });
-                
-                document.getElementById('segment-btn-landscape').addEventListener('click', () => {
-                    this.setLayoutMode('landscape');
-                });
-
+                document.getElementById('header-btn-settings').addEventListener('click', () => this.openSettingsModal());
+                document.getElementById('segment-btn-portrait').addEventListener('click', () => this.setLayoutMode('portrait'));
+                document.getElementById('segment-btn-landscape').addEventListener('click', () => this.setLayoutMode('landscape'));
                 document.getElementById('modal-btn-save').addEventListener('click', this.handleSettingsSave);
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
-                
-                const globalLinkBtn = document.getElementById('global-link-synchronization-button');
-                if (globalLinkBtn) {
-                    globalLinkBtn.addEventListener('click', () => {
-                        this.toggleGlobalLinkState();
-                    });
-                }
+                document.getElementById('global-link-synchronization-button').addEventListener('click', () => this.toggleGlobalLinkState());
             }
             
             toggleWeatherExpansion() {
                 const widget = document.getElementById('weather-dashboard-widget');
-                if(widget) {
-                    widget.classList.toggle('is-expanded');
-                }
+                if(widget) widget.classList.toggle('is-expanded');
             }
 
             // ================== AGENDA UI METHODS ==================
 
             evaluateAndRenderActiveRoutine() {
-                if (!window.AgendaSystem) return;
-                const activeRoutine = window.AgendaSystem.getActiveRoutine();
+                const activeRoutine = AgendaSystem.getActiveRoutine();
                 const sectionWrapper = document.getElementById('agenda-dashboard-section-wrapper');
                 const titleLabel = document.getElementById('agenda-dynamic-title');
                 const timeLabel = document.getElementById('agenda-active-time-label');
@@ -2349,11 +2071,12 @@
 
                 if (!activeRoutine) {
                     sectionWrapper.classList.remove('is-routine-active');
-                    this.currentActiveRoutineId = null;
                     return;
                 }
 
                 sectionWrapper.classList.add('is-routine-active');
+                
+                // Dynamic Title Injection
                 titleLabel.innerText = activeRoutine.title;
                 timeLabel.innerText = `${activeRoutine.startTime} - ${activeRoutine.endTime}`;
                 
@@ -2363,7 +2086,7 @@
                     listContainer.innerHTML = `<div class="agenda-empty-state">No tasks scheduled.</div>`;
                 } else {
                     listContainer.innerHTML = sortedTasks.map(task => `
-                        <div class="agenda-item-row ${task.completed ? 'is-task-completed' : ''}" onclick="if(window.ApplicationUI) window.ApplicationUI.handleDashboardTaskToggle('${activeRoutine.id}', '${task.id}')">
+                        <div class="agenda-item-row ${task.completed ? 'is-task-completed' : ''}" onclick="ApplicationUI.handleDashboardTaskToggle('${activeRoutine.id}', '${task.id}')">
                             <div class="agenda-checkbox-container">
                                 <svg class="agenda-checkbox-svg" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
                             </div>
@@ -2373,33 +2096,32 @@
                         </div>
                     `).join('');
                 }
-
-                this.currentActiveRoutineId = activeRoutine.id;
             }
 
             handleDashboardTaskToggle(routineId, taskId) {
-                if (window.AgendaSystem) {
-                    window.AgendaSystem.toggleTaskCompletion(routineId, taskId);
-                    this.evaluateAndRenderActiveRoutine();
-                }
+                AgendaSystem.toggleTaskCompletion(routineId, taskId);
+                this.evaluateAndRenderActiveRoutine();
             }
 
+            /**
+             * Renders the settings editor with fully editable inline text inputs.
+             * Utilizes explicit onblur/onchange events to save data without losing focus awkwardly.
+             */
             renderAgendaEditorSettings() {
-                if (!window.AgendaSystem) return;
                 const container = document.getElementById('settings-agenda-editor-container');
                 if (!container) return;
 
-                const sortedRoutines = [...window.AgendaSystem.routines].sort((a, b) => a.order - b.order);
+                const sortedRoutines = [...AgendaSystem.routines].sort((a, b) => a.order - b.order);
 
                 if (sortedRoutines.length === 0) {
                     container.innerHTML = `<div class="agenda-empty-state" style="margin-bottom:24px;">No routines created yet.</div>`;
                     return;
                 }
 
-                const upIcon = window.SVG_ASSETS.UP_CHEVRON;
-                const downIcon = window.SVG_ASSETS.DOWN_CHEVRON;
-                const trashIcon = window.SVG_ASSETS.TRASH_CAN;
-                const plusIcon = window.SVG_ASSETS.PLUS_ICON;
+                const upIcon = SVG_ASSETS.UP_CHEVRON;
+                const downIcon = SVG_ASSETS.DOWN_CHEVRON;
+                const trashIcon = SVG_ASSETS.TRASH_CAN;
+                const plusIcon = SVG_ASSETS.PLUS_ICON;
 
                 let editorHtml = '';
 
@@ -2412,13 +2134,14 @@
                     } else {
                         tasksHtml = sortedTasks.map((task, tIndex) => `
                             <div class="agenda-task-edit-item">
+                                <!-- Inline Editable Task Title -->
                                 <input type="text" class="agenda-edit-inline-input" value="${task.title}" 
-                                       onchange="if(window.AgendaSystem) window.AgendaSystem.updateTask('${routine.id}', '${task.id}', this.value); if(window.ApplicationUI) window.ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                       onchange="AgendaSystem.updateTask('${routine.id}', '${task.id}', this.value); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                 
                                 <div class="agenda-task-edit-controls">
-                                    <button class="agenda-edit-action-btn" onclick="if(window.AgendaSystem) window.AgendaSystem.moveTaskUp('${routine.id}', '${task.id}'); if(window.ApplicationUI) window.ApplicationUI.renderAgendaEditorSettings();" ${tIndex === 0 ? 'disabled style="opacity:0.3"' : ''}>${upIcon}</button>
-                                    <button class="agenda-edit-action-btn" onclick="if(window.AgendaSystem) window.AgendaSystem.moveTaskDown('${routine.id}', '${task.id}'); if(window.ApplicationUI) window.ApplicationUI.renderAgendaEditorSettings();" ${tIndex === sortedTasks.length - 1 ? 'disabled style="opacity:0.3"' : ''}>${downIcon}</button>
-                                    <button class="agenda-edit-action-btn delete" onclick="if(window.AgendaSystem) window.AgendaSystem.deleteTask('${routine.id}', '${task.id}'); if(window.ApplicationUI) window.ApplicationUI.renderAgendaEditorSettings();">${trashIcon}</button>
+                                    <button class="agenda-edit-action-btn" onclick="AgendaSystem.moveTaskUp('${routine.id}', '${task.id}'); ApplicationUI.renderAgendaEditorSettings();" ${tIndex === 0 ? 'disabled style="opacity:0.3"' : ''}>${upIcon}</button>
+                                    <button class="agenda-edit-action-btn" onclick="AgendaSystem.moveTaskDown('${routine.id}', '${task.id}'); ApplicationUI.renderAgendaEditorSettings();" ${tIndex === sortedTasks.length - 1 ? 'disabled style="opacity:0.3"' : ''}>${downIcon}</button>
+                                    <button class="agenda-edit-action-btn delete" onclick="AgendaSystem.deleteTask('${routine.id}', '${task.id}'); ApplicationUI.renderAgendaEditorSettings();">${trashIcon}</button>
                                 </div>
                             </div>
                         `).join('');
@@ -2428,18 +2151,21 @@
                         <div class="agenda-routine-block">
                             <div class="agenda-routine-header">
                                 <div class="agenda-routine-title-info">
+                                    <!-- Inline Editable Routine Title -->
                                     <input type="text" class="agenda-edit-inline-input agenda-routine-title-text" style="padding-left:0; margin-bottom:4px;" value="${routine.title}" 
-                                           onchange="if(window.AgendaSystem) window.AgendaSystem.updateRoutine('${routine.id}', this.value, undefined, undefined); if(window.ApplicationUI) window.ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                           onchange="AgendaSystem.updateRoutine('${routine.id}', this.value, undefined, undefined); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                     
                                     <div class="agenda-routine-time-text">
+                                        <!-- Inline Editable Start Time -->
                                         <input type="time" class="agenda-edit-inline-time" value="${routine.startTime}" 
-                                               onchange="if(window.AgendaSystem) window.AgendaSystem.updateRoutine('${routine.id}', undefined, this.value, undefined); if(window.ApplicationUI) window.ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                               onchange="AgendaSystem.updateRoutine('${routine.id}', undefined, this.value, undefined); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                         <span>-</span>
+                                        <!-- Inline Editable End Time -->
                                         <input type="time" class="agenda-edit-inline-time" value="${routine.endTime}" 
-                                               onchange="if(window.AgendaSystem) window.AgendaSystem.updateRoutine('${routine.id}', undefined, undefined, this.value); if(window.ApplicationUI) window.ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                               onchange="AgendaSystem.updateRoutine('${routine.id}', undefined, undefined, this.value); ApplicationUI.evaluateAndRenderActiveRoutine();">
                                     </div>
                                 </div>
-                                <button class="agenda-edit-action-btn delete" onclick="if(window.AgendaSystem) window.AgendaSystem.deleteRoutine('${routine.id}'); if(window.ApplicationUI) window.ApplicationUI.renderAgendaEditorSettings();" title="Delete Routine">${trashIcon}</button>
+                                <button class="agenda-edit-action-btn delete" onclick="AgendaSystem.deleteRoutine('${routine.id}'); ApplicationUI.renderAgendaEditorSettings();" title="Delete Routine">${trashIcon}</button>
                             </div>
                             
                             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -2448,7 +2174,7 @@
                             
                             <div class="agenda-add-task-form">
                                 <input type="text" class="settings-text-input-field" style="margin-bottom:0; padding:12px; font-size:14px; border-radius:12px;" id="add-task-input-${routine.id}" placeholder="New task..." autocomplete="off">
-                                <button class="settings-action-button-primary" style="margin:0; width:auto; padding:12px 16px; border-radius:12px;" onclick="if(window.ApplicationUI) window.ApplicationUI.handleAddNewTaskToRoutine('${routine.id}')">${plusIcon}</button>
+                                <button class="settings-action-button-primary" style="margin:0; width:auto; padding:12px 16px; border-radius:12px;" onclick="ApplicationUI.handleAddNewTaskToRoutine('${routine.id}')">${plusIcon}</button>
                             </div>
                         </div>
                     `;
@@ -2459,8 +2185,8 @@
 
             handleAddNewTaskToRoutine(routineId) {
                 const inputElement = document.getElementById(`add-task-input-${routineId}`);
-                if (inputElement && inputElement.value.trim() !== '' && window.AgendaSystem) {
-                    window.AgendaSystem.addTaskToRoutine(routineId, inputElement.value);
+                if (inputElement && inputElement.value.trim() !== '') {
+                    AgendaSystem.addTaskToRoutine(routineId, inputElement.value);
                     this.renderAgendaEditorSettings(); 
                     this.evaluateAndRenderActiveRoutine(); 
                 }
@@ -2473,11 +2199,9 @@
                     this.deviceGridContainer.removeChild(this.deviceGridContainer.firstChild);
                 }
 
-                if (!window.DeviceManager) return;
-
-                for (let i = 0; i < window.TUYA_DEVICES.length; i++) {
-                    const deviceData = window.TUYA_DEVICES[i];
-                    const currentState = window.DeviceManager.devicesState[deviceData.id];
+                for (let i = 0; i < TUYA_DEVICES.length; i++) {
+                    const deviceData = TUYA_DEVICES[i];
+                    const currentState = DeviceManager.devicesState[deviceData.id];
                     const activeClassString = currentState.on ? 'state-is-on' : '';
 
                     const cardElement = document.createElement('article');
@@ -2493,7 +2217,7 @@
                                      role="button" 
                                      aria-pressed="${currentState.on ? 'true' : 'false'}" 
                                      aria-label="Toggle Power for ${deviceData.name}">
-                                    ${window.SVG_ASSETS.LIGHTBULB}
+                                    ${SVG_ASSETS.LIGHTBULB}
                                 </div>
                             </div>
                             
@@ -2536,11 +2260,12 @@
                     this.deviceGridContainer.appendChild(cardElement);
                     this.attachDynamicCardListeners(deviceData.id);
                     
+                    // Initialize isolated Color Wheel Controller
                     const canvasEl = document.getElementById(`canvas-${deviceData.id}`);
                     const indicatorEl = document.getElementById(`color-thumb-${deviceData.id}`);
-                    window.DeviceManager.colorWheelControllers[deviceData.id] = new ColorWheelManager(deviceData.id, canvasEl, indicatorEl);
+                    DeviceManager.colorWheelControllers[deviceData.id] = new ColorWheelManager(deviceData.id, canvasEl, indicatorEl);
                     
-                    window.DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
+                    DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                 }
             }
 
@@ -2552,20 +2277,21 @@
 
                 if (cardWrapper) {
                     cardWrapper.addEventListener('click', (event) => {
+                        // Prevent expansion trigger if clicking interior interactive controls
                         if (event.target === toggleButton || toggleButton.contains(event.target) || event.target === sliderInput || expansionArea.contains(event.target)) {
                             return;
                         }
                         
-                        if (window.DeviceManager.devicesState[deviceId].on === false) {
+                        if (DeviceManager.devicesState[deviceId].on === false) {
                             return;
                         }
                         
                         cardWrapper.classList.toggle('is-expanded');
                         
-                        if(cardWrapper.classList.contains('is-expanded') && window.DeviceManager.colorWheelControllers[deviceId]) {
+                        if(cardWrapper.classList.contains('is-expanded') && DeviceManager.colorWheelControllers[deviceId]) {
                             window.requestAnimationFrame(() => {
                                 setTimeout(() => {
-                                    window.DeviceManager.colorWheelControllers[deviceId].updateIndicatorFromState();
+                                    DeviceManager.colorWheelControllers[deviceId].updateIndicatorFromState();
                                 }, 80); 
                             });
                         }
@@ -2575,7 +2301,7 @@
                 if (toggleButton) {
                     toggleButton.addEventListener('click', (event) => {
                         event.stopPropagation(); 
-                        if (window.DeviceManager) window.DeviceManager.toggleDevicePower(deviceId);
+                        DeviceManager.toggleDevicePower(deviceId);
                     });
                 }
 
@@ -2592,22 +2318,22 @@
                     sliderInput.addEventListener('change', (event) => {
                         event.stopPropagation();
                         const finalBrightnessValue = event.target.value;
-                        if (window.DeviceManager) window.DeviceManager.handleBrightnessChangeIntent(deviceId, finalBrightnessValue);
+                        DeviceManager.handleBrightnessChangeIntent(deviceId, finalBrightnessValue);
                     });
                 }
             }
 
             handleHighFrequencySliderDrag(deviceId, rawValue) {
                 const integerValue = parseInt(rawValue, 10);
-                const targetDeviceIds = this.isDevicesLinked ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = this.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
 
                 targetDeviceIds.forEach(id => {
-                    if (window.DeviceManager && window.DeviceManager.devicesState[id].on === false) {
-                        window.DeviceManager.devicesState[id].on = true;
+                    if (DeviceManager.devicesState[id].on === false) {
+                        DeviceManager.devicesState[id].on = true;
                         this.updateDeviceCardRender(id);
                     }
 
-                    if (window.DeviceManager) window.DeviceManager.devicesState[id].brightness = integerValue;
+                    DeviceManager.devicesState[id].brightness = integerValue;
                     
                     const fillLayer = document.getElementById(`slider-fill-layer-${id}`);
                     const statusLabel = document.getElementById(`status-label-${id}`);
@@ -2615,7 +2341,7 @@
                     
                     if (fillLayer) fillLayer.style.setProperty('--current-fill-percentage', `${integerValue}%`);
 
-                    if (window.DeviceManager && window.DeviceManager.devicesState[id].on && statusLabel && nativeSlider) {
+                    if (DeviceManager.devicesState[id].on && statusLabel && nativeSlider) {
                         statusLabel.innerText = `${integerValue}%`;
                         nativeSlider.value = integerValue; 
                         nativeSlider.setAttribute('aria-valuenow', integerValue);
@@ -2625,8 +2351,7 @@
             }
 
             updateDeviceCardRender(deviceId) {
-                if (!window.DeviceManager) return;
-                const stateObject = window.DeviceManager.devicesState[deviceId];
+                const stateObject = DeviceManager.devicesState[deviceId];
                 const cardWrapper = document.getElementById(`device-card-wrapper-${deviceId}`);
                 const statusLabel = document.getElementById(`status-label-${deviceId}`);
                 const fillLayer = document.getElementById(`slider-fill-layer-${deviceId}`);
@@ -2666,8 +2391,8 @@
             }
 
             openSettingsModal() {
-                this.setLayoutMode(window.SafeStorage.getLocal(window.STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
-                if (this.inputWorkerUrl && window.DeviceManager) this.inputWorkerUrl.value = window.DeviceManager.workerApiUrl;
+                this.setLayoutMode(localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
+                if (this.inputWorkerUrl) this.inputWorkerUrl.value = DeviceManager.workerApiUrl;
                 
                 this.renderAgendaEditorSettings();
                 
@@ -2678,7 +2403,7 @@
             }
 
             handleSettingsCancel() {
-                const memoryLayout = window.SafeStorage.getLocal(window.STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
+                const memoryLayout = localStorage.getItem(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
                 this.setLayoutMode(memoryLayout);
                 if (this.settingsModalBackdrop) {
                     this.settingsModalBackdrop.classList.remove('is-visible-active');
@@ -2689,13 +2414,10 @@
             handleSettingsSave() {
                 if (!this.inputWorkerUrl) return;
                 const inputString = this.inputWorkerUrl.value.trim();
-                if (inputString === '') {
-                    if (window.GlobalToast) window.GlobalToast.show("Error: Web URL cannot be empty.");
-                    return;
-                }
+                if (inputString === '') return GlobalToast.show("Error: Web URL cannot be empty.");
                 
-                if (window.DeviceManager) window.DeviceManager.setApiUrl(inputString);
-                window.SafeStorage.setLocal(window.STORAGE_KEYS.LAYOUT_MODE, this.layoutMode);
+                DeviceManager.setApiUrl(inputString);
+                localStorage.setItem(STORAGE_KEYS.LAYOUT_MODE, this.layoutMode);
                 this.applyLayoutModeToBody();
 
                 if (this.settingsModalBackdrop) {
@@ -2703,44 +2425,52 @@
                     this.settingsModalBackdrop.setAttribute('aria-hidden', 'true');
                 }
 
-                if (window.GlobalToast) window.GlobalToast.show("Configuration saved. Connecting...");
-                if (window.DeviceManager) window.DeviceManager.synchronizeAllDevices();
+                GlobalToast.show("Configuration saved. Connecting...");
+                DeviceManager.synchronizeAllDevices();
                 
                 this.evaluateAndRenderActiveRoutine();
             }
         }
 
+        const ApplicationUI = new UserInterfaceController();
+        
+        // Expose explicit functions to global namespace for HTML inline event handlers
+        AgendaSystem.handleCreateNewRoutine = () => {
+            const titleEl = document.getElementById('agenda-new-routine-title');
+            const startEl = document.getElementById('agenda-new-routine-start');
+            const endEl = document.getElementById('agenda-new-routine-end');
+            
+            if(titleEl && startEl && endEl && titleEl.value.trim() !== '') {
+                AgendaSystem.addRoutine(titleEl.value, startEl.value, endEl.value);
+                titleEl.value = '';
+                ApplicationUI.renderAgendaEditorSettings();
+                ApplicationUI.evaluateAndRenderActiveRoutine();
+                GlobalToast.show("Routine Created");
+            } else {
+                GlobalToast.show("Please provide a name for the routine.");
+            }
+        };
+
         /* ==========================================================================
-           BOOTSTRAPPING & DEPENDENCY INJECTION
+           BOOTSTRAPPING & LIFECYCLE MANAGEMENT
            ========================================================================== */
         
-        class SystemBootstrapper {
-            static initialize() {
-                try {
-                    window.ApplicationUI = new UserInterfaceController();
-                    window.ApplicationUI.initialize();
-                    
-                    triggerEntryAnimations();
-                    window.LiveClock.start();
+        document.addEventListener('DOMContentLoaded', () => {
+            ApplicationUI.initialize();
+            triggerEntryAnimations();
+            LiveClock.start();
 
-                    if (window.WeatherAPI) window.WeatherAPI.fetchAndRender();
-                    if (window.RoomClimateSystem) window.RoomClimateSystem.fetchAndRender();
+            const WeatherAPI = new WeatherService();
+            WeatherAPI.fetchAndRender();
 
-                    if (!window.DeviceManager.isConfigured()) {
-                        setTimeout(() => {
-                            if (window.ApplicationUI) window.ApplicationUI.openSettingsModal();
-                        }, 1200);
-                    } else {
-                        window.DeviceManager.synchronizeAllDevices();
-                    }
-                } catch (error) {
-                    console.error("Bootstrapping Error:", error);
-                    document.body.classList.add('critical-js-error-active');
-                }
+            if (!DeviceManager.isConfigured()) {
+                setTimeout(() => {
+                    ApplicationUI.openSettingsModal();
+                }, 1200);
+            } else {
+                DeviceManager.synchronizeAllDevices();
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', SystemBootstrapper.initialize);
+        });
 
     </script>
 </body>
