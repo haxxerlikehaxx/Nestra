@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -269,7 +268,7 @@
             font-family: var(--font-medium);
             font-weight: normal; 
             font-size: 38px;
-            letter-spacing: -0.02em; 
+            letter-spacing: -0.04em; 
             line-height: 1.2;
             color: #FFFFFF;
             font-variant-numeric: proportional-nums;
@@ -370,8 +369,7 @@
             transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
             transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve);
             
-            outline-style: none;
-            outline-width: 0px;
+            outline: none;
         }
 
         .circular-icon-button:active {
@@ -404,6 +402,7 @@
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
             cursor: pointer;
             
+            /* Hardware Acceleration for iPad Air 2 Rendering Performance */
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
             backface-visibility: hidden;
@@ -491,6 +490,7 @@
             border-top-style: solid;
             border-top-color: transparent;
             
+            /* Crucial iOS Native Scrolling and GPU Acceleration bounds */
             -webkit-overflow-scrolling: touch;
             transform: translate3d(0, 0, 0);
             -webkit-transform: translate3d(0, 0, 0);
@@ -498,7 +498,7 @@
             
             transition-property: max-height, opacity, padding-top, padding-bottom, border-top-color;
             transition-duration: 0.5s;
-            transition-timing-function: var(--animation-smooth-curve);
+            transition-timing-function: var(--animation-spring-curve);
         }
 
         .weather-hourly-container::-webkit-scrollbar { display: none; }
@@ -516,7 +516,7 @@
         .weather-dashboard-widget.is-expanded .hourly-item-block {
             animation-name: hourly-item-fade-in;
             animation-duration: 0.6s;
-            animation-timing-function: var(--animation-smooth-curve);
+            animation-timing-function: var(--animation-spring-curve);
             animation-fill-mode: forwards;
         }
 
@@ -830,7 +830,7 @@
             
             transition-property: height, background-color, color, transform, box-shadow, border-color;
             transition-duration: 0.5s, var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve), var(--animation-spring-curve), var(--animation-ease-out-curve), var(--animation-ease-out-curve);
+            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve);
         }
 
         .smart-device-card.is-expanded {
@@ -1097,10 +1097,10 @@
         }
 
         .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; flex-shrink: 0;}
-        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); }
+        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); }
         .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
+        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
         .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
         /* Highly customized inline edit inputs */
@@ -1144,9 +1144,9 @@
         }
         .agenda-edit-inline-time::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
+        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
         .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
-        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-ease-out-curve); flex-shrink:0;}
+        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
         .settings-action-button-secondary:active { color: #FFFFFF; transform: scale(0.96); opacity: 0.85;}
 
         /* Agenda Modal Editor Specifics */
@@ -1186,7 +1186,9 @@
          ========================================================================== -->
     <header class="application-header awaits-animation" id="anim-target-1" aria-label="Main Application Header">
         
+        <!-- Nested Group for Clock and Room Climate Badge -->
         <div class="header-title-group">
+            <!-- Explicit Typographic Render fixes the "1" spacing bug -->
             <h1 class="application-title" id="live-clock-display">00:00</h1>
             
             <div class="room-climate-badge" id="room-climate-badge" title="Indoor Temperature">
@@ -1336,7 +1338,7 @@
         /* ==========================================================================
            SAFE STORAGE WRAPPER
            ========================================================================== */
-        const SafeStorage = {
+        window.SafeStorage = {
             getLocal: function(key) {
                 try { return localStorage.getItem(key); } 
                 catch (e) { return null; }
@@ -1359,24 +1361,24 @@
            CONSTANTS & STATIC DATA
            ========================================================================== */
         
-        const TUYA_DEVICES = [
+        window.TUYA_DEVICES = [
             { id: 'bf8b0e945d8c5f9861fjzy', name: 'Led Lights Tak' },
             { id: 'bf1cf6aca13749cf898g3p', name: 'Led Lights Skrivbord' }
         ];
 
-        const TUYA_CLIMATE_SENSOR_ID = 'bfdf7bb3a6bbe3b451q1ma';
+        window.TUYA_CLIMATE_SENSOR_ID = 'bfdf7bb3a6bbe3b451q1ma';
 
-        const STORAGE_KEYS = {
-            WORKER_URL: 'enterprise_tuya_worker_url_v24',
-            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v24',
-            WEATHER_CACHE: 'enterprise_weather_cache_v24',
-            CLIMATE_CACHE: 'enterprise_climate_cache_v24',
-            DEVICES_LINKED: 'enterprise_devices_linked_v24',
-            AGENDA_ROUTINES: 'enterprise_agenda_routines_v24',
-            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v24'
+        window.STORAGE_KEYS = {
+            WORKER_URL: 'enterprise_tuya_worker_url_v25',
+            LAYOUT_MODE: 'enterprise_tuya_layout_mode_v25',
+            WEATHER_CACHE: 'enterprise_weather_cache_v25',
+            CLIMATE_CACHE: 'enterprise_climate_cache_v25',
+            DEVICES_LINKED: 'enterprise_devices_linked_v25',
+            AGENDA_ROUTINES: 'enterprise_agenda_routines_v25',
+            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v25'
         };
 
-        const SVG_ASSETS = {
+        window.SVG_ASSETS = {
             WEATHER_SUN: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFB340" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
             WEATHER_CLOUD: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>`,
             WEATHER_RAIN: `<svg viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.4 14.5a6 6 0 1 0-10.8-2.5A5.5 5.5 0 1 0 7.5 22h9a5 5 0 1 0-.1-10Z"/><path d="M12 22v-4"/><path d="M8 22v-4"/><path d="M16 22v-4"/></svg>`,
@@ -1502,7 +1504,7 @@
 
         class RoomClimateManager {
             constructor() {
-                this.deviceId = TUYA_CLIMATE_SENSOR_ID;
+                this.deviceId = window.TUYA_CLIMATE_SENSOR_ID;
                 this.valueElement = document.getElementById('room-temperature-value');
                 this.badgeElement = document.getElementById('room-climate-badge');
             }
@@ -1511,7 +1513,7 @@
                 if (!window.DeviceManager || !window.DeviceManager.isConfigured()) return;
                 
                 if (!isBackgroundSync) {
-                    const cachedTemp = SafeStorage.getSession(STORAGE_KEYS.CLIMATE_CACHE);
+                    const cachedTemp = window.SafeStorage.getSession(window.STORAGE_KEYS.CLIMATE_CACHE);
                     if (cachedTemp) {
                         this.updateClimateUI(parseFloat(cachedTemp));
                     }
@@ -1525,7 +1527,7 @@
                         const parsedTemperature = this.parseTemperaturePayload(jsonPayload.result);
                         if (parsedTemperature !== null) {
                             this.updateClimateUI(parsedTemperature);
-                            SafeStorage.setSession(STORAGE_KEYS.CLIMATE_CACHE, parsedTemperature.toString());
+                            window.SafeStorage.setSession(window.STORAGE_KEYS.CLIMATE_CACHE, parsedTemperature.toString());
                         }
                     }
                 } catch (error) {
@@ -1576,14 +1578,16 @@
             }
 
             loadFromStorage() {
-                const storedData = SafeStorage.getLocal(STORAGE_KEYS.AGENDA_ROUTINES);
+                const storedData = window.SafeStorage.getLocal(window.STORAGE_KEYS.AGENDA_ROUTINES);
                 if (storedData) {
                     try {
                         this.routines = JSON.parse(storedData);
                     } catch (e) {
+                        console.error("AgendaManager: Corrupt data in storage. Resetting.");
                         this.routines = [];
                     }
                 } else {
+                    // Seed initial example data if empty
                     this.routines = [
                         {
                             id: this.generateUUID(),
@@ -1594,6 +1598,17 @@
                             tasks: [
                                 { id: this.generateUUID(), title: "Make Coffee", completed: false, order: 0 },
                                 { id: this.generateUUID(), title: "Check Emails", completed: false, order: 1 }
+                            ]
+                        },
+                        {
+                            id: this.generateUUID(),
+                            title: "Evening Routine",
+                            startTime: "18:00",
+                            endTime: "22:00",
+                            order: 1,
+                            tasks: [
+                                { id: this.generateUUID(), title: "Dim the lights", completed: false, order: 0 },
+                                { id: this.generateUUID(), title: "Read a book", completed: false, order: 1 }
                             ]
                         }
                     ];
@@ -1608,19 +1623,19 @@
                         task.order = tIndex;
                     });
                 });
-                SafeStorage.setLocal(STORAGE_KEYS.AGENDA_ROUTINES, JSON.stringify(this.routines));
+                window.SafeStorage.setLocal(window.STORAGE_KEYS.AGENDA_ROUTINES, JSON.stringify(this.routines));
             }
 
             enforceDailyReset() {
                 const currentLocalDateString = new Date().toDateString();
-                const lastRecordedResetDate = SafeStorage.getLocal(STORAGE_KEYS.AGENDA_LAST_RESET);
+                const lastRecordedResetDate = window.SafeStorage.getLocal(window.STORAGE_KEYS.AGENDA_LAST_RESET);
 
                 if (lastRecordedResetDate !== currentLocalDateString) {
                     this.routines.forEach(routine => {
                         routine.tasks.forEach(task => task.completed = false);
                     });
                     this.saveToStorage();
-                    SafeStorage.setLocal(STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
+                    window.SafeStorage.setLocal(window.STORAGE_KEYS.AGENDA_LAST_RESET, currentLocalDateString);
                 }
             }
 
@@ -1732,7 +1747,7 @@
                     this.saveToStorage();
                 }
             }
-
+            
             handleCreateNewRoutine() {
                 const titleEl = document.getElementById('agenda-new-routine-title');
                 const startEl = document.getElementById('agenda-new-routine-start');
@@ -1752,6 +1767,10 @@
             }
         }
         window.AgendaSystem = new AgendaManager();
+
+        /* ==========================================================================
+           EXTERNAL SERVICE INTEGRATIONS (WEATHER)
+           ========================================================================== */
 
         class WeatherService {
             constructor() {
@@ -1789,15 +1808,15 @@
             }
 
             parseWmoWeatherCode(code) {
-                if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
-                if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
-                return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
+                if (code === 0 || code === 1) return { text: "Clear Sky", icon: window.SVG_ASSETS.WEATHER_SUN };
+                if (code === 2) return { text: "Partly Cloudy", icon: window.SVG_ASSETS.WEATHER_CLOUD };
+                if (code === 3) return { text: "Overcast", icon: window.SVG_ASSETS.WEATHER_CLOUD };
+                if (code >= 51 && code <= 67) return { text: "Rain", icon: window.SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: window.SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: window.SVG_ASSETS.WEATHER_RAIN };
+                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: window.SVG_ASSETS.WEATHER_SNOW };
+                if (code >= 95) return { text: "Thunderstorm", icon: window.SVG_ASSETS.WEATHER_RAIN };
+                return { text: "Cloudy", icon: window.SVG_ASSETS.WEATHER_CLOUD };
             }
 
             renderSuccessState(data) {
@@ -1826,7 +1845,7 @@
             }
 
             async fetchAndRender(isBackgroundSync = false) {
-                const cachedPayload = SafeStorage.getSession(STORAGE_KEYS.WEATHER_CACHE);
+                const cachedPayload = window.SafeStorage.getSession(window.STORAGE_KEYS.WEATHER_CACHE);
                 if (!isBackgroundSync) {
                     if (cachedPayload) {
                         try {
@@ -1881,7 +1900,7 @@
                     }
 
                     this.renderSuccessState(compiledWeatherData);
-                    SafeStorage.setSession(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
+                    window.SafeStorage.setSession(window.STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
 
                 } catch (error) {
                     let errorMessage = "Data Unavailable";
@@ -1892,6 +1911,10 @@
         }
         window.WeatherAPI = new WeatherService();
 
+        /* ==========================================================================
+           COLOR WHEEL LOGIC (HTML5 CANVAS WITH MATHEMATICAL SNAP)
+           ========================================================================== */
+           
         class ColorWheelManager {
             constructor(deviceId, canvasElement, indicatorElement) {
                 this.deviceId = deviceId;
@@ -1899,6 +1922,7 @@
                 this.indicator = indicatorElement;
                 this.isDragging = false;
                 
+                // Fixed geometric constraints for precision tracking unbothered by CSS layout
                 this.fixedCanvasDimension = 200;
                 this.fixedCenterPoint = this.fixedCanvasDimension / 2; 
                 
@@ -1944,6 +1968,7 @@
                     clientY = event.touches[0].clientY;
                 }
 
+                // Utilize strictly fixed dimensions for calculation
                 const centerX = rect.width / 2; 
                 const centerY = rect.height / 2;
                 
@@ -1954,8 +1979,11 @@
                 const rawDistance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
                 
                 let clampedDistance = Math.min(rawDistance, this.fixedCenterPoint);
+                
                 const SNAP_RADIUS = 18;
-                if (clampedDistance <= SNAP_RADIUS) clampedDistance = 0;
+                if (clampedDistance <= SNAP_RADIUS) {
+                    clampedDistance = 0;
+                }
                 
                 const saturationRatio = clampedDistance / this.fixedCenterPoint;
 
@@ -1976,10 +2004,11 @@
                 window.DeviceManager.devicesState[this.deviceId].saturation = Math.round(saturationRatio * 1000);
                 
                 if (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) {
-                    TUYA_DEVICES.forEach(deviceData => {
+                    window.TUYA_DEVICES.forEach(deviceData => {
                         if (deviceData.id !== this.deviceId) {
                             window.DeviceManager.devicesState[deviceData.id].hue = Math.round(hueDegrees);
                             window.DeviceManager.devicesState[deviceData.id].saturation = Math.round(saturationRatio * 1000);
+                            
                             if (window.DeviceManager.colorWheelControllers[deviceData.id]) {
                                 window.DeviceManager.colorWheelControllers[deviceData.id].updateIndicatorFromState();
                             }
@@ -1989,9 +2018,9 @@
             }
 
             dispatchFinalColorCommand() {
-                const targetIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
+                const targetIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d=>d.id) : [this.deviceId];
                 targetIds.forEach(id => {
-                    window.DeviceManager.executeColorCommand(id);
+                    if(window.DeviceManager) window.DeviceManager.executeColorCommand(id);
                 });
             }
             
@@ -2021,27 +2050,31 @@
             }
         }
 
+        /* ==========================================================================
+           STATE & API MANAGEMENT FOR SMART DEVICES
+           ========================================================================== */
+
         class TuyaSmartDeviceManager {
             constructor() {
-                this.workerApiUrl = SafeStorage.getLocal(STORAGE_KEYS.WORKER_URL) || '';
+                this.workerApiUrl = window.SafeStorage.getLocal(window.STORAGE_KEYS.WORKER_URL) || '';
                 this.devicesState = {};
                 this.colorWheelControllers = {};
                 
-                for (let i = 0; i < TUYA_DEVICES.length; i++) {
-                    const device = TUYA_DEVICES[i];
+                for (let i = 0; i < window.TUYA_DEVICES.length; i++) {
+                    const device = window.TUYA_DEVICES[i];
                     this.devicesState[device.id] = { on: false, brightness: 100, hue: 0, saturation: 0 };
                 }
                 this.debounceTimers = {};
             }
 
             buildEndpointUrl(path) { return this.workerApiUrl.replace(/\/$/, '') + path; }
-            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); SafeStorage.setLocal(STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
+            setApiUrl(newUrl) { this.workerApiUrl = newUrl.trim(); window.SafeStorage.setLocal(window.STORAGE_KEYS.WORKER_URL, this.workerApiUrl); }
             isConfigured() { return this.workerApiUrl !== null && this.workerApiUrl !== ''; }
 
             async synchronizeAllDevices(isBackgroundSync = false) {
                 if (!this.isConfigured()) return;
-                for (let i = 0; i < TUYA_DEVICES.length; i++) {
-                    const device = TUYA_DEVICES[i];
+                for (let i = 0; i < window.TUYA_DEVICES.length; i++) {
+                    const device = window.TUYA_DEVICES[i];
                     if (!isBackgroundSync && window.ApplicationUI) window.ApplicationUI.setDeviceConnectingState(device.id, true);
                     try {
                         const jsonPayload = await window.NetworkService.get(this.buildEndpointUrl(`/status?device=${device.id}`));
@@ -2079,7 +2112,7 @@
                 }
 
                 const targetState = !this.devicesState[deviceId].on;
-                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
 
                 targetDeviceIds.forEach(id => {
                     this.devicesState[id].on = targetState;
@@ -2112,7 +2145,7 @@
             }
 
             async executeBrightnessCommand(deviceId, newBrightnessPercentage) {
-                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
                 const tuyaFormatBrightness = parseInt(newBrightnessPercentage, 10) * 10;
                 
                 let dispatchNeeded = false;
@@ -2142,7 +2175,7 @@
             async executeColorCommand(deviceId) {
                 if (!this.isConfigured()) return;
                 
-                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = (window.ApplicationUI && window.ApplicationUI.isDevicesLinked) ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
                 
                 targetDeviceIds.forEach(id => {
                     if (this.devicesState[id].on === false) {
@@ -2174,8 +2207,8 @@
 
         class UserInterfaceController {
             constructor() {
-                this.layoutMode = SafeStorage.getLocal(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
-                this.isDevicesLinked = SafeStorage.getLocal(STORAGE_KEYS.DEVICES_LINKED) === 'true';
+                this.layoutMode = window.SafeStorage.getLocal(window.STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
+                this.isDevicesLinked = window.SafeStorage.getLocal(window.STORAGE_KEYS.DEVICES_LINKED) === 'true';
                 
                 this.deviceGridContainer = document.getElementById('main-device-grid');
                 this.settingsModalBackdrop = document.getElementById('modal-backdrop-settings');
@@ -2205,8 +2238,11 @@
             }
 
             applyLayoutModeToBody() {
-                if (this.layoutMode === 'landscape') document.body.classList.add('layout-mode-landscape');
-                else document.body.classList.remove('layout-mode-landscape');
+                if (this.layoutMode === 'landscape') {
+                    document.body.classList.add('layout-mode-landscape');
+                } else {
+                    document.body.classList.remove('layout-mode-landscape');
+                }
 
                 const btnPortrait = document.getElementById('segment-btn-portrait');
                 const btnLandscape = document.getElementById('segment-btn-landscape');
@@ -2248,7 +2284,7 @@
             
             toggleGlobalLinkState() {
                 this.isDevicesLinked = !this.isDevicesLinked;
-                SafeStorage.setLocal(STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
+                window.SafeStorage.setLocal(window.STORAGE_KEYS.DEVICES_LINKED, this.isDevicesLinked);
                 this.applyGlobalLinkStateToButton();
                 
                 if (window.GlobalToast) {
@@ -2298,6 +2334,8 @@
                     widget.classList.toggle('is-expanded');
                 }
             }
+
+            // ================== AGENDA UI METHODS ==================
 
             evaluateAndRenderActiveRoutine() {
                 if (!window.AgendaSystem) return;
@@ -2358,10 +2396,10 @@
                     return;
                 }
 
-                const upIcon = SVG_ASSETS.UP_CHEVRON;
-                const downIcon = SVG_ASSETS.DOWN_CHEVRON;
-                const trashIcon = SVG_ASSETS.TRASH_CAN;
-                const plusIcon = SVG_ASSETS.PLUS_ICON;
+                const upIcon = window.SVG_ASSETS.UP_CHEVRON;
+                const downIcon = window.SVG_ASSETS.DOWN_CHEVRON;
+                const trashIcon = window.SVG_ASSETS.TRASH_CAN;
+                const plusIcon = window.SVG_ASSETS.PLUS_ICON;
 
                 let editorHtml = '';
 
@@ -2428,6 +2466,8 @@
                 }
             }
 
+            // ================== END AGENDA UI METHODS ==================
+
             constructDeviceGrid() {
                 while (this.deviceGridContainer.firstChild) {
                     this.deviceGridContainer.removeChild(this.deviceGridContainer.firstChild);
@@ -2435,8 +2475,8 @@
 
                 if (!window.DeviceManager) return;
 
-                for (let i = 0; i < TUYA_DEVICES.length; i++) {
-                    const deviceData = TUYA_DEVICES[i];
+                for (let i = 0; i < window.TUYA_DEVICES.length; i++) {
+                    const deviceData = window.TUYA_DEVICES[i];
                     const currentState = window.DeviceManager.devicesState[deviceData.id];
                     const activeClassString = currentState.on ? 'state-is-on' : '';
 
@@ -2453,7 +2493,7 @@
                                      role="button" 
                                      aria-pressed="${currentState.on ? 'true' : 'false'}" 
                                      aria-label="Toggle Power for ${deviceData.name}">
-                                    ${SVG_ASSETS.LIGHTBULB}
+                                    ${window.SVG_ASSETS.LIGHTBULB}
                                 </div>
                             </div>
                             
@@ -2516,13 +2556,13 @@
                             return;
                         }
                         
-                        if (window.DeviceManager && window.DeviceManager.devicesState[deviceId].on === false) {
+                        if (window.DeviceManager.devicesState[deviceId].on === false) {
                             return;
                         }
                         
                         cardWrapper.classList.toggle('is-expanded');
                         
-                        if(cardWrapper.classList.contains('is-expanded') && window.DeviceManager && window.DeviceManager.colorWheelControllers[deviceId]) {
+                        if(cardWrapper.classList.contains('is-expanded') && window.DeviceManager.colorWheelControllers[deviceId]) {
                             window.requestAnimationFrame(() => {
                                 setTimeout(() => {
                                     window.DeviceManager.colorWheelControllers[deviceId].updateIndicatorFromState();
@@ -2559,7 +2599,7 @@
 
             handleHighFrequencySliderDrag(deviceId, rawValue) {
                 const integerValue = parseInt(rawValue, 10);
-                const targetDeviceIds = this.isDevicesLinked ? TUYA_DEVICES.map(d => d.id) : [deviceId];
+                const targetDeviceIds = this.isDevicesLinked ? window.TUYA_DEVICES.map(d => d.id) : [deviceId];
 
                 targetDeviceIds.forEach(id => {
                     if (window.DeviceManager && window.DeviceManager.devicesState[id].on === false) {
@@ -2626,7 +2666,7 @@
             }
 
             openSettingsModal() {
-                this.setLayoutMode(SafeStorage.getLocal(STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
+                this.setLayoutMode(window.SafeStorage.getLocal(window.STORAGE_KEYS.LAYOUT_MODE) || 'portrait');
                 if (this.inputWorkerUrl && window.DeviceManager) this.inputWorkerUrl.value = window.DeviceManager.workerApiUrl;
                 
                 this.renderAgendaEditorSettings();
@@ -2638,7 +2678,7 @@
             }
 
             handleSettingsCancel() {
-                const memoryLayout = SafeStorage.getLocal(STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
+                const memoryLayout = window.SafeStorage.getLocal(window.STORAGE_KEYS.LAYOUT_MODE) || 'portrait';
                 this.setLayoutMode(memoryLayout);
                 if (this.settingsModalBackdrop) {
                     this.settingsModalBackdrop.classList.remove('is-visible-active');
@@ -2655,7 +2695,7 @@
                 }
                 
                 if (window.DeviceManager) window.DeviceManager.setApiUrl(inputString);
-                SafeStorage.setLocal(STORAGE_KEYS.LAYOUT_MODE, this.layoutMode);
+                window.SafeStorage.setLocal(window.STORAGE_KEYS.LAYOUT_MODE, this.layoutMode);
                 this.applyLayoutModeToBody();
 
                 if (this.settingsModalBackdrop) {
@@ -2681,7 +2721,7 @@
                     window.ApplicationUI.initialize();
                     
                     triggerEntryAnimations();
-                    LiveClock.start();
+                    window.LiveClock.start();
 
                     if (window.WeatherAPI) window.WeatherAPI.fetchAndRender();
                     if (window.RoomClimateSystem) window.RoomClimateSystem.fetchAndRender();
