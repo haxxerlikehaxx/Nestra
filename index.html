@@ -16,7 +16,6 @@
     <style>
         /* ==========================================================================
            CUSTOM TYPOGRAPHY INTEGRATION (ENTERPRISE GRADE)
-           Mapping exact local files to distinct font families to prevent faux-bolding
            ========================================================================== */
 
         @font-face {
@@ -73,7 +72,7 @@
             --glass-backdrop-filter-blur: blur(45px);
             --glass-backdrop-filter-saturate: saturate(180%);
             
-            /* Active Device States (ON) - Flawless Solid Colors */
+            /* Active Device States (ON) */
             --card-active-background-color: #FFFFFF; 
             --card-active-text-color: #000000;
             --card-active-subtitle-color: rgba(0, 0, 0, 0.50);
@@ -100,6 +99,7 @@
             --link-active-foreground-color: #FFFFFF;
             --link-active-box-shadow: 0px 4px 16px rgba(10, 132, 255, 0.4);
             --success-color: #32D74B;
+            --danger-color: #FF453A;
 
             /* Typography Pointers */
             --font-light: 'SF Pro Light Custom', -apple-system, sans-serif;
@@ -108,14 +108,14 @@
             --font-semibold-soft: 'SF Pro Semibold Soft Custom', -apple-system, sans-serif;
             --font-bold: 'SF Pro Bold Custom', -apple-system, sans-serif;
             
-            /* Physics & Animation Curves (Overhauled for absolute smoothness) */
-            --animation-smooth-curve: cubic-bezier(0.25, 0.1, 0.25, 1.0); /* Native Apple Ease */
+            /* Physics & Animation Curves */
+            --animation-smooth-curve: cubic-bezier(0.25, 0.1, 0.25, 1.0); 
             --animation-bouncy-curve: cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --animation-duration-fast: 0.25s;
             --animation-duration-medium: 0.45s;
             --animation-duration-slow: 0.65s;
 
-            /* Layout Constraints & Mathematical Animation Bounds */
+            /* Layout Constraints */
             --layout-max-width-portrait: 768px;
             --layout-max-width-landscape: 1024px;
             --layout-padding-horizontal-portrait: 32px;
@@ -135,44 +135,32 @@
            ========================================================================== */
         *, *::before, *::after {
             box-sizing: border-box;
-            margin-top: 0;
-            margin-right: 0;
-            margin-bottom: 0;
-            margin-left: 0;
-            padding-top: 0;
-            padding-right: 0;
-            padding-bottom: 0;
-            padding-left: 0;
+            margin: 0; padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
 
         html {
             font-family: var(--font-regular);
-            -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
         }
 
         body {
             background-color: var(--application-background-color);
             color: var(--card-inactive-text-color);
-            margin-left: auto;
-            margin-right: auto;
+            margin-left: auto; margin-right: auto;
             min-height: 100vh;
             padding-top: calc(env(safe-area-inset-top, 40px) + 24px);
             padding-right: var(--layout-padding-horizontal-portrait);
             padding-bottom: var(--layout-padding-vertical-bottom);
             padding-left: var(--layout-padding-horizontal-portrait);
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            user-select: none;
-            -webkit-user-select: none;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+            user-select: none; -webkit-user-select: none;
             touch-action: pan-y;
             max-width: var(--layout-max-width-portrait);
             
-            transition-property: max-width, padding-right, padding-left;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition: max-width var(--animation-duration-medium) var(--animation-smooth-curve), 
+                        padding var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
         body.layout-mode-landscape {
@@ -193,14 +181,8 @@
            ========================================================================== */
         
         @keyframes elegant-fade-slide-up {
-            0% {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0px);
-            }
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0px); }
         }
 
         @keyframes checkmark-pop-animation {
@@ -215,15 +197,12 @@
             100% { box-shadow: 0px 4px 12px rgba(50, 215, 75, 0.2); }
         }
 
-        @keyframes hourly-item-fade-in {
-            0% { opacity: 0; transform: translateX(15px); }
-            100% { opacity: 1; transform: translateX(0px); }
+        @keyframes task-enter {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
-        .awaits-animation {
-            opacity: 0;
-            transform: translateY(30px);
-        }
+        .awaits-animation { opacity: 0; transform: translateY(30px); }
 
         .animate-entry {
             animation-name: elegant-fade-slide-up;
@@ -236,567 +215,303 @@
            HEADER COMPONENT
            ========================================================================== */
         .application-header {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 36px;
-            padding-left: 8px;
-            padding-right: 8px;
+            display: flex; flex-direction: row; justify-content: space-between; align-items: center;
+            margin-bottom: 36px; padding-left: 8px; padding-right: 8px;
         }
 
         .application-title {
-            font-family: var(--font-medium);
-            font-weight: normal; 
-            font-size: 38px;
-            letter-spacing: -0.04em; 
-            line-height: 1.2;
-            color: #FFFFFF;
-            font-variant-numeric: proportional-nums;
-            font-feature-settings: "pnum" 1, "tnum" 0, "kern" 1;
+            font-family: var(--font-medium); font-weight: normal; font-size: 38px;
+            letter-spacing: -0.04em; line-height: 1.2; color: #FFFFFF;
+            font-variant-numeric: proportional-nums; font-feature-settings: "pnum" 1, "tnum" 0, "kern" 1;
         }
 
-        .header-controls-container {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 16px;
-        }
+        .header-controls-container { display: flex; flex-direction: row; align-items: center; gap: 16px; }
 
         .circular-icon-button {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 40px; height: 40px; border-radius: 50%;
             background-color: var(--glass-background-base);
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-style: solid;
-            border-color: var(--glass-border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFFFFF;
-            cursor: pointer;
+            border: 1px solid var(--glass-border-color);
+            display: flex; align-items: center; justify-content: center;
+            color: #FFFFFF; cursor: pointer;
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
-            
-            transition-property: transform, background-color;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-fast);
-            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve);
+            transition: transform var(--animation-duration-medium) var(--animation-smooth-curve), 
+                        background-color var(--animation-duration-fast) var(--animation-smooth-curve);
             outline: none;
         }
 
-        .circular-icon-button:active {
-            transform: scale(0.88);
-            background-color: var(--glass-background-hover);
-        }
-
-        .circular-icon-button svg {
-            width: 20px;
-            height: 20px;
-        }
+        .circular-icon-button:active { transform: scale(0.88); background-color: var(--glass-background-hover); }
+        .circular-icon-button svg { width: 20px; height: 20px; }
 
         /* ==========================================================================
-           WEATHER WIDGET COMPONENT
+           TASKS / REMINDERS DASHBOARD WIDGET
            ========================================================================== */
-        .weather-dashboard-widget {
+        .task-dashboard-widget {
             background-color: var(--glass-background-base);
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-style: solid;
-            border-color: var(--glass-border-color);
+            border: 1px solid var(--glass-border-color);
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             border-radius: 32px;
             margin-bottom: 24px; 
-            display: flex;
-            flex-direction: column;
+            padding: 24px 32px 32px 32px;
+            display: flex; flex-direction: column;
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            
-            transform: translate3d(0, 0, 0);
-            -webkit-transform: translate3d(0, 0, 0);
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            perspective: 1000px;
-            -webkit-perspective: 1000px;
-            
-            transition-property: transform, background-color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
         }
 
-        .weather-dashboard-widget:active {
-            transform: scale(0.97) translate3d(0, 0, 0);
-            background-color: var(--glass-background-hover);
+        .task-header-row {
+            display: flex; flex-direction: row; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-left: 4px; padding-right: 4px;
         }
 
-        .weather-main-row {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 28px;
-            padding-right: 32px;
-            padding-bottom: 28px;
-            padding-left: 32px;
+        .task-title {
+            font-family: var(--font-bold); font-weight: normal; font-size: 22px;
+            color: #FFFFFF; letter-spacing: -0.02em;
         }
 
-        .weather-information-left { display: flex; flex-direction: column; gap: 6px; }
-        
-        .weather-city-label { 
-            font-family: var(--font-bold);
-            font-weight: normal;
-            font-size: 15px; 
-            color: var(--card-inactive-subtitle-color); 
-            text-transform: uppercase; 
-            letter-spacing: 0.06em; 
+        .task-stats-label {
+            font-family: var(--font-medium); font-weight: normal; font-size: 14px;
+            color: var(--card-inactive-subtitle-color); letter-spacing: 0.04em;
         }
-        
-        .weather-temperature-display { 
-            font-family: var(--font-light);
-            font-weight: normal;
-            font-size: 56px; 
-            letter-spacing: -0.05em; 
-            line-height: 1.0; 
-            margin-top: 4px; 
-            margin-bottom: 4px; 
-            color: #FFFFFF; 
-            font-variant-numeric: proportional-nums;
-            font-feature-settings: "pnum" 1, "tnum" 0;
-        }
-        
-        .weather-condition-description { 
-            font-family: var(--font-regular);
-            font-weight: normal;
-            font-size: 16px; 
-            color: var(--card-inactive-subtitle-color); 
-        }
-        
-        .weather-graphics-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
-        .weather-vector-icon { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
-        .weather-vector-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 6px 16px rgba(255, 255, 255, 0.15)); }
-        .weather-high-low-range { font-family: var(--font-medium); font-weight: normal; font-size: 15px; color: var(--card-inactive-subtitle-color); }
-        
-        /* Expandable Hourly Section */
-        .weather-hourly-container {
-            max-height: 0px;
-            opacity: 0;
-            overflow-x: auto;
-            overflow-y: hidden;
-            display: flex;
-            flex-direction: row;
-            gap: 24px;
-            padding-left: 32px;
-            padding-right: 32px;
-            padding-top: 0px;
-            padding-bottom: 0px;
-            border-top-width: 1px;
-            border-top-style: solid;
-            border-top-color: transparent;
-            
+
+        .task-list-container {
+            max-height: 280px;
+            overflow-y: auto; overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
-            transform: translate3d(0, 0, 0);
-            -webkit-transform: translate3d(0, 0, 0);
-            will-change: max-height, opacity, padding-top, padding-bottom;
-            
-            transition-property: max-height, opacity, padding-top, padding-bottom, border-top-color;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            display: flex; flex-direction: column; gap: 8px;
+            margin-bottom: 20px; padding-right: 4px;
         }
-
-        .weather-hourly-container::-webkit-scrollbar { display: none; }
-
-        .weather-dashboard-widget.is-expanded .weather-hourly-container {
-            max-height: 160px;
-            opacity: 1;
-            padding-top: 24px;
-            padding-bottom: 28px;
-            border-top-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .hourly-item-block { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 48px; flex-shrink: 0; opacity: 0; }
         
-        .weather-dashboard-widget.is-expanded .hourly-item-block {
-            animation-name: hourly-item-fade-in;
-            animation-duration: 0.6s;
-            animation-timing-function: var(--animation-smooth-curve);
-            animation-fill-mode: forwards;
+        .task-list-container::-webkit-scrollbar { width: 4px; }
+        .task-list-container::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+
+        .task-item-row {
+            display: flex; flex-direction: row; align-items: center; gap: 14px;
+            padding: 12px 16px; cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            animation: task-enter 0.4s var(--animation-smooth-curve) forwards;
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
-        .hourly-item-time { font-family: var(--font-regular); font-weight: normal; font-size: 14px; color: var(--card-inactive-subtitle-color); }
-        .hourly-item-icon { width: 32px; height: 32px; }
-        .hourly-item-icon svg { width: 100%; height: 100%; filter: drop-shadow(0px 2px 4px rgba(255,255,255,0.1)); }
-        .hourly-item-temp { font-family: var(--font-medium); font-weight: normal; font-size: 17px; color: #FFFFFF; }
+        .task-item-row:active { transform: scale(0.98); background-color: rgba(255, 255, 255, 0.08); }
+
+        .task-item-row.is-completed { opacity: 0.55; }
+        .task-item-row.is-completed .task-text { text-decoration-line: line-through; color: var(--card-inactive-subtitle-color); }
+
+        /* Independent Checkbox for Tasks to avoid overlap with Agenda */
+        .task-checkbox-container {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all var(--animation-duration-fast) var(--animation-smooth-curve);
+        }
+
+        .task-item-row.is-completed .task-checkbox-container {
+            background-color: var(--success-color); border-color: var(--success-color);
+            animation: subtle-pulse-glow 2s infinite ease-in-out;
+        }
+
+        .task-checkbox-svg {
+            width: 12px; height: 12px; stroke: #FFFFFF; stroke-width: 3; stroke-linecap: round;
+            stroke-linejoin: round; fill: none; stroke-dasharray: 24; stroke-dashoffset: 24; opacity: 0;
+        }
+
+        .task-item-row.is-completed .task-checkbox-svg {
+            stroke-dashoffset: 0; opacity: 1;
+            animation: checkmark-pop-animation 0.4s var(--animation-bouncy-curve) forwards;
+        }
+
+        .task-text {
+            font-family: var(--font-medium); font-weight: normal; font-size: 16px;
+            color: #FFFFFF; flex-grow: 1; line-height: 1.3;
+            transition: color var(--animation-duration-medium);
+        }
+
+        .task-delete-btn {
+            background: rgba(255, 69, 58, 0.1); color: var(--danger-color);
+            border: none; border-radius: 10px; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; opacity: 0.4;
+            transition: all var(--animation-duration-fast) var(--animation-smooth-curve);
+        }
         
-        .skeleton { background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; position: relative; overflow: hidden; }
-        .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%); animation: shimmer 2s infinite; }
-        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .task-item-row:hover .task-delete-btn { opacity: 1; }
+        .task-delete-btn:active { transform: scale(0.9); opacity: 0.8 !important; }
+
+        .task-input-wrapper { display: flex; flex-direction: row; gap: 12px; align-items: stretch; }
+
+        .task-input-field {
+            flex-grow: 1; background-color: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px;
+            padding: 0 20px; color: #FFFFFF; font-family: var(--font-regular); font-size: 16px;
+            outline: none; transition: all var(--animation-duration-fast) var(--animation-smooth-curve);
+        }
+
+        .task-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
+        .task-input-field::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+        .task-add-submit-btn {
+            width: 48px; height: 48px; background-color: #FFFFFF; color: #000000;
+            border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0;
+            transition: transform var(--animation-duration-fast) var(--animation-smooth-curve), 
+                        opacity var(--animation-duration-fast) var(--animation-smooth-curve);
+        }
+        
+        .task-add-submit-btn:active { transform: scale(0.92); opacity: 0.85; }
+
+        .task-empty-state {
+            font-family: var(--font-regular); font-weight: normal; font-size: 15px;
+            color: var(--card-inactive-subtitle-color); text-align: center;
+            padding-top: 16px; padding-bottom: 16px;
+        }
 
         /* ==========================================================================
            AGENDA DASHBOARD WIDGET (DYNAMICALLY VISIBLE)
            ========================================================================== */
         
         .agenda-dashboard-section-wrapper {
-            max-height: 0px;
-            opacity: 0;
-            overflow: hidden;
-            margin-bottom: 0px;
-            pointer-events: none;
-            
+            max-height: 0px; opacity: 0; overflow: hidden; margin-bottom: 0px; pointer-events: none;
             transform: translate3d(0, 30px, 0);
-            -webkit-transform: translate3d(0, 30px, 0);
             will-change: max-height, opacity, transform, margin-bottom;
-            
-            transition-property: max-height, opacity, transform, margin-bottom;
-            transition-duration: var(--animation-duration-slow);
-            transition-timing-function: var(--animation-smooth-curve);
+            transition: all var(--animation-duration-slow) var(--animation-smooth-curve);
         }
 
         .agenda-dashboard-section-wrapper.is-routine-active {
-            max-height: 1000px; 
-            opacity: 1;
-            margin-bottom: 24px;
-            pointer-events: auto;
+            max-height: 1000px; opacity: 1; margin-bottom: 24px; pointer-events: auto;
             transform: translate3d(0, 0px, 0);
-            -webkit-transform: translate3d(0, 0px, 0);
         }
 
         .agenda-dashboard-widget {
             background-color: var(--glass-background-base);
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-style: solid;
-            border-color: var(--glass-border-color);
+            border: 1px solid var(--glass-border-color);
             backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             -webkit-backdrop-filter: var(--glass-backdrop-filter-blur) var(--glass-backdrop-filter-saturate);
             border-radius: 32px;
-            padding-top: 24px;
-            padding-right: 32px;
-            padding-bottom: 24px; /* Reduced bottom padding for tighter integration */
-            padding-left: 32px;
-            display: flex;
-            flex-direction: column;
+            padding: 24px 32px;
+            display: flex; flex-direction: column;
             box-shadow: 0px 12px 48px rgba(0, 0, 0, 0.4), inset 0px 1px 0px rgba(255, 255, 255, 0.1);
         }
 
-        .agenda-header-row {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 20px; /* Tighter header spacing */
-            padding-left: 4px;
-        }
+        .agenda-header-row { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 20px; padding-left: 4px; }
+        .agenda-title { font-family: var(--font-bold); font-weight: normal; font-size: 22px; color: #FFFFFF; letter-spacing: -0.02em; margin-bottom: 2px; }
+        .agenda-time-period-label { font-family: var(--font-medium); font-weight: normal; font-size: 14px; color: var(--card-inactive-subtitle-color); letter-spacing: 0.04em; }
 
-        .agenda-title {
-            font-family: var(--font-bold);
-            font-weight: normal;
-            font-size: 22px;
-            color: #FFFFFF;
-            letter-spacing: -0.02em;
-            margin-bottom: 2px;
-        }
-
-        .agenda-time-period-label {
-            font-family: var(--font-medium);
-            font-weight: normal;
-            font-size: 14px;
-            color: var(--card-inactive-subtitle-color);
-            letter-spacing: 0.04em;
-        }
-
-        .agenda-list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px; /* Tighter gap between tasks */
-        }
+        .agenda-list-container { display: flex; flex-direction: column; gap: 8px; }
 
         .agenda-item-row {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 14px;
-            padding-top: 8px;
-            padding-bottom: 8px;
-            padding-left: 8px;
-            padding-right: 8px;
-            cursor: pointer;
-            border-radius: 12px;
-            
-            transition-property: opacity, background-color, transform;
-            transition-duration: var(--animation-duration-medium), var(--animation-duration-fast), var(--animation-duration-fast);
-            transition-timing-function: var(--animation-smooth-curve);
+            display: flex; flex-direction: row; align-items: center; gap: 14px;
+            padding: 8px; cursor: pointer; border-radius: 12px;
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
-        .agenda-item-row:active {
-            background-color: rgba(255,255,255,0.08);
-            transform: scale(0.98);
-        }
-
-        .agenda-item-row.is-task-completed {
-            opacity: 0.5;
-        }
-        
-        .agenda-item-row.is-task-completed .agenda-item-title {
-            text-decoration-line: line-through;
-            color: var(--card-inactive-subtitle-color);
-        }
+        .agenda-item-row:active { background-color: rgba(255,255,255,0.08); transform: scale(0.98); }
+        .agenda-item-row.is-task-completed { opacity: 0.5; }
+        .agenda-item-row.is-task-completed .agenda-item-title { text-decoration-line: line-through; color: var(--card-inactive-subtitle-color); }
 
         .agenda-checkbox-container {
-            width: 22px; /* Reduced dimension */
-            height: 22px; /* Reduced dimension */
-            border-radius: 50%;
-            border-top-width: 2px;
-            border-right-width: 2px;
-            border-bottom-width: 2px;
-            border-left-width: 2px;
-            border-style: solid;
-            border-color: rgba(255, 255, 255, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            
-            transition-property: background-color, border-color, box-shadow;
-            transition-duration: var(--animation-duration-fast);
-            transition-timing-function: var(--animation-smooth-curve);
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all var(--animation-duration-fast) var(--animation-smooth-curve);
         }
 
         .agenda-item-row.is-task-completed .agenda-checkbox-container {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-            animation-name: subtle-pulse-glow;
-            animation-duration: 2s;
-            animation-iteration-count: infinite;
-            animation-timing-function: ease-in-out;
+            background-color: var(--success-color); border-color: var(--success-color);
+            animation: subtle-pulse-glow 2s infinite ease-in-out;
         }
 
         .agenda-checkbox-svg {
-            width: 12px; /* Proportional reduction */
-            height: 12px;
-            stroke: #FFFFFF;
-            stroke-width: 3;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            fill: none;
-            stroke-dasharray: 24;
-            stroke-dashoffset: 24;
-            opacity: 0;
+            width: 12px; height: 12px; stroke: #FFFFFF; stroke-width: 3; stroke-linecap: round;
+            stroke-linejoin: round; fill: none; stroke-dasharray: 24; stroke-dashoffset: 24; opacity: 0;
         }
 
         .agenda-item-row.is-task-completed .agenda-checkbox-svg {
-            stroke-dashoffset: 0;
-            opacity: 1;
-            animation-name: checkmark-pop-animation;
-            animation-duration: 0.4s;
-            animation-timing-function: var(--animation-bouncy-curve);
-            animation-fill-mode: forwards;
+            stroke-dashoffset: 0; opacity: 1;
+            animation: checkmark-pop-animation 0.4s var(--animation-bouncy-curve) forwards;
         }
 
-        .agenda-item-content {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .agenda-item-title {
-            font-family: var(--font-medium);
-            font-weight: normal;
-            font-size: 15px; /* Reduced for proportional density */
-            color: #FFFFFF;
-            transition-property: color;
-            transition-duration: var(--animation-duration-medium);
-        }
-
-        .agenda-empty-state {
-            font-family: var(--font-regular);
-            font-weight: normal;
-            font-size: 14px;
-            color: var(--card-inactive-subtitle-color);
-            text-align: center;
-            padding-top: 8px;
-            padding-bottom: 8px;
-        }
+        .agenda-item-content { display: flex; flex-direction: column; flex-grow: 1; }
+        .agenda-item-title { font-family: var(--font-medium); font-weight: normal; font-size: 15px; color: #FFFFFF; transition: color var(--animation-duration-medium); }
+        .agenda-empty-state { font-family: var(--font-regular); font-weight: normal; font-size: 14px; color: var(--card-inactive-subtitle-color); text-align: center; padding: 8px 0; }
 
         /* ==========================================================================
            DEVICE GRID LAYOUT & GLOBAL LINK COMPONENT
            ========================================================================== */
         
-        .device-grid-wrapper {
-            position: relative;
-            width: 100%;
-        }
+        .device-grid-wrapper { position: relative; width: 100%; }
 
         .section-heading-title {
-            font-family: var(--font-bold);
-            font-weight: normal;
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-left: 8px;
-            letter-spacing: -0.02em;
-            color: #FFFFFF;
+            font-family: var(--font-bold); font-weight: normal; font-size: 22px;
+            margin-bottom: 20px; padding-left: 8px; letter-spacing: -0.02em; color: #FFFFFF;
         }
 
         .global-link-synchronization-button {
-            position: absolute;
-            left: 50%;
-            top: -26px; 
-            transform: translateX(-50%);
-            width: 38px;
-            height: 38px;
-            border-radius: 19px;
+            position: absolute; left: 50%; top: -26px; transform: translateX(-50%);
+            width: 38px; height: 38px; border-radius: 19px;
             background-color: var(--glass-background-base);
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-style: solid;
-            border-color: var(--glass-border-color);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            border: 1px solid var(--glass-border-color);
+            z-index: 100; display: flex; justify-content: center; align-items: center;
             color: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            cursor: pointer;
-            
-            transition-property: background-color, color, border-color, box-shadow, transform;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); cursor: pointer;
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
-        .global-link-synchronization-button:active {
-            transform: translateX(-50%) scale(0.85);
-        }
-
+        .global-link-synchronization-button:active { transform: translateX(-50%) scale(0.85); }
         .global-link-synchronization-button.is-devices-linked {
-            background-color: var(--link-active-background-color);
-            color: var(--link-active-foreground-color);
-            border-color: var(--link-active-background-color);
-            box-shadow: var(--link-active-box-shadow);
+            background-color: var(--link-active-background-color); color: var(--link-active-foreground-color);
+            border-color: var(--link-active-background-color); box-shadow: var(--link-active-box-shadow);
         }
-
         .global-link-synchronization-button svg { width: 18px; height: 18px; }
 
         .device-grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: grid; grid-template-columns: repeat(2, 1fr);
             grid-auto-rows: minmax(var(--card-base-height), auto);
-            column-gap: var(--grid-gap-portrait);
-            row-gap: var(--grid-gap-portrait);
-            
-            transition-property: grid-template-columns, column-gap, row-gap;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            column-gap: var(--grid-gap-portrait); row-gap: var(--grid-gap-portrait);
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
         body.layout-mode-landscape .device-grid-container {
             grid-template-columns: repeat(2, 1fr);
-            column-gap: var(--grid-gap-landscape);
-            row-gap: var(--grid-gap-landscape);
+            column-gap: var(--grid-gap-landscape); row-gap: var(--grid-gap-landscape);
         }
 
         /* ==========================================================================
            SMART DEVICE CARD COMPONENT
            ========================================================================== */
         .smart-device-card {
-            background-color: var(--glass-background-base);
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-style: solid;
-            border-color: var(--glass-border-color);
-            backdrop-filter: blur(35px) saturate(160%);
-            -webkit-backdrop-filter: blur(35px) saturate(160%);
-            border-radius: 32px;
-            padding-top: 24px;
-            padding-right: 24px;
-            padding-bottom: 24px;
-            padding-left: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            
+            background-color: var(--glass-background-base); border: 1px solid var(--glass-border-color);
+            backdrop-filter: blur(35px) saturate(160%); -webkit-backdrop-filter: blur(35px) saturate(160%);
+            border-radius: 32px; padding: 24px; display: flex; flex-direction: column; justify-content: flex-start;
             height: var(--card-base-height); 
             box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.05);
-            position: relative;
-            cursor: pointer;
-            
-            transform: translate3d(0, 0, 0);
-            -webkit-transform: translate3d(0, 0, 0);
+            position: relative; cursor: pointer; transform: translate3d(0, 0, 0);
             will-change: height, background-color, transform;
-            
-            transition-property: height, background-color, color, transform, box-shadow, border-color;
-            transition-duration: 0.5s, var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium), var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve), var(--animation-smooth-curve);
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
-        .smart-device-card.is-expanded {
-            grid-row-end: span 2;
-            height: var(--card-expanded-height-portrait);
-        }
-        
-        body.layout-mode-landscape .smart-device-card.is-expanded {
-            height: var(--card-expanded-height-landscape);
-        }
+        .smart-device-card.is-expanded { grid-row-end: span 2; height: var(--card-expanded-height-portrait); }
+        body.layout-mode-landscape .smart-device-card.is-expanded { height: var(--card-expanded-height-landscape); }
 
         .smart-device-card.state-is-on {
-            background-color: var(--card-active-background-color) !important;
-            color: var(--card-active-text-color);
+            background-color: var(--card-active-background-color) !important; color: var(--card-active-text-color);
             box-shadow: 0px 16px 40px rgba(0, 0, 0, 0.1), inset 0px 1px 0px rgba(255, 255, 255, 1.0);
             border-color: transparent;
         }
 
-        .card-base-content {
-            display: flex;
-            flex-direction: column;
-            height: 152px; 
-            justify-content: space-between;
-        }
-
-        .device-card-header-row {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
+        .card-base-content { display: flex; flex-direction: column; height: 152px; justify-content: space-between; }
+        .device-card-header-row { display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; }
 
         .device-toggle-icon-container {
-            width: 48px;
-            height: 48px;
-            border-radius: 24px;
-            background-color: var(--icon-inactive-background-color);
-            color: var(--icon-inactive-foreground-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            
-            transition-property: background-color, color, transform, box-shadow;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            width: 48px; height: 48px; border-radius: 24px;
+            background-color: var(--icon-inactive-background-color); color: var(--icon-inactive-foreground-color);
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
-        .smart-device-card.state-is-on .device-toggle-icon-container {
-            background-color: var(--icon-active-background-color);
-            color: var(--icon-active-foreground-color);
-            box-shadow: var(--icon-active-box-shadow);
-        }
-        
-        .smart-device-card.is-connecting .device-toggle-icon-container {
-            animation-name: pulse-connecting-indicator;
-            animation-duration: 1.2s;
-            animation-iteration-count: infinite;
-            animation-timing-function: ease-in-out;
-        }
+        .smart-device-card.state-is-on .device-toggle-icon-container { background-color: var(--icon-active-background-color); color: var(--icon-active-foreground-color); box-shadow: var(--icon-active-box-shadow); }
+        .smart-device-card.is-connecting .device-toggle-icon-container { animation: pulse-connecting-indicator 1.2s infinite ease-in-out; }
         
         @keyframes pulse-connecting-indicator {
             0% { transform: scale(1); }
@@ -806,284 +521,138 @@
 
         .device-toggle-icon-container svg { width: 26px; height: 26px; }
 
-        .device-text-information-block {
-            display: flex;
-            flex-direction: column;
-            pointer-events: none;
-            margin-bottom: 20px;
-        }
-
-        .device-display-name { 
-            font-family: var(--font-semibold-soft);
-            font-weight: normal;
-            font-size: 17px; 
-            letter-spacing: -0.015em; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        
-        .device-current-status-label { 
-            font-family: var(--font-medium);
-            font-weight: normal;
-            font-size: 15px; 
-            color: var(--card-inactive-subtitle-color); 
-            margin-top: 4px; 
-            transition-property: color; 
-            transition-duration: var(--animation-duration-medium); 
-            transition-timing-function: var(--animation-smooth-curve); 
-        }
-        
+        .device-text-information-block { display: flex; flex-direction: column; pointer-events: none; margin-bottom: 20px; }
+        .device-display-name { font-family: var(--font-semibold-soft); font-weight: normal; font-size: 17px; letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .device-current-status-label { font-family: var(--font-medium); font-weight: normal; font-size: 15px; color: var(--card-inactive-subtitle-color); margin-top: 4px; transition: color var(--animation-duration-medium) var(--animation-smooth-curve); }
         .smart-device-card.state-is-on .device-current-status-label { color: var(--card-active-subtitle-color); }
 
         /* Bottom Area: Slider Control */
         .device-brightness-slider-container {
-            width: 100%;
-            height: 40px;
-            border-radius: 20px;
-            background-color: var(--slider-inactive-track-color);
-            position: relative;
-            overflow: hidden;
+            width: 100%; height: 40px; border-radius: 20px;
+            background-color: var(--slider-inactive-track-color); position: relative; overflow: hidden;
             -webkit-mask-image: -webkit-linear-gradient(white, white);
-            -webkit-mask-repeat: no-repeat;
-            -webkit-backface-visibility: hidden;
-            -moz-backface-visibility: hidden;
-            transform: translate3d(0, 0, 0);
-            box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
-            transition-property: background-color, box-shadow, opacity;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            transform: translate3d(0, 0, 0); box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
-        .smart-device-card:not(.state-is-on) .device-brightness-slider-container {
-            pointer-events: none;
-            opacity: 0.5; 
-        }
-
-        .smart-device-card.state-is-on .device-brightness-slider-container {
-            background-color: var(--slider-active-track-color);
-            box-shadow: inset 0px 1px 4px rgba(0, 0, 0, 0.05);
-        }
+        .smart-device-card:not(.state-is-on) .device-brightness-slider-container { pointer-events: none; opacity: 0.5; }
+        .smart-device-card.state-is-on .device-brightness-slider-container { background-color: var(--slider-active-track-color); box-shadow: inset 0px 1px 4px rgba(0, 0, 0, 0.05); }
 
         .brightness-slider-visual-fill {
             position: absolute; top: 0; left: 0; bottom: 0;
-            background-color: var(--slider-inactive-fill-color);
-            pointer-events: none; z-index: 1;
-            width: var(--current-fill-percentage, 0%);
-            border-radius: 20px;
-            box-shadow: var(--slider-inactive-fill-shadow);
-            
-            transition-property: background-color, box-shadow;
-            transition-duration: var(--animation-duration-medium);
-            transition-timing-function: var(--animation-smooth-curve);
+            background-color: var(--slider-inactive-fill-color); pointer-events: none; z-index: 1;
+            width: var(--current-fill-percentage, 0%); border-radius: 20px; box-shadow: var(--slider-inactive-fill-shadow);
+            transition: all var(--animation-duration-medium) var(--animation-smooth-curve);
         }
 
-        .smart-device-card.state-is-on .brightness-slider-visual-fill {
-            background-color: var(--slider-active-fill-color);
-            box-shadow: var(--slider-active-fill-shadow);
-        }
+        .smart-device-card.state-is-on .brightness-slider-visual-fill { background-color: var(--slider-active-fill-color); box-shadow: var(--slider-active-fill-shadow); }
 
         .brightness-native-range-input {
-            -webkit-appearance: none; appearance: none;
-            width: 100%; height: 100%; background-color: transparent;
-            outline: none; border: none; box-shadow: none; margin: 0;
-            position: absolute; top: 0; left: 0; z-index: 2;
+            -webkit-appearance: none; appearance: none; width: 100%; height: 100%;
+            background-color: transparent; outline: none; border: none; margin: 0; position: absolute; top: 0; left: 0; z-index: 2;
         }
 
         .brightness-native-range-input::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none;
-            width: 40px; height: 40px; background-color: transparent;
-            border: none; box-shadow: none; cursor: pointer;
+            -webkit-appearance: none; appearance: none; width: 40px; height: 40px;
+            background-color: transparent; border: none; cursor: pointer;
         }
-        .brightness-native-range-input::-webkit-slider-runnable-track { background-color: transparent; border: none; box-shadow: none; }
+        .brightness-native-range-input::-webkit-slider-runnable-track { background-color: transparent; border: none; }
 
         /* Expansion Area: High Fidelity Color Picker */
         .color-picker-expansion-area {
-            opacity: 0;
-            max-height: 0px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-top: 0px;
-            padding-bottom: 0px;
+            opacity: 0; max-height: 0px; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             will-change: max-height, opacity, padding-top, padding-bottom;
-            
-            transition-property: opacity, max-height, padding-top, padding-bottom;
-            transition-duration: 0.5s;
-            transition-timing-function: var(--animation-spring-curve);
+            transition: all 0.5s var(--animation-smooth-curve);
         }
 
-        /* Use visible overflow ONLY when fully expanded so shadow doesn't clip */
-        .smart-device-card.is-expanded .color-picker-expansion-area {
-            opacity: 1;
-            max-height: 280px; 
-            padding-top: 32px;
-            padding-bottom: 24px; 
-            overflow: visible; 
-        }
+        .smart-device-card.is-expanded .color-picker-expansion-area { opacity: 1; max-height: 280px; padding-top: 32px; padding-bottom: 24px; overflow: visible; }
 
         .color-wheel-canvas-container {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            position: relative;
-            box-shadow: 0px 8px 24px rgba(0,0,0,0.25);
-            cursor: crosshair;
-            background: radial-gradient(circle at center, white 0%, transparent 100%), conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
-            transform: translate3d(0,0,0);
+            width: 200px; height: 200px; border-radius: 50%; position: relative; box-shadow: 0px 8px 24px rgba(0,0,0,0.25); cursor: crosshair;
+            background: radial-gradient(circle at center, white 0%, transparent 100%), conic-gradient(red, yellow, lime, cyan, blue, magenta, red); transform: translate3d(0,0,0);
         }
 
         .color-wheel-indicator {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border-top-width: 3px;
-            border-right-width: 3px;
-            border-bottom-width: 3px;
-            border-left-width: 3px;
-            border-style: solid;
-            border-color: #FFFFFF;
-            box-shadow: 0px 3px 12px rgba(0,0,0,0.4);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            background-color: #FFFFFF; 
-            transition-property: background-color;
-            transition-duration: 0.1s;
+            width: 32px; height: 32px; border-radius: 50%; border: 3px solid #FFFFFF;
+            box-shadow: 0px 3px 12px rgba(0,0,0,0.4); position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); pointer-events: none; background-color: #FFFFFF; transition: background-color 0.1s;
         }
 
         /* ==========================================================================
            MODALS, OVERLAYS & SETTINGS
            ========================================================================== */
         .application-modal-backdrop {
-            position: fixed; top: 0; right: 0; bottom: 0; left: 0;
-            background-color: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; z-index: 1000;
-            transition-property: opacity; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-smooth-curve);
+            position: fixed; top: 0; right: 0; bottom: 0; left: 0; background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; z-index: 1000; transition: opacity var(--animation-duration-medium) var(--animation-smooth-curve);
         }
         .application-modal-backdrop.is-visible-active { opacity: 1; pointer-events: auto; }
 
         .settings-modal-sheet {
-            background-color: rgba(30, 30, 30, 0.85);
-            backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
-            border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;
-            border-style: solid; border-color: rgba(255, 255, 255, 0.15);
-            width: 480px; border-radius: 36px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px;
-            box-shadow: 0px 24px 80px rgba(0, 0, 0, 0.6);
-            transform: translateY(50px) scale(0.92); transition-property: transform; transition-duration: 0.5s; transition-timing-function: var(--animation-spring-curve);
+            background-color: rgba(30, 30, 30, 0.85); backdrop-filter: blur(50px) saturate(200%); -webkit-backdrop-filter: blur(50px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.15); width: 480px; border-radius: 36px; box-shadow: 0px 24px 80px rgba(0, 0, 0, 0.6);
+            transform: translateY(50px) scale(0.92); transition: transform 0.5s var(--animation-smooth-curve);
             max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
         }
         .application-modal-backdrop.is-visible-active .settings-modal-sheet { transform: translateY(0) scale(1); }
 
-        .settings-modal-header-fixed {
-            padding-top: 32px; padding-right: 32px; padding-bottom: 24px; padding-left: 32px;
-            flex-shrink: 0; text-align: center;
-            border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgba(255, 255, 255, 0.1);
-        }
-
+        .settings-modal-header-fixed { padding: 32px 32px 24px 32px; flex-shrink: 0; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
         .settings-modal-heading { font-family: var(--font-bold); font-weight: normal; font-size: 24px; color: #FFFFFF; margin-bottom: 8px; letter-spacing: -0.02em; }
         .settings-modal-description { font-family: var(--font-regular); font-weight: normal; font-size: 15px; color: rgba(255, 255, 255, 0.65); line-height: 1.4; }
 
         .settings-modal-body-scrollable {
             overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-            padding-top: 24px; padding-right: 32px; padding-bottom: 24px; padding-left: 32px;
-            flex-grow: 1; display: flex; flex-direction: column;
+            padding: 24px 32px; flex-grow: 1; display: flex; flex-direction: column;
         }
         .settings-modal-body-scrollable::-webkit-scrollbar { width: 6px; }
         .settings-modal-body-scrollable::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 3px; }
 
-        .settings-modal-footer-fixed {
-            padding-top: 24px; padding-right: 32px; padding-bottom: 32px; padding-left: 32px;
-            flex-shrink: 0; background-color: rgba(30, 30, 30, 0.95);
-            border-top-width: 1px; border-top-style: solid; border-top-color: rgba(255, 255, 255, 0.1);
-        }
+        .settings-modal-footer-fixed { padding: 24px 32px 32px 32px; flex-shrink: 0; background-color: rgba(30, 30, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.1); }
 
-        .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-bottom: 28px; flex-shrink: 0;}
-        .ios-segmented-control-button { font-family: var(--font-medium); font-weight: normal; flex-grow: 1; padding-top: 12px; padding-bottom: 12px; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition-property: background-color, color, box-shadow; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); }
+        .ios-segmented-control-container { display: flex; flex-direction: row; background-color: rgba(0, 0, 0, 0.35); border-radius: 14px; padding: 4px; margin-bottom: 28px; flex-shrink: 0;}
+        .ios-segmented-control-button { font-family: var(--font-medium); flex-grow: 1; padding: 12px 0; border-radius: 10px; border: none; background-color: transparent; color: rgba(255, 255, 255, 0.6); font-size: 15px; cursor: pointer; transition: all var(--animation-duration-fast) var(--animation-smooth-curve); }
         .ios-segmented-control-button.is-segment-active { background-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25); }
 
-        .settings-text-input-field { font-family: var(--font-regular); font-weight: normal; width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 18px; padding-right: 18px; padding-bottom: 18px; padding-left: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition-property: border-color, background-color; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-text-input-field { font-family: var(--font-regular); width: 100%; box-sizing: border-box; background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); color: #FFFFFF; padding: 18px; border-radius: 18px; font-size: 16px; margin-bottom: 20px; outline: none; transition: all var(--animation-duration-fast) var(--animation-smooth-curve); flex-shrink:0;}
         .settings-text-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
 
-        /* Highly customized inline edit inputs */
-        .agenda-edit-inline-input {
-            background-color: transparent;
-            border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;
-            border-style: solid; border-color: transparent;
-            color: #FFFFFF;
-            font-family: inherit;
-            font-size: inherit;
-            padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px;
-            border-radius: 8px;
-            width: 100%;
-            transition-property: border-color, background-color;
-            transition-duration: var(--animation-duration-fast);
-            outline: none;
-        }
-        .agenda-edit-inline-input:focus {
-            border-color: rgba(255,255,255,0.3);
-            background-color: rgba(0,0,0,0.4);
-        }
+        .agenda-edit-inline-input { background-color: transparent; border: 1px solid transparent; color: #FFFFFF; font-family: inherit; font-size: inherit; padding: 4px 8px; border-radius: 8px; width: 100%; transition: all var(--animation-duration-fast); outline: none; }
+        .agenda-edit-inline-input:focus { border-color: rgba(255,255,255,0.3); background-color: rgba(0,0,0,0.4); }
 
-        .agenda-edit-inline-time {
-            background-color: transparent;
-            border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px;
-            border-style: solid; border-color: transparent;
-            color: var(--card-inactive-subtitle-color);
-            font-family: inherit;
-            font-size: inherit;
-            padding-top: 2px; padding-right: 4px; padding-bottom: 2px; padding-left: 4px;
-            border-radius: 6px;
-            width: 85px;
-            transition-property: border-color, background-color, color;
-            transition-duration: var(--animation-duration-fast);
-            outline: none;
-        }
-        .agenda-edit-inline-time:focus {
-            border-color: rgba(255,255,255,0.3);
-            background-color: rgba(0,0,0,0.4);
-            color: #FFFFFF;
-        }
+        .agenda-edit-inline-time { background-color: transparent; border: 1px solid transparent; color: var(--card-inactive-subtitle-color); font-family: inherit; font-size: inherit; padding: 2px 4px; border-radius: 6px; width: 85px; transition: all var(--animation-duration-fast); outline: none; }
+        .agenda-edit-inline-time:focus { border-color: rgba(255,255,255,0.3); background-color: rgba(0,0,0,0.4); color: #FFFFFF; }
         .agenda-edit-inline-time::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-        .settings-action-button-primary { font-family: var(--font-bold); font-weight: normal; background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding-top: 18px; padding-bottom: 18px; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-action-button-primary { font-family: var(--font-bold); background-color: #FFFFFF; color: #000000; width: 100%; box-sizing: border-box; padding: 18px 0; border-radius: 18px; font-size: 17px; border: none; cursor: pointer; margin-bottom: 14px; transition: all var(--animation-duration-fast) var(--animation-smooth-curve); flex-shrink:0;}
         .settings-action-button-primary:active { transform: scale(0.96); opacity: 0.85; }
-        .settings-action-button-secondary { font-family: var(--font-medium); font-weight: normal; background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding-top: 16px; padding-bottom: 16px; font-size: 17px; border: none; cursor: pointer; transition-property: color, transform, opacity; transition-duration: var(--animation-duration-fast); transition-timing-function: var(--animation-smooth-curve); flex-shrink:0;}
+        .settings-action-button-secondary { font-family: var(--font-medium); background-color: transparent; color: rgba(255, 255, 255, 0.65); width: 100%; box-sizing: border-box; padding: 16px 0; font-size: 17px; border: none; cursor: pointer; transition: all var(--animation-duration-fast) var(--animation-smooth-curve); flex-shrink:0;}
         .settings-action-button-secondary:active { color: #FFFFFF; transform: scale(0.96); opacity: 0.85;}
 
         /* Agenda Modal Editor Specifics */
         .modal-section-divider { height: 1px; background-color: rgba(255,255,255,0.1); margin-top: 16px; margin-bottom: 24px; flex-shrink: 0; }
         .modal-section-title { font-family: var(--font-semibold-soft); font-size: 16px; color: #FFFFFF; text-align: left; margin-bottom: 12px; margin-top: 8px; flex-shrink:0;}
 
-        .agenda-routine-block { background-color: rgba(0,0,0,0.25); border-radius: 20px; padding-top: 16px; padding-right: 16px; padding-bottom: 16px; padding-left: 16px; margin-bottom: 20px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255,255,255,0.05); flex-shrink: 0; }
+        .agenda-routine-block { background-color: rgba(0,0,0,0.25); border-radius: 20px; padding: 16px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
         .agenda-routine-header { display: flex; flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .agenda-routine-title-info { display: flex; flex-direction: column; align-items: flex-start; flex-grow: 1; margin-right: 16px; }
-        
         .agenda-routine-title-text { font-family: var(--font-semibold-soft); font-size: 17px; color: #FFFFFF; width: 100%; }
         .agenda-routine-time-text { font-family: var(--font-regular); font-size: 13px; color: var(--card-inactive-subtitle-color); display: flex; align-items: center; gap: 4px; margin-top: 4px; width: 100%; }
 
-        .agenda-edit-action-btn { width: 32px; height: 32px; border-radius: 8px; background-color: rgba(255,255,255,0.1); border-style: none; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; transition-property: transform, opacity; transition-duration: var(--animation-duration-fast); flex-shrink: 0;}
+        .agenda-edit-action-btn { width: 32px; height: 32px; border-radius: 8px; background-color: rgba(255,255,255,0.1); border: none; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all var(--animation-duration-fast); flex-shrink: 0;}
         .agenda-edit-action-btn:active { transform: scale(0.90); opacity: 0.8;}
-        .agenda-edit-action-btn.delete { background-color: rgba(255, 69, 58, 0.2); color: #FF453A; }
+        .agenda-edit-action-btn.delete { background-color: rgba(255, 69, 58, 0.2); color: var(--danger-color); }
 
-        .agenda-task-edit-item { background-color: rgba(255,255,255,0.05); border-radius: 12px; padding-top: 10px; padding-right: 12px; padding-bottom: 10px; padding-left: 12px; display: flex; flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .agenda-task-edit-title { font-family: var(--font-regular); font-size: 15px; color: #FFFFFF; flex-grow: 1; margin-right: 12px; }
+        .agenda-task-edit-item { background-color: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .agenda-task-edit-controls { display: flex; flex-direction: row; gap: 6px; flex-shrink: 0;}
 
         .agenda-add-task-form { display: flex; flex-direction: row; gap: 8px; margin-top: 12px; }
-        .agenda-add-routine-form { background-color: rgba(255,255,255,0.05); border-radius: 20px; padding-top: 16px; padding-right: 16px; padding-bottom: 16px; padding-left: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
-
+        .agenda-add-routine-form { background-color: rgba(255,255,255,0.05); border-radius: 20px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
         .agenda-time-inputs { display: flex; flex-direction: row; gap: 12px; }
         .agenda-time-input-wrapper { flex-grow: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
         .agenda-time-label { font-family: var(--font-regular); font-size: 13px; color: rgba(255,255,255,0.6); }
 
-        .system-toast-notification { font-family: var(--font-bold); font-weight: normal; position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-style: solid; border-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; padding-top: 16px; padding-right: 32px; padding-bottom: 16px; padding-left: 32px; border-radius: 32px; font-size: 16px; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition-property: opacity, transform; transition-duration: var(--animation-duration-medium); transition-timing-function: var(--animation-spring-curve); }
+        .system-toast-notification { font-family: var(--font-bold); font-weight: normal; position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(24px) scale(0.9); background-color: rgba(45, 45, 45, 0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.15); color: #FFFFFF; padding: 16px 32px; border-radius: 32px; font-size: 16px; opacity: 0; pointer-events: none; z-index: 2000; box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.4); white-space: nowrap; transition: all var(--animation-duration-medium) var(--animation-smooth-curve); }
         .system-toast-notification.is-toast-visible { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     </style>
 </head>
@@ -1105,15 +674,24 @@
     </header>
 
     <!-- ==========================================================================
-         WEATHER WIDGET SECTION (EXPANDABLE)
+         GLOBAL TASKS / REMINDERS DASHBOARD
          ========================================================================== -->
-    <section class="awaits-animation" id="anim-target-2" aria-label="Weather Dashboard">
-        <div class="weather-dashboard-widget" id="weather-dashboard-widget" onclick="ApplicationUI.toggleWeatherExpansion()">
-            <div class="weather-main-row" id="weather-main-row-container">
-                <!-- Populated by WeatherService with skeleton loading initially -->
+    <section class="awaits-animation" id="anim-target-2" aria-label="Task Management">
+        <div class="task-dashboard-widget" id="task-dashboard-widget">
+            <div class="task-header-row">
+                <h2 class="task-title">Reminders</h2>
+                <span class="task-stats-label" id="task-stats-label">0 remaining</span>
             </div>
-            <div class="weather-hourly-container" id="weather-hourly-container">
-                <!-- Hourly scroll items injected dynamically -->
+            
+            <div class="task-list-container" id="task-main-list-container">
+                <!-- Task list items generated dynamically here -->
+            </div>
+
+            <div class="task-input-wrapper">
+                <input type="text" class="task-input-field" id="new-task-input" placeholder="Add a new task..." autocomplete="off">
+                <button class="task-add-submit-btn" id="new-task-submit-btn" aria-label="Add Task">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
             </div>
         </div>
     </section>
@@ -1219,9 +797,8 @@
         /**
          * @fileoverview Enterprise-grade architecture for Tuya Smart Home Control via Cloudflare Workers.
          * Encompasses state management, UI rendering, debounced network requests, external API integrations,
-         * advanced HTML5 Canvas color picking with polar coordinate mathematics, responsive forecasting,
-         * real-time clock rendering, synchronized device dispatch, and a comprehensive Routine/Agenda Engine
-         * with inline editing capabilities.
+         * advanced HTML5 Canvas color picking with polar coordinate mathematics, real-time clock rendering,
+         * synchronized device dispatch, Global Task System, and a comprehensive Routine/Agenda Engine.
          */
 
         "use strict";
@@ -1238,17 +815,13 @@
         const STORAGE_KEYS = {
             WORKER_URL: 'enterprise_tuya_worker_url_v20',
             LAYOUT_MODE: 'enterprise_tuya_layout_mode_v20',
-            WEATHER_CACHE: 'enterprise_weather_cache_v20',
             DEVICES_LINKED: 'enterprise_devices_linked_v20',
             AGENDA_ROUTINES: 'enterprise_agenda_routines_v20',
-            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v20'
+            AGENDA_LAST_RESET: 'enterprise_agenda_last_reset_v20',
+            GLOBAL_TASKS: 'enterprise_global_tasks_v20'
         };
 
         const SVG_ASSETS = {
-            WEATHER_SUN: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFB340" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
-            WEATHER_CLOUD: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>`,
-            WEATHER_RAIN: `<svg viewBox="0 0 24 24" fill="none" stroke="#0A84FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.4 14.5a6 6 0 1 0-10.8-2.5A5.5 5.5 0 1 0 7.5 22h9a5 5 0 1 0-.1-10Z"/><path d="M12 22v-4"/><path d="M8 22v-4"/><path d="M16 22v-4"/></svg>`,
-            WEATHER_SNOW: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M8 23v-2"/><path d="M12 23v-2"/><path d="M16 23v-2"/></svg>`,
             LIGHTBULB: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/><path d="M14 20h-4c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg>`,
             UP_CHEVRON: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>`,
             DOWN_CHEVRON: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`,
@@ -1328,6 +901,68 @@
             }
         }
         const LiveClock = new RealTimeClockManager('live-clock-display');
+
+        /* ==========================================================================
+           GLOBAL TASK / REMINDERS SYSTEM
+           ========================================================================== */
+
+        class GlobalTaskManager {
+            constructor() {
+                this.tasks = [];
+                this.loadFromStorage();
+            }
+
+            generateUUID() {
+                return 'task-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
+            }
+
+            loadFromStorage() {
+                const storedData = localStorage.getItem(STORAGE_KEYS.GLOBAL_TASKS);
+                if (storedData) {
+                    try {
+                        this.tasks = JSON.parse(storedData);
+                    } catch (e) {
+                        this.tasks = [];
+                    }
+                }
+            }
+
+            saveToStorage() {
+                localStorage.setItem(STORAGE_KEYS.GLOBAL_TASKS, JSON.stringify(this.tasks));
+                if (window.ApplicationUI) {
+                    window.ApplicationUI.renderTaskDashboard();
+                }
+            }
+
+            addTask(text) {
+                if (!text.trim()) return;
+                this.tasks.push({
+                    id: this.generateUUID(),
+                    text: text.trim(),
+                    completed: false,
+                    createdAt: Date.now()
+                });
+                this.saveToStorage();
+            }
+
+            toggleTask(id) {
+                const task = this.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveToStorage();
+                }
+            }
+
+            deleteTask(id) {
+                this.tasks = this.tasks.filter(t => t.id !== id);
+                this.saveToStorage();
+            }
+
+            getPendingCount() {
+                return this.tasks.filter(t => !t.completed).length;
+            }
+        }
+        const GlobalTasks = new GlobalTaskManager();
 
         /* ==========================================================================
            AGENDA SYSTEM (TIME-BRACKETED ROUTINES WITH INLINE EDITING)
@@ -1503,146 +1138,6 @@
             }
         }
         const AgendaSystem = new AgendaManager();
-
-        /* ==========================================================================
-           EXTERNAL SERVICE INTEGRATIONS (WEATHER)
-           ========================================================================== */
-
-        class WeatherService {
-            constructor() {
-                this.latitudeCoordinateForApi = 59.38; // Spånga
-                this.longitudeCoordinateForApi = 17.90; // Spånga
-                this.apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${this.latitudeCoordinateForApi}&longitude=${this.longitudeCoordinateForApi}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
-                this.mainRowElement = document.getElementById('weather-main-row-container');
-                this.hourlyContainerElement = document.getElementById('weather-hourly-container');
-            }
-            
-            renderLoadingState() {
-                if (!this.mainRowElement) return;
-                this.mainRowElement.innerHTML = `
-                    <div class="weather-information-left">
-                        <span class="weather-city-label">Spånga</span>
-                        <h2 class="weather-temperature-display"><div class="skeleton" style="width: 80px; height: 50px;"></div></h2>
-                        <span class="weather-condition-description">Fetching Weather...</span>
-                    </div>
-                    <div class="weather-graphics-right">
-                        <div class="weather-vector-icon"><div class="weather-spinner"></div></div>
-                        <span class="weather-high-low-range"><div class="skeleton" style="width: 100px; height: 18px;"></div></span>
-                    </div>
-                `;
-            }
-            
-            renderErrorState(errorMessage) {
-                if (!this.mainRowElement) return;
-                this.mainRowElement.innerHTML = `
-                    <div class="weather-information-left">
-                        <span class="weather-city-label">Spånga</span>
-                        <h2 class="weather-temperature-display">--</h2>
-                        <span class="weather-condition-description" style="color: #FF453A;">${errorMessage}</span>
-                    </div>
-                `;
-            }
-
-            parseWmoWeatherCode(code) {
-                if (code === 0 || code === 1) return { text: "Clear Sky", icon: SVG_ASSETS.WEATHER_SUN };
-                if (code === 2) return { text: "Partly Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code === 3) return { text: "Overcast", icon: SVG_ASSETS.WEATHER_CLOUD };
-                if (code >= 51 && code <= 67) return { text: "Rain", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 71 && code <= 77) return { text: "Snowfall", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 80 && code <= 82) return { text: "Rain Showers", icon: SVG_ASSETS.WEATHER_RAIN };
-                if (code >= 85 && code <= 86) return { text: "Snow Showers", icon: SVG_ASSETS.WEATHER_SNOW };
-                if (code >= 95) return { text: "Thunderstorm", icon: SVG_ASSETS.WEATHER_RAIN };
-                return { text: "Cloudy", icon: SVG_ASSETS.WEATHER_CLOUD };
-            }
-
-            renderSuccessState(data) {
-                if (!this.mainRowElement) return;
-                this.mainRowElement.innerHTML = `
-                    <div class="weather-information-left">
-                        <span class="weather-city-label">Spånga</span>
-                        <h2 class="weather-temperature-display">${data.current.temp}°</h2>
-                        <span class="weather-condition-description">${data.current.text}</span>
-                    </div>
-                    <div class="weather-graphics-right">
-                        <div class="weather-vector-icon">${data.current.icon}</div>
-                        <span class="weather-high-low-range">H:${data.current.high}° L:${data.current.low}°</span>
-                    </div>
-                `;
-
-                if (this.hourlyContainerElement && data.hourly && data.hourly.length > 0) {
-                    this.hourlyContainerElement.innerHTML = data.hourly.map((hourBlock, index) => `
-                        <div class="hourly-item-block" style="animation-delay: ${index * 50}ms;">
-                            <span class="hourly-item-time">${hourBlock.time}</span>
-                            <div class="hourly-item-icon">${hourBlock.icon}</div>
-                            <span class="hourly-item-temp">${hourBlock.temp}°</span>
-                        </div>
-                    `).join('');
-                }
-            }
-
-            async fetchAndRender() {
-                const cachedPayload = sessionStorage.getItem(STORAGE_KEYS.WEATHER_CACHE);
-                if (cachedPayload) {
-                    try {
-                        this.renderSuccessState(JSON.parse(cachedPayload));
-                    } catch (e) {
-                        this.renderLoadingState(); 
-                    }
-                } else {
-                    this.renderLoadingState();
-                }
-
-                try {
-                    const rawData = await NetworkService.get(this.apiUrl);
-                    if (!rawData || !rawData.current || !rawData.daily || !rawData.hourly) {
-                        throw new Error("Invalid data structure from Open-Meteo API.");
-                    }
-
-                    const currentCondition = this.parseWmoWeatherCode(rawData.current.weather_code);
-                    const compiledWeatherData = {
-                        current: {
-                            temp: Math.round(rawData.current.temperature_2m),
-                            text: currentCondition.text,
-                            icon: currentCondition.icon,
-                            high: Math.round(rawData.daily.temperature_2m_max[0]),
-                            low: Math.round(rawData.daily.temperature_2m_min[0])
-                        },
-                        hourly: []
-                    };
-
-                    let startIndex = 0;
-                    const nowTime = new Date().getTime();
-                    
-                    for (let i = 0; i < rawData.hourly.time.length; i++) {
-                        const hourTime = new Date(rawData.hourly.time[i]).getTime();
-                        if (hourTime >= nowTime - 1800000) { 
-                            startIndex = i;
-                            break;
-                        }
-                    }
-
-                    for (let i = startIndex; i < startIndex + 24 && i < rawData.hourly.time.length; i++) {
-                        const dateObj = new Date(rawData.hourly.time[i]);
-                        const hoursStr = String(dateObj.getHours()).padStart(2, '0') + ":00";
-                        const hCondition = this.parseWmoWeatherCode(rawData.hourly.weather_code[i]);
-                        
-                        compiledWeatherData.hourly.push({
-                            time: i === startIndex ? "Now" : hoursStr,
-                            temp: Math.round(rawData.hourly.temperature_2m[i]),
-                            icon: hCondition.icon
-                        });
-                    }
-
-                    this.renderSuccessState(compiledWeatherData);
-                    sessionStorage.setItem(STORAGE_KEYS.WEATHER_CACHE, JSON.stringify(compiledWeatherData));
-
-                } catch (error) {
-                    let errorMessage = "Data Unavailable";
-                    if (error.name === 'AbortError') errorMessage = "Weather API Timeout";
-                    if (!cachedPayload) this.renderErrorState(errorMessage);
-                }
-            }
-        }
 
         /* ==========================================================================
            NETWORK SERVICE LAYER
@@ -1985,6 +1480,7 @@
                 this.constructDeviceGrid();
                 this.attachStaticEventListeners();
                 this.evaluateAndRenderActiveRoutine();
+                this.renderTaskDashboard();
             }
 
             applyLayoutModeToBody() {
@@ -2051,11 +1547,57 @@
                 document.getElementById('modal-btn-save').addEventListener('click', this.handleSettingsSave);
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
                 document.getElementById('global-link-synchronization-button').addEventListener('click', () => this.toggleGlobalLinkState());
+                
+                // Tasks / Reminders Listeners
+                const taskInput = document.getElementById('new-task-input');
+                const taskSubmitBtn = document.getElementById('new-task-submit-btn');
+
+                if (taskInput && taskSubmitBtn) {
+                    const handleTaskAdd = () => {
+                        GlobalTasks.addTask(taskInput.value);
+                        taskInput.value = '';
+                        taskInput.focus();
+                    };
+                    
+                    taskSubmitBtn.addEventListener('click', handleTaskAdd);
+                    taskInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') handleTaskAdd();
+                    });
+                }
             }
-            
-            toggleWeatherExpansion() {
-                const widget = document.getElementById('weather-dashboard-widget');
-                if(widget) widget.classList.toggle('is-expanded');
+
+            // ================== TASKS UI METHODS ==================
+
+            renderTaskDashboard() {
+                const listContainer = document.getElementById('task-main-list-container');
+                const statsLabel = document.getElementById('task-stats-label');
+                if (!listContainer || !statsLabel) return;
+
+                const pendingCount = GlobalTasks.getPendingCount();
+                statsLabel.innerText = `${pendingCount} remaining`;
+
+                if (GlobalTasks.tasks.length === 0) {
+                    listContainer.innerHTML = `<div class="task-empty-state">All caught up! Add a new task below.</div>`;
+                    return;
+                }
+
+                // Sort Tasks: Pending first, then completed. Secondary sort by creation time.
+                const sortedTasks = [...GlobalTasks.tasks].sort((a, b) => {
+                    if (a.completed === b.completed) return a.createdAt - b.createdAt;
+                    return a.completed ? 1 : -1;
+                });
+
+                listContainer.innerHTML = sortedTasks.map(task => `
+                    <div class="task-item-row ${task.completed ? 'is-completed' : ''}" onclick="GlobalTasks.toggleTask('${task.id}')">
+                        <div class="task-checkbox-container">
+                            <svg class="task-checkbox-svg" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="task-text">${task.text}</span>
+                        <button class="task-delete-btn" onclick="event.stopPropagation(); GlobalTasks.deleteTask('${task.id}')" aria-label="Delete Task">
+                            ${SVG_ASSETS.TRASH_CAN}
+                        </button>
+                    </div>
+                `).join('');
             }
 
             // ================== AGENDA UI METHODS ==================
@@ -2192,7 +1734,7 @@
                 }
             }
 
-            // ================== END AGENDA UI METHODS ==================
+            // ================== DEVICE GRID UI METHODS ==================
 
             constructDeviceGrid() {
                 while (this.deviceGridContainer.firstChild) {
@@ -2459,9 +2001,6 @@
             ApplicationUI.initialize();
             triggerEntryAnimations();
             LiveClock.start();
-
-            const WeatherAPI = new WeatherService();
-            WeatherAPI.fetchAndRender();
 
             if (!DeviceManager.isConfigured()) {
                 setTimeout(() => {
