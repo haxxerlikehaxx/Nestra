@@ -155,7 +155,7 @@
             padding-left: var(--layout-padding-horizontal-portrait);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-            user-select: none; -webkit-user-select: none;
+            user-select: none; -webkit-user-select: none; /* Block selection on UI by default */
             touch-action: pan-y;
             max-width: var(--layout-max-width-portrait);
             
@@ -169,9 +169,10 @@
             padding-left: var(--layout-padding-horizontal-landscape);
         }
 
+        /* Essential for iPad virtual keyboard to trigger properly */
         input, textarea, select {
-            user-select: text !important;
-            -webkit-user-select: text !important;
+            user-select: auto !important;
+            -webkit-user-select: auto !important;
             -webkit-touch-callout: default !important;
             font-family: inherit;
         }
@@ -299,7 +300,7 @@
         .task-item-row.is-completed { opacity: 0.55; }
         .task-item-row.is-completed .task-text { text-decoration-line: line-through; color: var(--card-inactive-subtitle-color); }
 
-        /* Independent Checkbox for Tasks to avoid overlap with Agenda */
+        /* Independent Checkbox for Tasks */
         .task-checkbox-container {
             width: 22px; height: 22px; border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.4);
@@ -339,13 +340,17 @@
         .task-item-row:hover .task-delete-btn { opacity: 1; }
         .task-delete-btn:active { transform: scale(0.9); opacity: 0.8 !important; }
 
-        .task-input-wrapper { display: flex; flex-direction: row; gap: 12px; align-items: stretch; }
+        .task-form-wrapper { 
+            display: flex; flex-direction: row; gap: 12px; align-items: stretch; margin: 0; padding: 0; 
+        }
 
         .task-input-field {
             flex-grow: 1; background-color: rgba(0, 0, 0, 0.35);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 18px;
             padding: 0 20px; color: #FFFFFF; font-family: var(--font-regular); font-size: 16px;
             outline: none; transition: all var(--animation-duration-fast) var(--animation-smooth-curve);
+            -webkit-appearance: none; /* Bypasses iOS native rendering quirks */
+            cursor: text;
         }
 
         .task-input-field:focus { border-color: rgba(255, 255, 255, 0.4); background-color: rgba(0, 0, 0, 0.5); }
@@ -354,7 +359,7 @@
         .task-add-submit-btn {
             width: 48px; height: 48px; background-color: #FFFFFF; color: #000000;
             border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; flex-shrink: 0;
+            cursor: pointer; flex-shrink: 0; -webkit-appearance: none;
             transition: transform var(--animation-duration-fast) var(--animation-smooth-curve), 
                         opacity var(--animation-duration-fast) var(--animation-smooth-curve);
         }
@@ -687,12 +692,13 @@
                 <!-- Task list items generated dynamically here -->
             </div>
 
-            <div class="task-input-wrapper">
-                <input type="text" class="task-input-field" id="new-task-input" placeholder="Add a new task..." autocomplete="off">
-                <button class="task-add-submit-btn" id="new-task-submit-btn" aria-label="Add Task">
+            <!-- Native Form bypasses iOS Safari's strict text input locks -->
+            <form class="task-form-wrapper" id="new-task-form">
+                <input type="text" class="task-input-field" id="new-task-input" placeholder="Add a new task..." autocomplete="off" enterkeyhint="done" required>
+                <button type="submit" class="task-add-submit-btn" id="new-task-submit-btn" aria-label="Add Task">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
-            </div>
+            </form>
         </div>
     </section>
 
@@ -833,9 +839,6 @@
            ANIMATION ORCHESTRATION
            ========================================================================== */
         
-        /**
-         * Fires initial load animations systematically.
-         */
         function triggerEntryAnimations() {
             const targets = [
                 document.getElementById('anim-target-1'),
@@ -895,7 +898,7 @@
                 this.clockElement.innerText = `${formattedHours}:${formattedMinutes}`;
                 
                 // Every minute, evaluate the active Agenda Routine
-                if (now.getSeconds() === 0 && window.ApplicationUI) {
+                if (window.ApplicationUI && now.getSeconds() === 0) {
                     window.ApplicationUI.evaluateAndRenderActiveRoutine();
                 }
             }
@@ -930,7 +933,7 @@
             saveToStorage() {
                 localStorage.setItem(STORAGE_KEYS.GLOBAL_TASKS, JSON.stringify(this.tasks));
                 if (window.ApplicationUI) {
-                    window.ApplicationUI.renderTaskDashboard();
+                    window.ApplicationUI.renderTaskDashboard(); // Ensures immediate UI refresh globally
                 }
             }
 
@@ -1548,20 +1551,18 @@
                 document.getElementById('modal-btn-cancel').addEventListener('click', this.handleSettingsCancel);
                 document.getElementById('global-link-synchronization-button').addEventListener('click', () => this.toggleGlobalLinkState());
                 
-                // Tasks / Reminders Listeners
+                // Tasks / Reminders Listeners for Native Form Submits (Optimal for iOS Safari Keyboard)
+                const taskForm = document.getElementById('new-task-form');
                 const taskInput = document.getElementById('new-task-input');
-                const taskSubmitBtn = document.getElementById('new-task-submit-btn');
 
-                if (taskInput && taskSubmitBtn) {
-                    const handleTaskAdd = () => {
-                        GlobalTasks.addTask(taskInput.value);
-                        taskInput.value = '';
-                        taskInput.focus();
-                    };
-                    
-                    taskSubmitBtn.addEventListener('click', handleTaskAdd);
-                    taskInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') handleTaskAdd();
+                if (taskForm && taskInput) {
+                    taskForm.addEventListener('submit', (e) => {
+                        e.preventDefault(); // Intercept page reload from form naturally
+                        if (taskInput.value.trim() !== '') {
+                            GlobalTasks.addTask(taskInput.value);
+                            taskInput.value = '';
+                            taskInput.focus(); // Retains keyboard actively for rapid entry
+                        }
                     });
                 }
             }
@@ -1588,12 +1589,12 @@
                 });
 
                 listContainer.innerHTML = sortedTasks.map(task => `
-                    <div class="task-item-row ${task.completed ? 'is-completed' : ''}" onclick="GlobalTasks.toggleTask('${task.id}')">
+                    <div class="task-item-row ${task.completed ? 'is-completed' : ''}" onclick="window.GlobalTasks.toggleTask('${task.id}')">
                         <div class="task-checkbox-container">
                             <svg class="task-checkbox-svg" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <span class="task-text">${task.text}</span>
-                        <button class="task-delete-btn" onclick="event.stopPropagation(); GlobalTasks.deleteTask('${task.id}')" aria-label="Delete Task">
+                        <button class="task-delete-btn" onclick="event.stopPropagation(); window.GlobalTasks.deleteTask('${task.id}')" aria-label="Delete Task">
                             ${SVG_ASSETS.TRASH_CAN}
                         </button>
                     </div>
@@ -1628,7 +1629,7 @@
                     listContainer.innerHTML = `<div class="agenda-empty-state">No tasks scheduled.</div>`;
                 } else {
                     listContainer.innerHTML = sortedTasks.map(task => `
-                        <div class="agenda-item-row ${task.completed ? 'is-task-completed' : ''}" onclick="ApplicationUI.handleDashboardTaskToggle('${activeRoutine.id}', '${task.id}')">
+                        <div class="agenda-item-row ${task.completed ? 'is-task-completed' : ''}" onclick="window.ApplicationUI.handleDashboardTaskToggle('${activeRoutine.id}', '${task.id}')">
                             <div class="agenda-checkbox-container">
                                 <svg class="agenda-checkbox-svg" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
                             </div>
@@ -1678,12 +1679,12 @@
                             <div class="agenda-task-edit-item">
                                 <!-- Inline Editable Task Title -->
                                 <input type="text" class="agenda-edit-inline-input" value="${task.title}" 
-                                       onchange="AgendaSystem.updateTask('${routine.id}', '${task.id}', this.value); ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                       onchange="window.AgendaSystem.updateTask('${routine.id}', '${task.id}', this.value); window.ApplicationUI.evaluateAndRenderActiveRoutine();">
                                 
                                 <div class="agenda-task-edit-controls">
-                                    <button class="agenda-edit-action-btn" onclick="AgendaSystem.moveTaskUp('${routine.id}', '${task.id}'); ApplicationUI.renderAgendaEditorSettings();" ${tIndex === 0 ? 'disabled style="opacity:0.3"' : ''}>${upIcon}</button>
-                                    <button class="agenda-edit-action-btn" onclick="AgendaSystem.moveTaskDown('${routine.id}', '${task.id}'); ApplicationUI.renderAgendaEditorSettings();" ${tIndex === sortedTasks.length - 1 ? 'disabled style="opacity:0.3"' : ''}>${downIcon}</button>
-                                    <button class="agenda-edit-action-btn delete" onclick="AgendaSystem.deleteTask('${routine.id}', '${task.id}'); ApplicationUI.renderAgendaEditorSettings();">${trashIcon}</button>
+                                    <button class="agenda-edit-action-btn" onclick="window.AgendaSystem.moveTaskUp('${routine.id}', '${task.id}'); window.ApplicationUI.renderAgendaEditorSettings();" ${tIndex === 0 ? 'disabled style="opacity:0.3"' : ''}>${upIcon}</button>
+                                    <button class="agenda-edit-action-btn" onclick="window.AgendaSystem.moveTaskDown('${routine.id}', '${task.id}'); window.ApplicationUI.renderAgendaEditorSettings();" ${tIndex === sortedTasks.length - 1 ? 'disabled style="opacity:0.3"' : ''}>${downIcon}</button>
+                                    <button class="agenda-edit-action-btn delete" onclick="window.AgendaSystem.deleteTask('${routine.id}', '${task.id}'); window.ApplicationUI.renderAgendaEditorSettings();">${trashIcon}</button>
                                 </div>
                             </div>
                         `).join('');
@@ -1695,19 +1696,19 @@
                                 <div class="agenda-routine-title-info">
                                     <!-- Inline Editable Routine Title -->
                                     <input type="text" class="agenda-edit-inline-input agenda-routine-title-text" style="padding-left:0; margin-bottom:4px;" value="${routine.title}" 
-                                           onchange="AgendaSystem.updateRoutine('${routine.id}', this.value, undefined, undefined); ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                           onchange="window.AgendaSystem.updateRoutine('${routine.id}', this.value, undefined, undefined); window.ApplicationUI.evaluateAndRenderActiveRoutine();">
                                     
                                     <div class="agenda-routine-time-text">
                                         <!-- Inline Editable Start Time -->
                                         <input type="time" class="agenda-edit-inline-time" value="${routine.startTime}" 
-                                               onchange="AgendaSystem.updateRoutine('${routine.id}', undefined, this.value, undefined); ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                               onchange="window.AgendaSystem.updateRoutine('${routine.id}', undefined, this.value, undefined); window.ApplicationUI.evaluateAndRenderActiveRoutine();">
                                         <span>-</span>
                                         <!-- Inline Editable End Time -->
                                         <input type="time" class="agenda-edit-inline-time" value="${routine.endTime}" 
-                                               onchange="AgendaSystem.updateRoutine('${routine.id}', undefined, undefined, this.value); ApplicationUI.evaluateAndRenderActiveRoutine();">
+                                               onchange="window.AgendaSystem.updateRoutine('${routine.id}', undefined, undefined, this.value); window.ApplicationUI.evaluateAndRenderActiveRoutine();">
                                     </div>
                                 </div>
-                                <button class="agenda-edit-action-btn delete" onclick="AgendaSystem.deleteRoutine('${routine.id}'); ApplicationUI.renderAgendaEditorSettings();" title="Delete Routine">${trashIcon}</button>
+                                <button class="agenda-edit-action-btn delete" onclick="window.AgendaSystem.deleteRoutine('${routine.id}'); window.ApplicationUI.renderAgendaEditorSettings();" title="Delete Routine">${trashIcon}</button>
                             </div>
                             
                             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -1716,7 +1717,7 @@
                             
                             <div class="agenda-add-task-form">
                                 <input type="text" class="settings-text-input-field" style="margin-bottom:0; padding:12px; font-size:14px; border-radius:12px;" id="add-task-input-${routine.id}" placeholder="New task..." autocomplete="off">
-                                <button class="settings-action-button-primary" style="margin:0; width:auto; padding:12px 16px; border-radius:12px;" onclick="ApplicationUI.handleAddNewTaskToRoutine('${routine.id}')">${plusIcon}</button>
+                                <button class="settings-action-button-primary" style="margin:0; width:auto; padding:12px 16px; border-radius:12px;" onclick="window.ApplicationUI.handleAddNewTaskToRoutine('${routine.id}')">${plusIcon}</button>
                             </div>
                         </div>
                     `;
@@ -1975,9 +1976,19 @@
         }
 
         const ApplicationUI = new UserInterfaceController();
+
+        /* ==========================================================================
+           GLOBAL EXPOSURE FOR INLINE HANDLERS
+           ========================================================================== */
+        // These are attached to window so that inline HTML `onclick` events execute properly
+        // without throwing ReferenceErrors, ensuring instant state-to-UI synchrony.
+        window.ApplicationUI = ApplicationUI;
+        window.GlobalTasks = GlobalTasks;
+        window.AgendaSystem = AgendaSystem;
+        window.DeviceManager = DeviceManager;
         
         // Expose explicit functions to global namespace for HTML inline event handlers
-        AgendaSystem.handleCreateNewRoutine = () => {
+        window.AgendaSystem.handleCreateNewRoutine = () => {
             const titleEl = document.getElementById('agenda-new-routine-title');
             const startEl = document.getElementById('agenda-new-routine-start');
             const endEl = document.getElementById('agenda-new-routine-end');
